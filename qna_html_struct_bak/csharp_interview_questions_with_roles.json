@@ -1,0 +1,470 @@
+[
+    {
+        "number": 1,
+        "question": "What is the difference between value and reference types? Is it true that the value type is always stored in a stack?",
+        "answer": "<p><strong>Value types</strong> hold their data directly, whereas <strong>reference types</strong> store a reference (memory address) to their data located on the heap.</p><ul><li><strong>Value Types:</strong> int, double, struct, bool.</li><li><strong>Reference Types:</strong> class, interface, string, delegate.</li></ul><p><strong>No, it is not true</strong> that value types are always stored on the stack. A value type is stored wherever it is declared. If it is declared as a local variable in a method, it goes on the stack. If it is a field within a class (a reference type), it is stored on the heap along with the rest of the object.</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior"
+    },
+    {
+        "number": 3,
+        "question": "What is the difference between classes and structures? Is it possible to inherit from structure? In what cases it's better to use structures?",
+        "answer": "<p><strong>Differences:</strong></p><ul><li><strong>Classes</strong> are reference types (stored on the heap), support inheritance, and can have explicit parameterless constructors (prior to C# 10).</li><li><strong>Structures (structs)</strong> are value types (stored inline or on the stack), are implicitly sealed, and operate by value semantics (copied on assignment).</li></ul><p><strong>Inheritance:</strong> No, it is not possible to inherit from a struct, nor can a struct inherit from another struct or class. They implicitly inherit from <code>System.ValueType</code>. However, they can implement interfaces.</p><p><strong>When to use:</strong> Use structures for small, lightweight objects that represent a single value logically (e.g., <code>Point</code>, <code>Color</code>, <code>Vector3</code>). They are beneficial when you want to avoid garbage collection overhead and the data size is small (typically under 16 bytes).</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior/Mid"
+    },
+    {
+        "number": 4,
+        "question": "What is the purpose of namespaces? Is it good practice to keep your application in a single namespace?",
+        "answer": "<p><strong>Purpose:</strong> Namespaces are used to organize code hierarchically and to prevent naming collisions. They allow you to have classes with the same name in different contexts (e.g., <code>System.Windows.Point</code> vs <code>System.Drawing.Point</code>).</p><p><strong>Good Practice:</strong> No, it is <strong>not good practice</strong> to keep an entire application in a single namespace. As the application grows, a single namespace becomes cluttered and difficult to maintain. It is best practice to group related classes into dedicated namespaces based on their architectural layer or feature domain (e.g., <code>App.Data</code>, <code>App.Services</code>, <code>App.UI</code>).</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior"
+    },
+    {
+        "number": 8,
+        "question": "Can you describe why the lock() statement is designed to only accept reference type parameters?",
+        "answer": "<p>The <code>lock()</code> statement works by acquiring a mutual-exclusion lock on a specific object header (using its sync block index). Value types do not have object headers. </p><p>If you were allowed to pass a value type to <code>lock()</code>, it would be <strong>boxed</strong> into a new reference type on the heap every time the statement is executed. Consequently, different threads would lock on entirely different boxed objects, providing zero thread synchronization and completely defeating the purpose of the lock.</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Senior"
+    },
+    {
+        "number": 9,
+        "question": "How method arguments are passed in C#? Can this behavior be changed?",
+        "answer": "<p>By default, method arguments in C# are passed <strong>by value</strong>:</p><ul><li>For <strong>value types</strong>, a complete copy of the data is passed.</li><li>For <strong>reference types</strong>, a copy of the reference (pointer) is passed, meaning both the caller and the method point to the same object on the heap, but reassigning the reference inside the method won't affect the caller.</li></ul><p><strong>Changing Behavior:</strong> Yes, you can change this behavior to pass by reference using the following modifiers:</p><ul><li><code>ref</code>: Variable must be initialized before passing. Can be modified.</li><li><code>out</code>: Variable does not need prior initialization, but <em>must</em> be assigned inside the method.</li><li><code>in</code>: Passed by reference but strictly read-only.</li></ul>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior/Mid"
+    },
+    {
+        "number": 10,
+        "question": "What is the difference between Int.Parse and Int.TryParse?",
+        "answer": "<p>Both methods are used to convert a string representation of a number to an integer, but they handle failures differently:</p><ul><li><code>int.Parse(string)</code>: Attempts to parse the string and <strong>throws an exception</strong> (such as <code>FormatException</code> or <code>ArgumentNullException</code>) if the parsing fails.</li><li><code>int.TryParse(string, out int result)</code>: Attempts to parse the string and returns a <strong>boolean</strong> (<code>true</code> if successful, <code>false</code> if it fails). It safely assigns the parsed value to the <code>out</code> parameter or <code>0</code> if it fails, completely avoiding costly exceptions.</li></ul>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior"
+    },
+    {
+        "number": 11,
+        "question": "What are the implicit and explicit type conversions?",
+        "answer": "<p><strong>Implicit Conversions:</strong> Handled automatically by the C# compiler. They are guaranteed to succeed without any loss of data. For example, converting a smaller integer type to a larger one: <code>int a = 10; long b = a;</code>.</p><p><strong>Explicit Conversions (Casting):</strong> Require a cast operator because there is a risk of data loss or a runtime exception (e.g., converting a larger numeric type to a smaller one, or downcasting a base class to a derived class). Example: <code>double x = 9.8; int y = (int)x;</code> (fractional part is truncated).</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior"
+    },
+    {
+        "number": 12,
+        "question": "How do you cast from one reference type to another without risking to throw an exception?",
+        "answer": "<p>You can use the <code>as</code> operator or pattern matching with the <code>is</code> operator.</p><ul><li><strong>The <code>as</code> operator:</strong> Tries to cast the object. If the cast fails, it returns <code>null</code> instead of throwing an <code>InvalidCastException</code>. Example: <code>MyClass obj = myBaseObj as MyClass;</code></li><li><strong>The <code>is</code> operator (Pattern Matching):</strong> Checks the type and safely assigns it to a new variable in one step. Example: <br><code>if (myBaseObj is MyClass obj) { /* use obj safely */ }</code></li></ul>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior"
+    },
+    {
+        "number": 13,
+        "question": "Why isn't it possible to create an instance of an abstract class?",
+        "answer": "<p>An abstract class is intentionally designed to be incomplete. It serves as a <strong>blueprint or base template</strong> for other classes.</p><p>It may contain <code>abstract</code> methods which have no implementation (no method body). Allowing instantiation of an abstract class would mean you could potentially call a method that has no code to execute, which breaks application logic and safety. You must inherit from it and provide the missing implementations before creating an instance.</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior"
+    },
+    {
+        "number": 14,
+        "question": "Is it possible to invoke a method from an abstract class?",
+        "answer": "<p><strong>Yes</strong>, it is absolutely possible. Abstract classes can contain fully implemented (non-abstract) methods.</p><p>To invoke them, you have two options:</p><ol><li><strong>Instance Methods:</strong> Create an instance of a <em>derived</em> class that inherits from the abstract class, and call the base method through that instance.</li><li><strong>Static Methods:</strong> If the method inside the abstract class is marked as <code>static</code>, you can invoke it directly using the abstract class's name (e.g., <code>MyAbstractClass.MyStaticMethod()</code>).</li></ol>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior/Mid"
+    },
+    {
+        "number": 15,
+        "question": "Is it true that Interface can only contain method declarations?",
+        "answer": "<p><strong>Historically, yes. But since C# 8.0, no.</strong></p><p>Prior to C# 8.0, interfaces could only contain declarations (signatures) for methods, properties, events, and indexers without any actual implementation body.</p><p>Starting with C# 8.0, interfaces support <strong>Default Interface Methods</strong>, meaning an interface can provide a concrete implementation for a method. This was introduced primarily to allow developers to add new methods to existing interfaces without breaking legacy code that implements them.</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 16,
+        "question": "Is it possible to specify access modifiers inside of an interface?",
+        "answer": "<p><strong>Yes, starting from C# 8.0.</strong></p><p>Prior to C# 8.0, all interface members were implicitly <code>public</code>, and you could not specify any access modifiers.</p><p>With the introduction of Default Interface Methods in C# 8.0, you can now use access modifiers like <code>private</code>, <code>protected</code>, <code>internal</code>, and <code>public</code> inside an interface. For example, <code>private</code> methods can be used as helper methods for default implementations within the interface.</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 17,
+        "question": "Can you inherit from two interfaces with the same method name in both of them?",
+        "answer": "<p><strong>Yes.</strong> A class can implement multiple interfaces that share the same method signature.</p><p>If both interfaces intend for the method to do the same thing, a single public method in the class will satisfy both interfaces.</p><p>If the interfaces represent different logical operations and you need different implementations for each, you must use <strong>Explicit Interface Implementation</strong>. <br>Example: <code>void IFirstInterface.DoWork() { }</code> and <code>void ISecondInterface.DoWork() { }</code>. Explicitly implemented methods are private to the class and can only be invoked when the object is cast to the specific interface.</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 18,
+        "question": "Is it possible to define two methods with the same name and arguments, but with a different return types?",
+        "answer": "<p><strong>No.</strong> In C#, method overloading is resolved purely by the method signature, which consists of the method name and the number, types, and order of its parameters.</p><p>The return type is <strong>not</strong> part of the method signature. Therefore, defining two methods that differ only by their return type will result in a compile-time error.</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior"
+    },
+    {
+        "number": 19,
+        "question": "What is the difference between method overriding and overloading?",
+        "answer": "<ul><li><strong>Overloading (Compile-time polymorphism):</strong> Occurs within the <em>same class</em>. It involves creating multiple methods with the same name but <strong>different parameter lists</strong> (different types or number of parameters).</li><li><strong>Overriding (Run-time polymorphism):</strong> Occurs between a <em>base class and a derived class</em>. It involves redefining a method in the derived class that was marked as <code>virtual</code> or <code>abstract</code> in the base class, using the exact same signature and the <code>override</code> keyword.</li></ul>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior"
+    },
+    {
+        "number": 20,
+        "question": "What does protected internal access modifier mean?",
+        "answer": "<p>The <code>protected internal</code> access modifier provides a union of both <code>protected</code> and <code>internal</code> access levels.</p><p>A member marked as <code>protected internal</code> can be accessed from:</p><ul><li>Any code within the <strong>same assembly</strong> (the <code>internal</code> part).</li><li>Any <strong>derived class</strong>, even if that derived class is located in a different assembly (the <code>protected</code> part).</li></ul>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 21,
+        "question": "Your class Shape has one constructor with parameters. Can you create an instances of this class by calling new Shape()?",
+        "answer": "<p><strong>No.</strong></p><p>In C#, if a class does not have any constructors explicitly defined, the compiler automatically generates a hidden, default parameterless constructor. However, the moment you define <em>any</em> constructor (e.g., one with parameters), the compiler <strong>removes the default parameterless constructor</strong>.</p><p>To call <code>new Shape()</code>, you would have to explicitly add a parameterless constructor (<code>public Shape() { }</code>) back into your class.</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior"
+    },
+    {
+        "number": 22,
+        "question": "Is it possible to override a method which is declared without a virtual keyword?",
+        "answer": "<p><strong>No, you cannot logically override it.</strong></p><p>To perform polymorphic overriding in C#, the base method must be explicitly marked with <code>virtual</code>, <code>abstract</code>, or <code>override</code>.</p><p>If a method is not marked as such, you can <strong>hide</strong> (or shadow) it in a derived class by using the <code>new</code> keyword. However, this is not true overriding. If you access the derived class object via a base class reference, the base class's version of the method will be executed, not the derived class's version.</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 23,
+        "question": "What is the difference between new and override keywords in method declaration?",
+        "answer": "<p>Both keywords dictate how a derived class method interacts with a base class method of the same name:</p><ul><li><strong><code>override</code>:</strong> Extends a base class <code>virtual</code> or <code>abstract</code> method. It enables <strong>polymorphism</strong>. Even if the object is cast to the base type, the derived class's overridden method executes.</li><li><strong><code>new</code> (Shadowing/Hiding):</strong> Hides the base class method. It breaks polymorphism. If the object is held in a variable of the derived type, the <code>new</code> method executes. If held in a variable of the base type, the original base method executes.</li></ul>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 24,
+        "question": "Is it possible to explicitly call a class’ static constructor?",
+        "answer": "<p><strong>No.</strong></p><p>A static constructor is called automatically by the Common Language Runtime (CLR) under the hood. It is guaranteed to be executed exactly once per Application Domain, before any static members of the class are accessed or before any instance of the class is created.</p><p>Developers are not permitted to invoke it directly, which is also why static constructors cannot have access modifiers (like <code>public</code>) or parameters.</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 25,
+        "question": "How can you override a static constructor?",
+        "answer": "<p><strong>You cannot override a static constructor.</strong></p><p>Static constructors do not participate in inheritance. Overriding is a concept tied to instance methods and polymorphism. Since static constructors are called strictly at the class/type level by the CLR for initialization, the concepts of virtual tables and overriding simply do not apply.</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 26,
+        "question": "Can you use this keyword inside of a static method?",
+        "answer": "<p><strong>No, generally you cannot.</strong></p><p>The <code>this</code> keyword is a reference to the current <em>instance</em> of a class. Static methods belong to the type itself, not to any specific instance, so there is no instance for <code>this</code> to refer to.</p><p><em>Exception:</em> In C#, <strong>Extension Methods</strong> are static methods, and the <code>this</code> keyword is used as a modifier on the first parameter to denote the type being extended (e.g., <code>public static void Print(this string str)</code>). But it is not used to access instance members of the static class itself.</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 27,
+        "question": "What is the difference between using a static class and a Singleton pattern?",
+        "answer": "<p>While both ensure only one source of logic/data exists, they are fundamentally different:</p><ul><li><strong>Static Class:</strong> Cannot be instantiated, cannot inherit from other classes (only <code>Object</code>), cannot implement interfaces, and cannot be passed as a method parameter. The CLR handles its memory allocation.</li><li><strong>Singleton Pattern:</strong> An actual object instance of a class. Because it is an object, it can implement interfaces, inherit from base classes, be passed as an argument to other methods (ideal for Dependency Injection), and can be lazily instantiated.</li></ul>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Senior"
+    },
+    {
+        "number": 28,
+        "question": "What does immutable mean? Can you provide examples?",
+        "answer": "<p><strong>Immutable</strong> means that the state or data of an object cannot be changed after it is instantiated. Any operation that appears to modify the object actually returns a completely new instance with the modified data.</p><p><strong>Examples in .NET:</strong></p><ul><li><code>System.String</code>: String manipulation methods (like <code>Replace</code> or <code>Substring</code>) return a new string.</li><li><code>System.DateTime</code>: Adding days via <code>AddDays()</code> returns a new <code>DateTime</code> object.</li><li><code>Tuple</code> and <code>record</code> types (by default).</li></ul>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior/Mid"
+    },
+    {
+        "number": 29,
+        "question": "How can you create delegates in C#?",
+        "answer": "<p>A delegate is a type-safe function pointer. You create it in two steps:</p><ol><li><strong>Declaration:</strong> Define the signature. <br><code>public delegate int MathOperation(int a, int b);</code></li><li><strong>Instantiation:</strong> Assign a method (or lambda) that matches the signature to a delegate variable. <br><code>MathOperation add = (x, y) =&gt; x + y;</code><br>or by assigning an existing method directly: <br><code>MathOperation op = MyClass.AddMethod;</code></li></ol>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 30,
+        "question": "Are delegates of a value or a reference type?",
+        "answer": "<p><strong>Delegates are reference types.</strong></p><p>Under the hood, every delegate you declare implicitly inherits from the <code>System.MulticastDelegate</code> class, which in turn inherits from <code>System.Delegate</code>, which is a reference type. They are instantiated and stored on the heap.</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 31,
+        "question": "What is the difference between events and multicast delegates?",
+        "answer": "<p>An <strong>Event</strong> is essentially a protective wrapper or modifier built on top of a <strong>Multicast Delegate</strong>.</p><ul><li><strong>Multicast Delegate:</strong> Any class holding a public delegate field can allow external code to assign to it (<code>=</code>), add to it (<code>+=</code>), clear it (<code>= null</code>), or invoke it.</li><li><strong>Event:</strong> Enforces encapsulation. When you declare a delegate as an <code>event</code>, external classes can <em>only</em> subscribe (<code>+=</code>) or unsubscribe (<code>-=</code>). They are completely prevented from directly invoking the event or clearing other subscribers' invocations.</li></ul>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Senior"
+    },
+    {
+        "number": 32,
+        "question": "Is there any difference between Action and Function?",
+        "answer": "<p>Yes. Both are built-in generic delegates provided by the .NET framework, but they differ in their return types:</p><ul><li><strong><code>Action</code>:</strong> Represents a method that takes parameters (up to 16) but <strong>does not return a value</strong> (i.e., its return type is <code>void</code>). Example: <code>Action&lt;string&gt; logMessage;</code></li><li><strong><code>Func</code>:</strong> Represents a method that takes parameters (up to 16) and <strong>must return a value</strong>. The last type parameter in the angle brackets always specifies the return type. Example: <code>Func&lt;int, int, string&gt;</code> takes two integers and returns a string.</li></ul>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior/Mid"
+    },
+    {
+        "number": 33,
+        "question": "What are lambda expressions? What are they used for?",
+        "answer": "<p><strong>Lambda expressions</strong> are anonymous functions (methods without a name) that provide a concise syntax for writing inline code blocks. They use the lambda operator <code>=&gt;</code> (read as \"goes to\").</p><p><strong>Used for:</strong></p><ul><li>Quickly instantiating delegates (like <code>Action</code> or <code>Func</code>).</li><li>Writing compact, readable LINQ queries (e.g., <code>list.Where(x =&gt; x &gt; 10)</code>).</li><li>Creating Expression Trees for dynamic query generation in ORMs like Entity Framework.</li></ul>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior/Mid"
+    },
+    {
+        "number": 34,
+        "question": "Is it possible to access variables from the outside of a lambda expression?",
+        "answer": "<p><strong>Yes.</strong></p><p>Lambda expressions can capture and use variables from the enclosing scope. This concept is known as a <strong>closure</strong>. The compiler essentially builds a hidden class under the hood to store references to these external variables, allowing the lambda expression to access and even modify them well after the original scope has exited.</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Senior"
+    },
+    {
+        "number": 35,
+        "question": "What is LINQ used for?",
+        "answer": "<p><strong>LINQ (Language Integrated Query)</strong> is used to query, filter, project, and manipulate data from various data sources in a consistent, readable, and strongly-typed manner directly within C#.</p><p>Instead of writing nested loops and complex conditional statements, LINQ allows developers to use a declarative syntax (similar to SQL) to interact with collections (LINQ to Objects), relational databases (LINQ to SQL / Entity Framework), and XML documents (LINQ to XML).</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior/Mid"
+    },
+    {
+        "number": 36,
+        "question": "What should usually be done inside of a catch statement?",
+        "answer": "<p>A <code>catch</code> block is responsible for handling exceptions gracefully. Usually, you should:</p><ol><li><strong>Log the exception:</strong> Record the error details, stack trace, and context for debugging purposes (e.g., using NLog or Serilog).</li><li><strong>Clean up:</strong> Ensure any corrupted state is fixed (though <code>finally</code> is better for resource disposal).</li><li><strong>Recover or Rethrow:</strong> If the error is recoverable (e.g., prompting the user to try again), handle it. If it is fatal or shouldn't be suppressed, rethrow it using <code>throw;</code> (which preserves the original stack trace) or wrap it in a custom exception.</li></ol>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior/Mid"
+    },
+    {
+        "number": 38,
+        "question": "What is reflection? Where can it be used?",
+        "answer": "<p><strong>Reflection</strong> is a feature that allows a program to inspect its own structural metadata at runtime. You can dynamically query types, modules, and assemblies, instantiate objects, and invoke methods or access properties without knowing them at compile time.</p><p><strong>Where it is used:</strong></p><ul><li>Dependency Injection (DI) containers.</li><li>ORMs (like Entity Framework) mapping database columns to properties.</li><li>Serialization libraries (like JSON.NET) extracting property names and values.</li><li>Late binding and plugin architectures.</li></ul>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Senior"
+    },
+    {
+        "number": 39,
+        "question": "What are generics?",
+        "answer": "<p><strong>Generics</strong> are a mechanism that allows you to define classes, interfaces, methods, and delegates with a placeholder for the data type, rather than specifying a concrete type immediately.</p><p>They provide <strong>type safety</strong> and <strong>performance</strong>. For example, <code>List&lt;T&gt;</code> allows you to create a list of integers (<code>List&lt;int&gt;</code>) or strings (<code>List&lt;string&gt;</code>). This prevents runtime casting errors and eliminates the performance penalties of boxing and unboxing value types.</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Junior/Mid"
+    },
+    {
+        "number": 40,
+        "question": "What constrains can be applied to generics?",
+        "answer": "<p>Constraints restrict the kinds of types that can be substituted for a generic type parameter. You use the <code>where</code> keyword to apply them:</p><ul><li><code>where T : struct</code> (Must be a value type)</li><li><code>where T : class</code> (Must be a reference type)</li><li><code>where T : new()</code> (Must have a public parameterless constructor)</li><li><code>where T : &lt;BaseClass&gt;</code> (Must inherit from a specific base class)</li><li><code>where T : &lt;Interface&gt;</code> (Must implement a specific interface)</li><li><code>where T : unmanaged</code> (Must be an unmanaged type)</li></ul>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 41,
+        "question": "Can Garbage Collection be forced manually?",
+        "answer": "<p><strong>Yes,</strong> by calling <code>GC.Collect()</code>.</p><p>However, doing so is highly discouraged in typical application code. The .NET Garbage Collector is self-tuning and highly optimized. Forcing a collection disrupts its performance heuristics and forces thread suspensions, often leading to performance degradation. It should only be used in very specific scenarios, such as when you know a massive amount of unmanaged memory was just released.</p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Senior"
+    },
+    {
+        "number": 42,
+        "question": "What are the generations of .NET Garbage Collector?",
+        "answer": "<p>The GC organizes objects on the heap into three generations to optimize memory management:</p><ul><li><strong>Generation 0:</strong> Contains newly allocated, short-lived objects (e.g., temporary local variables). Garbage collection occurs here most frequently and rapidly.</li><li><strong>Generation 1:</strong> Acts as a buffer between short-lived and long-lived objects. Objects that survive Gen 0 collections are promoted to Gen 1.</li><li><strong>Generation 2:</strong> Contains long-lived objects (e.g., singletons, static data). Collections here are rare and expensive, known as \"full garbage collections.\"</li></ul>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Senior"
+    },
+    {
+        "number": 43,
+        "question": "With the IDisposable interface, what logic is usually placed inside of the Dispose method?",
+        "answer": "<p>The <code>Dispose()</code> method is used for deterministic cleanup of resources. Inside it, you should:</p><ol><li><strong>Release Unmanaged Resources:</strong> Close file handles, network sockets, or database connections.</li><li><strong>Dispose Managed Resources:</strong> Call <code>Dispose()</code> on any managed objects that your class owns which also implement <code>IDisposable</code>.</li><li><strong>Suppress Finalization:</strong> Call <code>GC.SuppressFinalize(this)</code> to inform the Garbage Collector that the object has already been cleaned up and doesn't need to be placed in the finalizer queue.</li></ol>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Senior"
+    },
+    {
+        "number": 44,
+        "question": "Can you extend the core .NET framework class with your own method?",
+        "answer": "<p><strong>Yes, by using Extension Methods.</strong></p><p>You can add new methods to existing types (even sealed core .NET classes like <code>String</code> or <code>Int32</code>) without altering their source code or inheriting from them.</p><p>To create an extension method, you must define a <strong>static method</strong> inside a <strong>static class</strong>, and use the <code>this</code> modifier on the first parameter to specify the type being extended. <br>Example: <code>public static bool IsCapitalized(this string str) { ... }</code></p>",
+        "tags": [
+            "C#"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    }
+]

@@ -1,0 +1,843 @@
+[
+    {
+        "number": 1,
+        "question": "What are the primary APIs available for AutoCAD automation, and how do you choose between them for a new project?",
+        "answer": "<p>The primary APIs are AutoLISP/Visual LISP, VBA/ActiveX (COM), AutoCAD .NET API (C#/VB.NET), ObjectARX (C++), and the JavaScript API. AutoLISP is best for lightweight, quick command-line utilities and legacy script maintenance. VBA is largely deprecated and only used for maintaining legacy macros or simple Excel-to-AutoCAD COM integration. The .NET API is the industry standard for modern enterprise plugins, offering rich UI capabilities (WPF), strong typing, and access to most ObjectARX features. ObjectARX (C++) is chosen when maximum performance is required, or when creating custom entities (DBX) and deep core integrations. In cloud workflows, Autodesk Platform Services (APS) Design Automation API is used for headless batch processing.</p>",
+        "tags": [
+            "Architecture",
+            ".NET API",
+            "AutoLISP",
+            "ObjectARX"
+        ],
+        "companies": [
+            "Autodesk",
+            "AECOM",
+            "Jacobs"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 2,
+        "question": "Explain the importance of Transactions in the AutoCAD .NET API. What happens if you neither Commit nor Abort a transaction?",
+        "answer": "<p>Transactions in the AutoCAD .NET API manage safe read/write access to objects in the drawing database (Database). They ensure ACID-like integrity by wrapping object openings, modifications, and creations. If a transaction goes out of scope inside a 'using' block without calling Commit(), the Dispose() method is automatically triggered, which implicitly calls Abort() and rolls back all changes made during that transaction. If not wrapped in a 'using' statement and neither Commit() nor Abort() is called, AutoCAD will suffer from memory leaks, locked objects, and almost certainly crash with an eHadMultipleReaders or eWasOpenForWrite fatal error.</p>",
+        "tags": [
+            ".NET API",
+            "Transactions",
+            "Memory Management"
+        ],
+        "companies": [
+            "Autodesk",
+            "WSP",
+            "Bentley Systems"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 3,
+        "question": "What is the difference between an ObjectId and a Handle in AutoCAD?",
+        "answer": "<p>An ObjectId is a session-specific, in-memory pointer/identifier assigned to a DBObject while a drawing is open. If you close and reopen the drawing, the ObjectId of the exact same entity can change. A Handle is a persistent, unique 64-bit hexadecimal identifier stored within the DWG file itself that remains constant across sessions for the entire lifetime of the entity. Therefore, if you need to reference an AutoCAD entity from an external database (like SQL) or store persistent links across sessions, you must store the Handle and convert it back to an ObjectId at runtime using Database.TryGetObjectId().</p>",
+        "tags": [
+            "Database",
+            "ObjectId",
+            "Handle",
+            ".NET API"
+        ],
+        "companies": [
+            "Autodesk",
+            "Arcadis",
+            "Stantec"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 4,
+        "question": "Explain the structure of the AutoCAD Database hierarchy, specifically concerning SymbolTables and BlockTableRecords.",
+        "answer": "<p>An AutoCAD Database represents the in-memory contents of a DWG file. It contains nine fixed SymbolTables: BlockTable, LayerTable, TextStyleTable, LinetypeTable, ViewTable, ViewportTable, UcsTable, RegAppTable, and DimStyleTable. Each SymbolTable contains SymbolTableRecords. Specifically, the BlockTable contains BlockTableRecords (BTR). Every graphical entity you see on screen does not live directly in the BlockTable; it lives inside a specific BlockTableRecord. By default, every drawing has at least three special BTRs: *Model_Space (where model geometry resides), *Paper_Space, and *Paper_Space0 (where layout geometry and viewports reside). Custom block definitions are also stored as distinct BlockTableRecords.</p>",
+        "tags": [
+            "Database",
+            "SymbolTables",
+            "BlockTableRecord"
+        ],
+        "companies": [
+            "Autodesk",
+            "Arup",
+            "Bechtel"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 5,
+        "question": "What is the difference between 'BlockDefinition' (BlockTableRecord) and 'BlockReference'?",
+        "answer": "<p>A BlockTableRecord (Block Definition) is the non-graphical template or blueprint stored in the BlockTable that holds the actual geometry (Lines, Circles, AttributeDefinitions) in its own local coordinate system near (0,0,0). A BlockReference is the actual visual instance placed into Model Space or Paper Space that points back to the BlockTableRecord. You can have one BlockTableRecord and thousands of BlockReferences pointing to it, each with its own Position, Rotation, ScaleFactors, Layer, and AttributeReferences.</p>",
+        "tags": [
+            "Blocks",
+            "BlockTableRecord",
+            "BlockReference"
+        ],
+        "companies": [
+            "Gensler",
+            "HDR",
+            "Tetra Tech"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 6,
+        "question": "When creating a command using the [CommandMethod] attribute in .NET, what is the difference between CommandFlags.Modal and CommandFlags.Session?",
+        "answer": "<p>CommandFlags.Modal is the default execution context (Document context). When a command runs in Modal mode, it executes within the context of the currently active Document, automatically locking it, and prohibits switching active documents, opening, or closing drawings until the command finishes. CommandFlags.Session runs the command in the Application context. This allows the command to open, create, switch between, and close multiple documents (ideal for batch processing). However, because a Session command runs in the Application context, it does not automatically lock any document; therefore, you must explicitly call Document.LockDocument() before modifying any open document's database.</p>",
+        "tags": [
+            ".NET API",
+            "CommandFlags",
+            "Document Locking"
+        ],
+        "companies": [
+            "Autodesk",
+            "Kiewit",
+            "Ramboll"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 7,
+        "question": "Why do you get an 'eLockViolation' exception in AutoCAD .NET, and how do you resolve it?",
+        "answer": "<p>An 'eLockViolation' exception occurs when code attempts to open an object for write or modify a Database that belongs to an open Document while executing outside of a modal Document context. Common scenarios include modifying the drawing from a modeless WPF PaletteSet, a Windows Forms floating dialog, an external COM event, or a command marked with CommandFlags.Session. To resolve it, you must wrap your database modification and transaction code inside a <code>using (DocumentLock docLock = doc.LockDocument()) { ... }</code> block.</p>",
+        "tags": [
+            "Debugging",
+            "Exception Handling",
+            "DocumentLock",
+            "UI"
+        ],
+        "companies": [
+            "Autodesk",
+            "Burns & McDonnell",
+            "Mott MacDonald"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 8,
+        "question": "How do you modify thousands of DWG files in a batch process without opening them in the AutoCAD graphical editor?",
+        "answer": "<p>You use a 'Side Database' via the <code>Database</code> constructor: <code>using (Database db = new Database(false, true))</code>. Passing <code>false</code> for <code>buildDefaultDrawing</code> prevents creating empty overhead tables, and <code>true</code> for <code>noDocument</code> detaches it from the UI. You then call <code>db.ReadDwgFile(filePath, FileOpenMode.OpenForReadAndWriteNoShare, true, null)</code> followed by <code>db.CloseInput(true)</code> to ensure the file stream is fully read into memory. You can then start a Transaction on <code>db.TransactionManager</code>, make modifications, commit the transaction, and call <code>db.SaveAs(filePath, DwgVersion.Current)</code>. For maximum scale, this code should be run in <code>accoreconsole.exe</code> or APS Design Automation.</p>",
+        "tags": [
+            "Batch Processing",
+            "Side Database",
+            "Performance",
+            ".NET API"
+        ],
+        "companies": [
+            "Autodesk",
+            "AECOM",
+            "Fluor"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 9,
+        "question": "What is AccoreConsole.exe, and how does it improve AutoCAD automation workflows?",
+        "answer": "<p>AccoreConsole.exe (AutoCAD Core Console) is a headless, command-line-only version of AutoCAD included in standard installations (located in the AutoCAD root folder). It loads <code>accore.dll</code> (the core geometry and database engine) without initializing <code>acad.exe</code> (the heavy Win32/WPF user interface, Ribbon, or DirectX graphics pipeline). Because it has no UI overhead, it starts up in less than a second and can process scripts (.scr), AutoLISP, and non-UI .NET DLLs (<code>acdbmgd.dll</code> and <code>accoremgd.dll</code>) 10x to 50x faster than full AutoCAD, while allowing parallel multi-process execution across CPU cores.</p>",
+        "tags": [
+            "AccoreConsole",
+            "Headless",
+            "Batch Processing",
+            "Architecture"
+        ],
+        "companies": [
+            "Autodesk",
+            "WSP",
+            "Thornton Tomasetti"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 10,
+        "question": "Explain the split of the AutoCAD .NET API assemblies into AcDbMgd.dll, AcCoreMgd.dll, and AcMgd.dll (introduced in AutoCAD 2013).",
+        "answer": "<p>In AutoCAD 2013 ('Big Split'), Autodesk separated the monolithic API to support headless computing (<code>accoreconsole.exe</code> and cloud Design Automation). <code>AcDbMgd.dll</code> is the ObjectDBX layer containing database classes, entities, and geometry (<code>Database</code>, <code>Transaction</code>, <code>Line</code>, <code>Point3d</code>). <code>AcCoreMgd.dll</code> is the core application logic layer containing command registration, editor interaction, and selection (<code>Editor</code>, <code>CommandMethod</code>, <code>Core.Application</code>). <code>AcMgd.dll</code> contains only platform-specific Windows UI features (<code>PaletteSet</code>, <code>Ribbon</code>, <code>Windows.Application</code>). For code to run on AccoreConsole or APS Design Automation, it must ONLY reference <code>AcDbMgd.dll</code> and <code>AcCoreMgd.dll</code>, avoiding <code>AcMgd.dll</code>.</p>",
+        "tags": [
+            ".NET API",
+            "Architecture",
+            "Assemblies",
+            "APS"
+        ],
+        "companies": [
+            "Autodesk",
+            "Cadalyst",
+            "SOFiSTiK"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 11,
+        "question": "What is the difference between XData (Extended Entity Data) and Extension Dictionaries (Xrecords) for storing custom metadata?",
+        "answer": "<p>XData is attached directly to any <code>DBObject</code>, identified by a registered application name (<code>RegAppTableRecord</code>). It uses typed DXF group codes (1000-1071) and has a strict size limit of 16 KB per object across all applications. However, XData supports automatic transformation (e.g., group code 1011 points move/rotate automatically when the entity is moved). Extension Dictionaries are optional object containers attached to an entity that can hold <code>Xrecord</code> objects or custom objects. Xrecords have virtually no size limit (up to gigabytes), can store arbitrary ResultBuffers without needing a RegApp registration, and can be organized hierarchically, making them superior for large or complex custom data.</p>",
+        "tags": [
+            "XData",
+            "Xrecord",
+            "Extension Dictionary",
+            "Data Storage"
+        ],
+        "companies": [
+            "Autodesk",
+            "Hexagon",
+            "AVEVA"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 12,
+        "question": "Where should you store drawing-wide (global) custom data inside a DWG file rather than attaching it to a specific graphical entity?",
+        "answer": "<p>Drawing-wide custom data should be stored in the Named Objects Dictionary (NOD), accessed via <code>Database.NamedObjectsDictionaryId</code>. The NOD is the root dictionary of the database (where standard dictionaries like <code>ACAD_GROUP</code>, <code>ACAD_LAYOUT</code>, and <code>ACAD_MLINESTYLE</code> also reside). Best practice is to open the NOD for write, create your own company/plugin sub-dictionary (e.g., <code>MY_COMPANY_DATA</code>), and store <code>Xrecord</code> objects inside that sub-dictionary to avoid namespace collisions.</p>",
+        "tags": [
+            "Named Objects Dictionary",
+            "Database",
+            "Data Storage"
+        ],
+        "companies": [
+            "Autodesk",
+            "Buro Happold",
+            "AtkinsR\u00e9alis"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 13,
+        "question": "How do you programmatically add Attributes to a newly inserted BlockReference in the .NET API?",
+        "answer": "<p>When you instantiate a <code>new BlockReference(insertionPoint, btrId)</code> and append it to Model Space, AutoCAD does NOT automatically attach its attributes! You must open the underlying <code>BlockTableRecord</code> (block definition) and iterate through its entities. For every entity that is an <code>AttributeDefinition</code> (and where <code>!attDef.Constant</code>), you must instantiate a <code>new AttributeReference()</code>, call <code>attRef.SetAttributeFromBlock(attDef, blockRef.BlockTransform)</code>, set its <code>TextString</code> value, and append it to <code>blockRef.AttributeCollection.AppendAttribute(attRef)</code> while registering it with the active transaction.</p>",
+        "tags": [
+            "Blocks",
+            "Attributes",
+            ".NET API"
+        ],
+        "companies": [
+            "Jacobs",
+            "Stantec",
+            "Sweco"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 14,
+        "question": "How do you read and modify Dynamic Block properties in the AutoCAD .NET API?",
+        "answer": "<p>First, verify the <code>BlockReference</code> is dynamic by checking <code>blockRef.IsDynamicBlock</code>. If true, iterate through <code>blockRef.DynamicBlockReferencePropertyCollection</code>. Each item is a <code>DynamicBlockReferenceProperty</code> object containing <code>PropertyName</code>, <code>Value</code>, <code>ReadOnly</code>, and <code>GetAllowedValues()</code>. To modify a parameter (such as a distance, visibility state, or flip state), locate the property by <code>PropertyName</code>, ensure <code>!prop.ReadOnly</code>, and assign a new value of the exact expected data type (e.g., <code>double</code> for linear parameters, <code>string</code> for Visibility states) to <code>prop.Value</code>.</p>",
+        "tags": [
+            "Dynamic Blocks",
+            ".NET API",
+            "Blocks"
+        ],
+        "companies": [
+            "HOK",
+            "Perkins&Will",
+            "HDR"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 15,
+        "question": "When an instance of a Dynamic Block is modified (e.g., stretched), its `BlockReference.Name` changes to an anonymous name like `*U12`. How do you find its original block name?",
+        "answer": "<p>When a Dynamic Block's parameters deviate from the default definition, AutoCAD creates an anonymous <code>BlockTableRecord</code> (prefixed with <code>*U</code>) to represent that specific geometric state. Consequently, <code>blockRef.Name</code> returns <code>*Uxx</code>. To get the true original block definition name, you must access <code>blockRef.DynamicBlockTableRecord</code> (which returns the <code>ObjectId</code> of the master dynamic block definition), open that <code>BlockTableRecord</code> for read, and read its <code>.Name</code> property.</p>",
+        "tags": [
+            "Dynamic Blocks",
+            "Anonymous Blocks",
+            ".NET API"
+        ],
+        "companies": [
+            "Autodesk",
+            "WSP",
+            "Black & Veatch"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 16,
+        "question": "Explain the difference between WCS, UCS, DCS, and PSDCS coordinate systems in AutoCAD and how to transform points between them.",
+        "answer": "<p>WCS (World Coordinate System) is the fixed global Cartesian system. Every database entity (like <code>Line.StartPoint</code>) is stored in WCS (or OCS for 2D planar entities). UCS (User Coordinate System) is the movable working coordinate system used by the user; <code>Editor.GetPoint()</code> returns points in UCS! To convert a UCS point from the editor to WCS for database creation, transform it via <code>pt.TransformBy(ed.CurrentUserCoordinateSystem)</code>. DCS (Display Coordinate System) is aligned with the current view screen plane, and PSDCS is Paper Space DCS, used when projecting coordinates through a <code>Viewport</code> between Model Space and Paper Space.</p>",
+        "tags": [
+            "Coordinate Systems",
+            "WCS",
+            "UCS",
+            "Geometry"
+        ],
+        "companies": [
+            "Autodesk",
+            "Trimble",
+            "Leica Geosystems"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 17,
+        "question": "What is the OCS (Object Coordinate System) or ECS (Entity Coordinate System), and why does it matter for 2D entities like `Polyline` or `Circle`?",
+        "answer": "<p>2D planar entities (<code>Polyline</code>, <code>Circle</code>, <code>Arc</code>, <code>LwPolyline</code>, <code>BlockReference</code>) are defined on a local 2D plane defined by their <code>Normal</code> vector (extrusion direction) and <code>Elevation</code> (distance from WCS origin along the normal). Their vertices (e.g., <code>Polyline.GetPoint2dAt()</code>) are stored in OCS, not WCS, using the Arbitrary Axis Algorithm. If a 2D Polyline has a Normal vector other than <code>(0,0,1)</code>, its 2D coordinates will not match WCS X/Y coordinates unless transformed using <code>Matrix3d.PlaneToWorld(polyline.Normal)</code>.</p>",
+        "tags": [
+            "OCS",
+            "Geometry",
+            "Matrix3d",
+            "Polyline"
+        ],
+        "companies": [
+            "Autodesk",
+            "Bentley Systems",
+            "Bricsys"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 18,
+        "question": "How does 3D affine transformation work in AutoCAD .NET using `Matrix3d`? How do you combine multiple transformations?",
+        "answer": "<p>In the <code>Autodesk.AutoCAD.Geometry</code> namespace, <code>Matrix3d</code> is a 4x4 homogeneous transformation matrix used to move (<code>Displacement</code>), rotate (<code>Rotation</code>), scale (<code>Scaling</code>), or mirror (<code>Mirroring</code>) entities and points via <code>entity.TransformBy(matrix)</code>. To combine multiple transformations (e.g., move to origin, rotate, and move back), you multiply matrices using the <code>*</code> operator or <code>.PreMultiplyBy()</code> / <code>.PostMultiplyBy()</code>. Because matrix multiplication is non-commutative, transformations are applied from right to left: <code>Matrix3d composite = matMoveBack * matRotate * matMoveToOrigin;</code>.</p>",
+        "tags": [
+            "Geometry",
+            "Matrix3d",
+            "Linear Algebra",
+            ".NET API"
+        ],
+        "companies": [
+            "Autodesk",
+            "Dassault Syst\u00e8mes",
+            "Siemens"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 19,
+        "question": "What is the difference between `EntityJig` and `DrawJig` in the AutoCAD .NET API, and when would you use each?",
+        "answer": "<p>Jigs allow interactive visual feedback during user mouse movement before final database placement. <code>EntityJig</code> is designed to dynamically manipulate a single existing <code>Entity</code> subclass (e.g., stretching a custom rectangle, rotating a single <code>BlockReference</code>, or sizing a <code>Circle</code>). It overrides <code>Sampler()</code> to capture mouse input and <code>Update()</code> to modify that single entity. <code>DrawJig</code> is more flexible and does not bind to a single entity; instead, it overrides <code>WorldDraw(WorldDraw draw)</code> allowing you to dynamically preview multiple entities simultaneously (e.g., a block + leader line + text preview) or transient geometry during mouse movement.</p>",
+        "tags": [
+            "Jig",
+            "EntityJig",
+            "DrawJig",
+            "User Interaction"
+        ],
+        "companies": [
+            "Autodesk",
+            "SOFiSTiK",
+            "Graitec"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 20,
+        "question": "How do Selection Filters work in `Editor.GetSelection()`, and how do you construct complex logical conditions like (Layer = 'A' OR Layer = 'B') AND Type = 'LINE'?",
+        "answer": "<p><code>SelectionFilter</code> takes an array of <code>TypedValue</code> objects representing DXF group codes. Complex boolean logic is built using special <code>DxfCode.Operator</code> strings (<code><AND</code>, <code>AND></code>, <code><OR</code>, <code>OR></code>, <code><XOR</code>, <code><NOT</code>). For <code>(Layer = 'A' OR Layer = 'B') AND Type = 'LINE'</code>, you construct the <code>TypedValue[]</code> array as: <code>[ (-4, '<AND'), (0, 'LINE'), (-4, '<OR'), (8, 'A'), (8, 'B'), (-4, 'OR>'), (-4, 'AND>') ]</code>. Filtering at the <code>SelectionFilter</code> level is significantly faster than opening every object in a transaction and checking properties in C#, as the filtering is executed natively in C++ by the ObjectARX kernel.</p>",
+        "tags": [
+            "SelectionFilter",
+            "DXF Group Codes",
+            "Performance",
+            ".NET API"
+        ],
+        "companies": [
+            "Autodesk",
+            "AECOM",
+            "Kimley-Horn"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 21,
+        "question": "Why is checking `ObjectId.ObjectClass.IsDerivedFrom(RXObject.GetClass(typeof(Curve)))` preferred over opening the object in a transaction and using the C# `is` operator when iterating through large spaces?",
+        "answer": "<p>Opening an object via <code>tr.GetObject(id, OpenMode.ForRead)</code> marshals the unmanaged C++ <code>AcDbObject</code> across the P/Invoke boundary and instantiates a managed .NET wrapper object on the garbage-collected heap. When iterating through 500,000 entities in Model Space, opening every entity just to check its type creates massive memory pressure and slows execution. <code>id.ObjectClass</code> inspects the unmanaged <code>AcRxClass</code> metadata pointer directly on the <code>ObjectId</code> struct without opening the database object or allocating managed wrappers, making type filtering 10x\u201320x faster.</p>",
+        "tags": [
+            "Performance",
+            "RXClass",
+            "Memory Management",
+            ".NET API"
+        ],
+        "companies": [
+            "Autodesk",
+            "Bentley Systems",
+            "Hexagon"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 22,
+        "question": "Explain the difference between `Transaction` and `OpenCloseTransaction`. When should you use `OpenCloseTransaction`?",
+        "answer": "<p>Standard <code>Transaction</code> uses the database's <code>TransactionManager</code> stack, supporting nested transactions and automatic rollback across all objects opened within it. However, deep transaction stacks or opening tens of thousands of objects inside a single standard <code>Transaction</code> adds significant overhead. <code>OpenCloseTransaction</code> (created via <code>db.TransactionManager.StartOpenCloseTransaction()</code>) is a lightweight wrapper around direct legacy <code>Open()</code> and <code>Close()</code> calls. It avoids the transaction manager queue overhead and is recommended when working Inside event handlers (like <code>Database.ObjectModified</code>) where starting a standard transaction might conflict with an active command's transaction, or when reading massive datasets sequentially.</p>",
+        "tags": [
+            "Transactions",
+            "OpenCloseTransaction",
+            "Events",
+            "Performance"
+        ],
+        "companies": [
+            "Autodesk",
+            "Cadalyst",
+            "AVEVA"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 23,
+        "question": "What are the dangers of modifying database objects directly inside a `Database.ObjectModified` or `ObjectAppended` event handler, and how do you handle it safely?",
+        "answer": "<p>When <code>Database.ObjectModified</code> fires, the object that triggered the event is still in the middle of being closed or modified by AutoCAD's internal state machine. Attempting to reopen that object for write or start a new Transaction inside <code>ObjectModified</code> will cause infinite recursion (<code>ObjectModified</code> firing itself), <code>eWasOpenForWrite</code> exceptions, or immediate fatal crashes (<code>FATAL ERROR: Unhandled Access Violation</code>). Instead, record the <code>ObjectId</code>s of the modified objects in a <code>HashSet<ObjectId></code> during <code>ObjectModified</code>, subscribe to <code>Document.CommandEnded</code> (or <code>Application.Idle</code>), and perform your follow-up modifications safely after the triggering operation completes.</p>",
+        "tags": [
+            "Events",
+            "Reactors",
+            "Architecture",
+            "Debugging"
+        ],
+        "companies": [
+            "Autodesk",
+            "Rib Software",
+            "Trimble"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 24,
+        "question": "What is the Overrule API (`ObjectOverrule`, `DrawableOverrule`, `TransformOverrule`, `GripOverrule`), and how does it replace custom ObjectARX entities?",
+        "answer": "<p>Introduced in AutoCAD 2010, the Overrule API allows .NET developers to intercept and override the standard behavior (visual display, grip manipulation, transformation, snap points, or properties) of built-in AutoCAD entities (like <code>Line</code> or <code>BlockReference</code>) without writing a custom C++ ObjectARX <code>.dbx</code> class. For example, using <code>DrawableOverrule</code>, you can make a standard <code>Line</code> carrying specific XData render as a 3D pipe with custom text labels in <code>WorldDraw()</code>. Because the underlying entity is still a standard <code>Line</code>, anyone opening the DWG without your plugin still sees the standard geometry instead of an unusable Zombie/Proxy entity.</p>",
+        "tags": [
+            "Overrule API",
+            "DrawableOverrule",
+            "Custom Entities",
+            ".NET API"
+        ],
+        "companies": [
+            "Autodesk",
+            "SOFiSTiK",
+            "MagiCAD"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 25,
+        "question": "How does the Transient Graphics API (`TransientManager`) work, and why would you use it instead of creating temporary database entities?",
+        "answer": "<p>The <code>TransientManager.CurrentTransientManager</code> allows you to draw temporary <code>Drawable</code> geometry (markers, direction arrows, highlight bounding boxes, preview splines) directly into the graphics pipeline on top of the viewport without adding them to the <code>Database</code>. Unlike temporary database entities, Transient Graphics do not dirty the drawing (<code>DBMOD</code> stays unchanged), do not pollute the Undo/Redo history stack, do not require Transactions or Document Locks, and render with virtually zero database overhead.</p>",
+        "tags": [
+            "Transient Graphics",
+            "Graphics Pipeline",
+            "UI",
+            ".NET API"
+        ],
+        "companies": [
+            "Autodesk",
+            "Transoft Solutions",
+            "Carlson Software"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 26,
+        "question": "In AutoLISP, what is the difference between `entmake` / `entmod` and `vla-*` (Visual LISP ActiveX) functions, and why avoid `(command ...)` in automation?",
+        "answer": "<p><code>(command \"_LINE\" ...)</code> drives the AutoCAD UI command line; it is slow, affected by running Object Snaps (<code>OSMODE</code>), depends on current view zoom for selection, and echoes to the console. <code>entmake</code> and <code>entmod</code> manipulate the entity's DXF association list directly in the database at high speed without invoking the command processor or being affected by OSNAPs. <code>vla-*</code> functions expose the ActiveX/COM object model in LISP (e.g., <code>(vla-addline modelSpace pt1 pt2)</code>), offering object-oriented property access and methods like <code>vla-intersectwith</code> that aren't available in vanilla DXF lists.</p>",
+        "tags": [
+            "AutoLISP",
+            "Visual LISP",
+            "DXF",
+            "Performance"
+        ],
+        "companies": [
+            "Jacobs",
+            "AECOM",
+            "Black & Veatch"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 27,
+        "question": "How do you write a clean error handler (`*error*`) in AutoLISP to ensure system variables like `OSMODE` and `CMDECHO` are restored if a user presses ESC?",
+        "answer": "<p>In AutoLISP, if a user hits ESC during <code>(getpoint)</code>, execution halts immediately, leaving modified system variables (<code>OSMODE=0</code>, <code>CMDECHO=0</code>) corrupted. To prevent this, declare <code>*error*</code> as a local variable in the function's argument list <code>(defun c:MyCmd ( / *error* oldOsmode oldCmdEcho) ...)</code>. Inside the function, start an Undo group <code>(vla-StartUndoMark doc)</code>, save the current variables, and define <code>(defun *error* (msg) ...)</code> to check if <code>msg</code> is not a standard cancel message, restore <code>oldOsmode</code> and <code>oldCmdEcho</code> via <code>setvar</code>, close the Undo group <code>(vla-EndUndoMark doc)</code>, and call <code>(princ)</code>.</p>",
+        "tags": [
+            "AutoLISP",
+            "Error Handling",
+            "System Variables"
+        ],
+        "companies": [
+            "Stantec",
+            "HDR",
+            "Kimley-Horn"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 28,
+        "question": "How can you expose a C# .NET function so that it can be called directly from AutoLISP with arguments and return a value back to AutoLISP?",
+        "answer": "<p>Instead of <code>[CommandMethod]</code>, decorate the C# method with the <code>[LispFunction(\"MyLispFunc\")]</code> attribute. The method must accept a single <code>ResultBuffer</code> parameter (which contains the arguments passed from LISP as an array of <code>TypedValue</code> objects) and can return either <code>void</code>, an <code>object</code> (like <code>double</code>, <code>string</code>, <code>int</code>, <code>Point3d</code>), or a <code>ResultBuffer</code> (for returning complex lists or entity names via <code>LispDataType.ListBegin</code> / <code>LispDataType.ObjectId</code>). In AutoLISP, you then invoke it just like a native function: <code>(setq res (MyLispFunc \"Arg1\" 42.5))</code>.</p>",
+        "tags": [
+            "AutoLISP",
+            ".NET API",
+            "LispFunction",
+            "Interoperability"
+        ],
+        "companies": [
+            "Autodesk",
+            "WSP",
+            "Arcadis"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 29,
+        "question": "Explain the difference between `Editor.Command()` and `Document.SendStringToExecute()` in the AutoCAD .NET API.",
+        "answer": "<p><code>Editor.Command()</code> (introduced in AutoCAD</p>\n<ul>\n  <li>executes a built-in AutoCAD command synchronously: your C# execution pauses, the AutoCAD command runs immediately, and control returns to the very next line of C# code once completed (note: must run in Document/Modal context). <code>Document.SendStringToExecute()</code> is completely asynchronous: it queues a macro string into the command line buffer to be executed ONLY AFTER your entire C# command has finished and returned control to AutoCAD. Because <code>SendStringToExecute</code> is asynchronous, you cannot write C# logic immediately after it expecting its output to exist yet.</li>\n</ul>",
+        "tags": [
+            ".NET API",
+            "Editor.Command",
+            "SendStringToExecute",
+            "Execution Flow"
+        ],
+        "companies": [
+            "Autodesk",
+            "Arup",
+            "GHD"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 30,
+        "question": "What is the purpose of the `IExtensionApplication` interface in an AutoCAD .NET plugin?",
+        "answer": "<p><code>IExtensionApplication</code> provides two lifecycle methods: <code>Initialize()</code> and <code>Terminate()</code>. When AutoCAD loads your <code>.dll</code> (via <code>NETLOAD</code>, the Registry, or an Autoloader <code>.bundle</code>), it searches for a class implementing <code>IExtensionApplication</code> and immediately executes <code>Initialize()</code>. This is where you set up global event handlers, load custom Ribbon tabs, initialize licensing checks, or create PaletteSets. When AutoCAD closes, <code>Terminate()</code> is called to clean up unmanaged resources. Using <code>[assembly: ExtensionApplication(typeof(MyPlugin.PluginInit))]</code> significantly speeds up plugin initialization because AutoCAD doesn't have to reflect over every class in the assembly.</p>",
+        "tags": [
+            ".NET API",
+            "IExtensionApplication",
+            "Plugin Lifecycle"
+        ],
+        "companies": [
+            "Autodesk",
+            "Kiewit",
+            "Mott MacDonald"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 31,
+        "question": "How does the AutoCAD Autoloader `.bundle` mechanism work, and why is it preferred over Windows Registry (`DemandLoad`) installers?",
+        "answer": "<p>The Autoloader format packages a plugin into a folder named <code>MyPlugin.bundle</code> placed in <code>%APPDATA%/Autodesk/ApplicationPlugins/</code> or <code>%PROGRAMDATA%/Autodesk/ApplicationPlugins/</code>. At its root is a <code>PackageContents.xml</code> manifest file. This XML defines <code>Components</code> targeting specific OS platforms, AutoCAD vertical flavours (Vanilla, Civil 3D, Plant 3D), and AutoCAD release versions (<code>SeriesMin='R24.0'</code>, <code>SeriesMax='R25.0'</code>), along with startup rules and command names for demand-loading. It eliminates the need for administrative registry permissions, supports per-user XCOPY deployment, and allows a single package to contain both <code>.NET 4.8</code> (AutoCAD 2021-2024) and <code>.NET 8.0</code> (AutoCAD 2025+) binaries side by side.</p>",
+        "tags": [
+            "Deployment",
+            "Autoloader",
+            "PackageContents.xml",
+            "DevOps"
+        ],
+        "companies": [
+            "Autodesk",
+            "AECOM",
+            "Gensler"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 32,
+        "question": "What major breaking change occurred in AutoCAD 2025 regarding the .NET API runtime, and how do you migrate plugins to support both 2024 and 2025?",
+        "answer": "<p>Prior to AutoCAD 2025, AutoCAD ran on the legacy .NET Framework (up to .NET Framework 4.8 in AutoCAD 2021\u20132024). Starting with AutoCAD 2025, Autodesk migrated the entire managed runtime to modern <strong>.NET 8.0 (<code>net8.0-windows</code>)</strong>. Because .NET Framework 4.8 and .NET 8.0 have different runtime binaries and NuGet dependencies, a single compiled DLL cannot always utilize modern APIs cleanly across both. To support both, convert your <code>.csproj</code> to an SDK-style project and use multi-targeting: <code><TargetFrameworks>net48;net8.0-windows</TargetFrameworks></code> with conditional <code><ItemGroup Condition=\"'$(TargetFramework)' == 'net8.0-windows'\"></code> blocks referencing the respective <code>Autodesk.AutoCAD.NET.Core</code> NuGet packages.</p>",
+        "tags": [
+            ".NET 8",
+            "AutoCAD 2025",
+            "Migration",
+            ".NET API"
+        ],
+        "companies": [
+            "Autodesk",
+            "SOFiSTiK",
+            "Graitec",
+            "WSP"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 33,
+        "question": "Is AutoCAD thread-safe? Can you use `Parallel.ForEach` or `Task.Run` to modify entities in an AutoCAD `Database`?",
+        "answer": "<p>No! The AutoCAD ObjectARX kernel and <code>Database</code> are strictly <strong>single-threaded (STA)</strong> and have thread-affinity to the main AutoCAD UI thread. Calling any <code>AcDb</code> or <code>AcCore</code> API method (even opening an object for Read in a Transaction) from a background worker thread or <code>Parallel.ForEach</code> will corrupt memory or immediately crash AutoCAD with an Access Violation. However, you CAN extract pure mathematical data (e.g., arrays of <code>Point3d</code> or custom DTOs) on the main thread, run heavy computational geometry or external API calls on background threads using <code>Parallel.ForEach</code>, marshal back to the main thread (<code>Application.DocumentManager.ExecuteInCommandContextAsync</code>), and write the results to the Database.</p>",
+        "tags": [
+            "Multithreading",
+            "Async",
+            "Architecture",
+            "Performance"
+        ],
+        "companies": [
+            "Autodesk",
+            "Bentley Systems",
+            "Trimble"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 34,
+        "question": "How do you safely execute AutoCAD Database modifications from a Modeless WPF `PaletteSet` button click in AutoCAD 2016+?",
+        "answer": "<p>When a user clicks a button in a modeless WPF <code>PaletteSet</code>, the click event runs outside the AutoCAD Command Context. While you can lock the document via <code>doc.LockDocument()</code>, doing so directly from a UI message pump can still conflict with active commands or fail to record proper Undo marks. The modern best practice is to call <code>await Application.DocumentManager.ExecuteInCommandContextAsync(async (obj) => { ... }, null);</code>. This asks AutoCAD to safely transition execution into the proper Document/Command context, lock the document automatically, and run your transaction cleanly.</p>",
+        "tags": [
+            "WPF",
+            "PaletteSet",
+            "Async",
+            "ExecuteInCommandContextAsync"
+        ],
+        "companies": [
+            "Autodesk",
+            "HOK",
+            "Jacobs"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 35,
+        "question": "Explain the architecture of Autodesk Platform Services (APS, formerly Forge) Design Automation API for AutoCAD.",
+        "answer": "<p>APS Design Automation for AutoCAD lets you run AutoCAD automation in the cloud without any local AutoCAD installation. It consists of three core abstractions:</p>\n<ul>\n  <li><strong>AppBundle</strong>: A zipped <code>.bundle</code> containing your compiled head-less AutoCAD .NET plugin (<code>AcDbMgd</code>/<code>AcCoreMgd</code> only) or LISP script uploaded to APS.</li>\n  <li><strong>Activity</strong>: The specification of an execution template (similar to a function signature) defining input parameters (e.g., input DWG URL, JSON payload), output files (e.g., output PDF or modified DWG URL), the <code>accoreconsole.exe</code> command-line arguments, and which AppBundle to load.</li>\n  <li><strong>WorkItem</strong>: An actual job execution instance of an Activity passing presigned S3/OSS URLs for inputs and outputs.</li>\n</ul>",
+        "tags": [
+            "APS",
+            "Forge",
+            "Design Automation",
+            "Cloud"
+        ],
+        "companies": [
+            "Autodesk",
+            "AECOM",
+            "TestFit",
+            "Higharc"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 36,
+        "question": "What are the constraints and limitations when developing a .NET plugin specifically for APS Design Automation for AutoCAD?",
+        "answer": "<p>In APS Design Automation, your plugin runs inside a sandboxed Linux/Windows container running <code>accoreconsole.exe</code>. Constraints include:</p>\n<ul>\n  <li><strong>No UI</strong>: Any reference to <code>AcMgd.dll</code>, <code>System.Windows.Forms</code>, or <code>WPF</code> dialogs will fail or hang the container.</li>\n  <li><strong>No Network Access</strong>: The <code>accoreconsole</code> sandbox completely blocks outbound internet access during a WorkItem; all external data must be passed in ahead of time as input files/JSON via the WorkItem definition.</li>\n  <li><strong>No COM/ActiveX</strong>: <code>Interop</code> and out-of-process COM calls fail.</li>\n  <li><strong>Time & Disk Limits</strong>: WorkItems have strict execution timeouts and local working directory size limits.</li>\n</ul>",
+        "tags": [
+            "APS",
+            "Cloud",
+            "Design Automation",
+            "Architecture"
+        ],
+        "companies": [
+            "Autodesk",
+            "WSP",
+            "Bryden Wood"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 37,
+        "question": "How do you programmatically copy specific Blocks or Layers from an external DWG file into the current active drawing using `WblockCloneObjects`?",
+        "answer": "<p>Open the external source drawing into a side database (<code>sourceDb.ReadDwgFile(...)</code>). Start a transaction in <code>sourceDb</code>, locate the <code>ObjectId</code>s of the desired <code>BlockTableRecord</code>s or <code>LayerTableRecord</code>s, and add them to an <code>ObjectIdCollection</code>. Then call <code>sourceDb.WblockCloneObjects(idCollection, destDb.BlockTableId, idMapping, DuplicateRecordCloning.Ignore, false)</code>. <code>WblockCloneObjects</code> automatically performs a deep clone of the requested records AND all their dependent objects (like nested blocks, linetypes, layers, and materials) into the destination database while translating <code>ObjectId</code> references via the <code>IdMapping</code> object.</p>",
+        "tags": [
+            "WblockCloneObjects",
+            "DeepClone",
+            "Database",
+            ".NET API"
+        ],
+        "companies": [
+            "Autodesk",
+            "Bechtel",
+            "Sweco"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 38,
+        "question": "What is the difference between `DeepCloneObjects` and `WblockCloneObjects`?",
+        "answer": "<p><code>DeepCloneObjects</code> is used for cloning objects <strong>within the same Database</strong> (for example, copying entities from one <code>BlockTableRecord</code>/Layout to another <code>BlockTableRecord</code> within the same DWG). <code>WblockCloneObjects</code> is specifically designed for cloning objects <strong>across two different Databases</strong> (from a source <code>Database</code> to a destination <code>Database</code>). If you attempt to use <code>DeepCloneObjects</code> across two different databases, AutoCAD will throw an <code>eWrongDatabase</code> exception.</p>",
+        "tags": [
+            "DeepCloneObjects",
+            "WblockCloneObjects",
+            "Database",
+            ".NET API"
+        ],
+        "companies": [
+            "Autodesk",
+            "Arcadis",
+            "Ramboll"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 39,
+        "question": "How do you programmatically plot a Layout to PDF in the AutoCAD .NET API?",
+        "answer": "<p>Plotting requires coordinating <code>PlotSettings</code>, <code>PlotSettingsValidator</code>, <code>PlotInfo</code>, <code>PlotEngine</code>, and <code>PlotProgressDialog</code>. First, create a <code>PlotSettings</code> object copied from the target <code>Layout</code>. Use <code>PlotSettingsValidator.Current</code> to set the plot device (<code>DWG To PDF.pc3</code>), media size (<code>ISO_full_bleed_A1_(594.00_x_841.00_MM)</code>), plot area (<code>PlotType.Extents</code> or <code>Layout</code>), scale (<code>StdScaleType.ScaleToFit</code>), and stylesheet (<code>monochrome.ctb</code>). Validate it with <code>PlotInfoValidator</code>. Then check <code>PlotFactory.ProcessPlotState == ProcessPlotState.NotPlotting</code>, create a <code>PlotEngine</code> via <code>PlotFactory.CreatePublishEngine()</code>, and call <code>BeginPlot</code>, <code>BeginDocument</code>, <code>BeginPage</code>, <code>BeginGenerateGraphics</code>, <code>EndGenerateGraphics</code>, <code>EndPage</code>, <code>EndDocument</code>, and <code>EndPlot</code>.</p>",
+        "tags": [
+            "Plotting",
+            "PDF",
+            "PlotEngine",
+            ".NET API"
+        ],
+        "companies": [
+            "AECOM",
+            "Burns & McDonnell",
+            "Fluor"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 40,
+        "question": "What is the BRep (`Autodesk.AutoCAD.BoundaryRepresentation`) API, and when is it required when working with `Solid3d`?",
+        "answer": "<p>In AutoCAD, a <code>Solid3d</code> entity is an opaque ACIS/ShapeManager boundary-representation solid. The <code>Solid3d</code> class itself provides boolean operations (<code>BooleanOperation</code>), extrusions, and mass properties, but it does not expose its individual faces, edges, or vertices directly! To inspect the topology of a 3D solid\u2014such as finding all planar surfaces, extracting edge loops, calculating surface normals, or determining if a point lies inside a solid (<code>Brep.GetPointContainment</code>)\u2014you must reference <code>AcDbMgdBrep.dll</code>, construct a <code>new Brep(solid3d)</code> object, and iterate through its <code>.Faces</code>, <code>.Loops</code>, <code>.Edges</code>, and <code>.Vertices</code> collections.</p>",
+        "tags": [
+            "3D Modeling",
+            "BRep",
+            "Solid3d",
+            "Geometry"
+        ],
+        "companies": [
+            "Autodesk",
+            "Thornton Tomasetti",
+            "Arup"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 41,
+        "question": "How do you find all geometric intersection points between two entities (e.g., a `Polyline` and a `BlockReference`) in .NET?",
+        "answer": "<p>Every <code>Entity</code> inherits the <code>Entity.IntersectWith(Entity ent, Intersect intersectType, Point3dCollection points, IntPtr thisGsMarker, IntPtr otherGsMarker)</code> method. You instantiate a <code>new Point3dCollection()</code>, specify <code>Intersect.OnBothOperands</code> (or <code>ExtendThis</code> / <code>ExtendBoth</code>), and call <code>entity1.IntersectWith(entity2, Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero)</code>. Note: If <code>entity2</code> is a complex <code>BlockReference</code>, <code>IntersectWith</code> can automatically compute intersections with the sub-entities inside the block, or you can call <code>blockRef.Explode(DBObjectCollection)</code> in memory (without adding to the database) to intersect against specific sub-entities.</p>",
+        "tags": [
+            "Geometry",
+            "IntersectWith",
+            ".NET API"
+        ],
+        "companies": [
+            "Trimble",
+            "Carlson Software",
+            "Stantec"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 42,
+        "question": "What is the difference between calling `Entity.Explode(DBObjectCollection)` and `Entity.ExplodeToOwnerSpace()`?",
+        "answer": "<p><code>Entity.Explode(DBObjectCollection entitySet)</code> explodes the entity in memory only, populating the passed <code>DBObjectCollection</code> with newly created non-database-resident <code>DBObject</code> fragments. The original entity remains untouched in the database, and the caller is responsible for either appending the fragments to a <code>BlockTableRecord</code> or calling <code>.Dispose()</code> on every item in the <code>DBObjectCollection</code> to prevent unmanaged memory leaks! Conversely, <code>BlockReference.ExplodeToOwnerSpace()</code> mimics the AutoCAD <code>EXPLODE</code> command: it appends the exploded entities directly into the same space as the block reference, erasing the original block reference automatically.</p>",
+        "tags": [
+            "Explode",
+            "Memory Management",
+            "Dispose",
+            ".NET API"
+        ],
+        "companies": [
+            "Autodesk",
+            "WSP",
+            "HDR"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 43,
+        "question": "Why is it critical to call `.Dispose()` on non-database-resident `DBObject`s (or wrap them in `using` blocks) in AutoCAD .NET?",
+        "answer": "<p>Every managed AutoCAD <code>.NET</code> object (<code>Line</code>, <code>Circle</code>, <code>DBObjectCollection</code>, <code>Brep</code>, <code>Region</code>) is a thin C# wrapper around a much larger unmanaged C++ ObjectARX heap allocation (<code>AcDbObject*</code>). If you instantiate a <code>new Line()</code> and append it to the Database via <code>Transaction.AddNewlyCreatedDBObject(line, true)</code>, the Transaction takes ownership of its lifetime and disposes the wrapper when the transaction ends. However, if you create temporary in-memory objects (like curves for <code>Region.CreateFromCurves()</code> or items from <code>entity.Explode()</code>) that are NEVER added to the Database, the .NET Garbage Collector does not know about the heavy unmanaged C++ memory, leading to severe memory leaks or crashes upon finalization unless you explicitly call <code>.Dispose()</code>.</p>",
+        "tags": [
+            "Memory Management",
+            "Dispose",
+            "Garbage Collection",
+            "ObjectARX"
+        ],
+        "companies": [
+            "Autodesk",
+            "Bentley Systems",
+            "Hexagon"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 44,
+        "question": "How do you programmatically trace a closed boundary or calculate the area of overlapping lines (similar to the `BOUNDARY` or `HATCH` command)?",
+        "answer": "<p>There are two primary methods:</p>\n<ul>\n  <li><strong><code>Editor.TraceBoundary(Point3d seedPoint, bool detectIslands)</code></strong>: Given an internal pick point, AutoCAD's ray-casting engine traces the surrounding visible geometry and returns a <code>DBObjectCollection</code> of closed <code>Polyline</code> or <code>Region</code> loops representing the boundary and any interior islands.</li>\n  <li><strong><code>Region.CreateFromCurves(DBObjectCollection curveSegments)</code></strong>: If you already have a known set of intersecting or contiguous curves, this static method computes all closed topological planar loops and returns them as <code>Region</code> objects, from which you can query <code>.Area</code> and <code>.AreaProperties()</code> (centroid, moments of inertia).</li>\n</ul>",
+        "tags": [
+            "Geometry",
+            "TraceBoundary",
+            "Region",
+            "Topology"
+        ],
+        "companies": [
+            "Autodesk",
+            "Gensler",
+            "TestFit"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 45,
+        "question": "How does the `Curve` base class simplify geometric calculations on `Line`, `Arc`, `Polyline`, and `Spline` entities?",
+        "answer": "<p>In the AutoCAD database hierarchy, <code>Line</code>, <code>Polyline</code>, <code>Arc</code>, <code>Circle</code>, <code>Ellipse</code>, and <code>Spline</code> all inherit from the abstract <code>Autodesk.AutoCAD.DatabaseServices.Curve</code> class. Instead of writing separate trigonometric math for lines vs. arcs vs. splines, you can cast any of them to <code>Curve</code> and use unified parametric methods: <code>GetPointAtDist(double dist)</code>, <code>GetDistAtPoint(Point3d pt)</code>, <code>GetClosestPointTo(Point3d pt, bool extend)</code>, <code>GetFirstDerivative(Point3d pt)</code> (which gives the tangent vector at that point), <code>GetOffsetCurves(double offsetDist)</code>, and <code>GetSplitCurves(Point3dCollection pts)</code>.</p>",
+        "tags": [
+            "Curve",
+            "Geometry",
+            "Polymorphism",
+            ".NET API"
+        ],
+        "companies": [
+            "Autodesk",
+            "Kimley-Horn",
+            "Transoft Solutions"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 46,
+        "question": "Explain how geometry Tolerance (`Autodesk.AutoCAD.Geometry.Tolerance.Global`) works in AutoCAD and why `pt1 == pt2` can fail in CAD algorithms.",
+        "answer": "<p>Because IEEE 754 double-precision floating-point arithmetic introduces microscopic rounding inaccuracies during matrix transformations and intersections, direct binary equality fails in CAD geometry. AutoCAD provides the <code>Tolerance</code> struct consisting of <code>EqualPoint</code> (default $10^{-10}$, the maximum distance between two <code>Point3d</code> objects for them to be considered coincident) and <code>EqualVector</code> (default $10^{-12}$, for normalized vector direction comparison). Always use <code>pt1.IsEqualTo(pt2, new Tolerance(1e-6, 1e-6))</code> or <code>vec1.IsParallelTo(vec2, tol)</code> rather than manual coordinate comparisons.</p>",
+        "tags": [
+            "Geometry",
+            "Floating Point",
+            "Tolerance",
+            "Algorithms"
+        ],
+        "companies": [
+            "Autodesk",
+            "Dassault Syst\u00e8mes",
+            "Siemens"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 47,
+        "question": "How do you automate External References (Xrefs)\u2014attaching, reloading, binding, or detaching them\u2014using the .NET API?",
+        "answer": "<p>An Xref in AutoCAD is simply a <code>BlockTableRecord</code> where <code>btr.IsFromExternalReference == true</code>. To attach an Xref, call <code>db.AttachXref(filePath, blockName)</code> or <code>db.OverlayXref(filePath, blockName)</code>, which returns the <code>ObjectId</code> of the new Xref <code>BlockTableRecord</code>, and then insert a <code>BlockReference</code> to it in Model Space. To reload, detach, or bind Xrefs, gather their <code>BlockTableRecord</code> <code>ObjectId</code>s into an <code>ObjectIdCollection</code> and call <code>db.ReloadXrefs(ids)</code>, <code>db.DetachXref(xrefBtrId)</code>, or <code>db.BindXrefs(ids, insertBind)</code> (<code>true</code> for Insert-style bind without <code>$0$</code> prefixes, <code>false</code> for traditional Bind).</p>",
+        "tags": [
+            "Xref",
+            "Database",
+            "BlockTableRecord",
+            ".NET API"
+        ],
+        "companies": [
+            "AECOM",
+            "Jacobs",
+            "HDR"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 48,
+        "question": "How do you inspect and traversed the Xref dependency tree of a drawing without opening every Xref manually?",
+        "answer": "<p>You use the <code>XrefGraph</code> class by calling <code>XrefGraph xrefGraph = db.GetHostDwgXrefGraph(true)</code>. The <code>XrefGraph</code> is a directed graph of <code>XrefGraphNode</code> objects starting at <code>xrefGraph.RootNode</code> (the host drawing). You can recursively traverse each node's children via <code>node.NumOut</code> and <code>node.Out(i)</code>, inspect <code>node.XrefStatus</code> (e.g., <code>Resolved</code>, <code>FileNotFound</code>, <code>Unloaded</code>), <code>node.Database</code>, and <code>node.BlockTableRecordId</code> to audit broken Xrefs, circular references, or nested attachment depths.</p>",
+        "tags": [
+            "Xref",
+            "XrefGraph",
+            "Data Structures",
+            ".NET API"
+        ],
+        "companies": [
+            "Autodesk",
+            "WSP",
+            "Mott MacDonald"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 49,
+        "question": "How do you programmatically purge unused Layers, Blocks, Linetypes, and RegApps from a Database in the .NET API?",
+        "answer": "<p>The <code>Database.Purge(ObjectIdCollection ids)</code> method does NOT purge the objects itself! Instead, you pass it an <code>ObjectIdCollection</code> containing all candidate <code>SymbolTableRecord</code> <code>ObjectId</code>s (e.g., all Layer IDs from <code>LayerTable</code>). <code>db.Purge(ids)</code> inspects the database's hard/soft pointer references and <strong>removes</strong> from your <code>ObjectIdCollection</code> any ID that is currently referenced/in-use, leaving only the unreferenced (purgeable) IDs inside the collection. You must then iterate through the remaining <code>ObjectId</code>s in that collection, open each <code>DBObject</code> with <code>OpenMode.ForWrite</code>, and call <code>obj.Erase(true)</code>. For nested blocks, repeat in a <code>do-while</code> loop until <code>ids.Count == 0</code>.</p>",
+        "tags": [
+            "Purge",
+            "Database Optimization",
+            ".NET API"
+        ],
+        "companies": [
+            "Autodesk",
+            "Stantec",
+            "Arcadis"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 50,
+        "question": "What is the difference between Hard/Soft Ownership (`HardOwnershipId`, `SoftOwnershipId`) and Hard/Soft Pointer (`HardPointerId`, `SoftPointerId`) references in ObjectARX and Custom Objects?",
+        "answer": "<p>In AutoCAD's object graph, references determine object lifetime, purging, and cloning behavior:</p>\n<ul>\n  <li><strong>Ownership vs. Pointer</strong>: Ownership implies parent-child hierarchy (a <code>BlockTableRecord</code> owns its <code>Entity</code> children; if the owner is erased, owned children are erased). Pointers are peer references (an <code>Entity</code> has a pointer to its <code>LayerTableRecord</code>).</li>\n  <li><strong>Hard vs. Soft</strong>: <strong>Hard</strong> references protect the target object from <code>PURGE</code> and force the target object to be automatically carried along during <code>WBLOCK</code> / <code>WblockCloneObjects</code> operations. <strong>Soft</strong> references do NOT protect the target from being purged and do NOT automatically clone the referenced object during <code>WBLOCK</code> unless explicitly included.</li>\n</ul>",
+        "tags": [
+            "ObjectARX",
+            "Database Architecture",
+            "Object References",
+            "Wblock"
+        ],
+        "companies": [
+            "Autodesk",
+            "Bentley Systems",
+            "Bricsys",
+            "Hexagon"
+        ],
+        "role_level": "Sr"
+    }
+]

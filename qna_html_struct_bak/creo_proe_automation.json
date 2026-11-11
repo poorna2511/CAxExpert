@@ -1,0 +1,402 @@
+[
+    {
+        "number": 1,
+        "question": "What are the primary APIs available for Creo Parametric customization, and how do you choose between them for a new automation project?",
+        "answer": "<p>Creo Parametric provides several APIs depending on performance requirements, licensing, and language preference:</p><ol><li><strong>Creo Toolkit (C/C++):</strong> The most comprehensive and highest-performance API. It has access to almost all internal Creo functionalities, UI customization, feature creation, and geometry traversal. Requires a Toolkit license for development and often runtime.</li><li><strong>OTK (Object Toolkit C++ / Java / .NET):</strong> Object-oriented wrapper around Creo Toolkit. Easier to write and maintain than raw C Toolkit while retaining wide functionality.</li><li><strong>J-Link (Java):</strong> Free, built-in synchronous API based on Java. Ideal for medium-complexity customizations, PDM integrations, and cross-platform tools without extra runtime license costs.</li><li><strong>Web.Link (JavaScript):</strong> Runs inside Creo's embedded browser. Great for lightweight HTML-based UI dashboards, parameter tables, and simple batch automation.</li><li><strong>VB API (Visual Basic / .NET):</strong> Asynchronous COM-based API. Good for external Excel/Windows applications driving Creo externally, though slower due to IPC overhead.</li></ol><p>Selection depends on: execution speed (C++ Toolkit for heavy geometry), licensing budget (J-Link/Web.Link are free), and integration ecosystem (.NET/VB API for Office integrations).</p>",
+        "tags": ["Creo Architecture", "Creo Toolkit", "J-Link", "Web.Link", "VB API", "OTK"],
+        "companies": ["PTC", "TCS", "Infosys", "Wipro", "Capgemini"],
+        "role_level": "Jr"
+    },
+    {
+        "number": 2,
+        "question": "Explain the difference between Synchronous and Asynchronous modes in Creo API applications.",
+        "answer": "<ol><li><strong>Synchronous Mode (DLL / Shared Library / In-Process):</strong> The application is started by Creo Parametric (via <code>protk.dat</code>) and runs within the same process space (or tightly coupled JVM in J-Link). It uses <code>user_initialize()</code> and <code>user_terminate()</code> entry points. It offers maximum performance because there is no Inter-Process Communication (IPC) overhead. However, if a C++ DLL crashes, it can crash the entire Creo session.</li><li><strong>Asynchronous Mode (Out-of-Process Executable):</strong> An independent external executable starts up, connects to an existing Creo session (<code>ProEngineerConnect</code>) or launches a new Creo session in the background (<code>ProEngineerStart</code>). It communicates with Creo via RPC/IPC through the <code>nmsd</code> (Name Server Daemon). It is slower due to serialization/IPC overhead, but ideal for external batch runners, worker daemons, or Excel integrations.</li></ol>",
+        "tags": ["Synchronous Mode", "Asynchronous Mode", "Architecture", "IPC", "protk.dat"],
+        "companies": ["PTC", "HCLTech", "L&T Technology Services", "Siemens", "Cummins"],
+        "role_level": "Jr"
+    },
+    {
+        "number": 3,
+        "question": "What is the purpose of the 'protk.dat' (or 'creotk.dat') registry file, and what are its mandatory fields?",
+        "answer": "<p>The <code>protk.dat</code> file is the registration file used by Creo Parametric to locate, load, and initialize a Creo Toolkit, OTK, or J-Link synchronous application.</p><p>Mandatory fields include:</p><ul><li><strong>name:</strong> Unique identifier for the application.</li><li><strong>startup:</strong> Specifies how the app starts (e.g., 'dll' for in-process C/C++, 'spawn' for multiprocess, 'java' for J-Link).</li><li><strong>exec_file / java_app_class:</strong> Full path to the compiled DLL/executable, or the main Java class name.</li><li><strong>text_dir:</strong> Path to the directory containing the 'text' folder (which holds message files, menus, and UI resource files).</li><li><strong>end:</strong> Signals the end of the application definition block.</li></ul><p>Optional fields include <code>allow_stop</code> (TRUE/FALSE), <code>delay_start</code> (TRUE/FALSE), <code>revision</code>, and <code>description</code>.</p>",
+        "tags": ["protk.dat", "Configuration", "Creo Toolkit", "Deployment"],
+        "companies": ["TCS", "Tech Mahindra", "Wipro", "Cognizant"],
+        "role_level": "Jr"
+    },
+    {
+        "number": 4,
+        "question": "Explain the lifecycle of a synchronous Creo Toolkit C/C++ application (`user_initialize` and `user_terminate`).",
+        "answer": "<p>Every synchronous C/C++ Creo Toolkit application must implement two global C functions (declared with <code>extern \"C\"</code> in C++):</p><ol><li><code>int user_initialize(int argc, char *argv[], char *version, char *build, wchar_t errbuf[80])</code>: Called automatically when Creo loads the DLL. Inside this function, developers register menu commands (<code>ProCmdActionAdd</code>), ribbon buttons, notification callbacks (<code>ProNotificationSet</code>), and allocate global resources. Returning <code>PRO_TK_NO_ERROR</code> keeps the application loaded; returning an error unloads the DLL immediately.</li><li><code>void user_terminate()</code>: Called when the user stops the application via the Auxiliary Applications dialog or exits Creo. Developers must unregister callbacks (<code>ProNotificationUnset</code>), release allocated ProArray memory, close database connections, and clean up dynamic memory to prevent memory leaks.</li></ol>",
+        "tags": ["Creo Toolkit", "C++", "Lifecycle", "user_initialize", "user_terminate"],
+        "companies": ["PTC", "John Deere", "Caterpillar", "L&T Technology Services"],
+        "role_level": "Jr"
+    },
+    {
+        "number": 5,
+        "question": "What is a `ProMdl`, `ProSolid`, and `ProModelitem` in Creo Toolkit, and how do they relate to each other?",
+        "answer": "<p>In the Creo C Toolkit type hierarchy:</p><ul><li><code>ProMdl</code> (<code>void*</code>): A generic opaque pointer representing any Creo model in memory (Part, Assembly, Drawing, Manufacturing, Layout, etc.).</li><li><code>ProSolid</code> (<code>struct sld_part*</code>): A specialized handle derived from <code>ProMdl</code> that specifically represents 3D solid geometry models (<code>PRO_MDL_PART</code> and <code>PRO_MDL_ASSEMBLY</code>). Functions that compute mass properties, regenerate features, or traverse 3D surfaces require a <code>ProSolid</code> rather than a generic <code>ProMdl</code> (converted via <code>ProMdlToSolid</code>).</li><li><code>ProModelitem</code>: A structure (<code>{ProType type; int id; ProMdl owner;}</code>) representing an individual entity inside a model, such as a feature, surface, edge, axis, datum plane, or dimension.</li></ul>",
+        "tags": ["Data Structures", "ProMdl", "ProSolid", "ProModelitem", "Creo Toolkit"],
+        "companies": ["PTC", "TCS", "HCLTech", "Infosys"],
+        "role_level": "Jr"
+    },
+    {
+        "number": 6,
+        "question": "Explain the Visit and Filter pattern in Creo Toolkit. How do `ProSolidFeatVisit` or `ProSolidSurfaceVisit` work?",
+        "answer": "<p>Instead of returning arrays directly, older C Toolkit functions heavily use the Visitor pattern via function pointers:</p><p>A Visit function (e.g., <code>ProSolidFeatVisit(ProSolid solid, ProFeatureVisitAction visit_action, ProFeatureFilterAction filter_action, ProAppData app_data)</code>) iterates over internal database items.</p><ol><li><strong>filter_action:</strong> Executed first for each item. If it returns <code>PRO_TK_CONTINUE</code>, the <code>visit_action</code> is skipped for that item. If it returns <code>PRO_TK_NO_ERROR</code>, the item is passed to <code>visit_action</code>. Passing <code>NULL</code> means no filtering.</li><li><strong>visit_action:</strong> Performs the desired logic on the valid item. If it returns <code>PRO_TK_NO_ERROR</code>, traversal continues to the next item. If it returns any other value (e.g., a custom stop code), traversal terminates immediately and the visit function returns that code.</li><li><strong>app_data:</strong> A <code>void*</code> pointer passed by the caller to accumulate results (like a <code>std::vector</code> or struct pointer) without using global variables.</li></ol>",
+        "tags": ["Visitor Pattern", "ProSolidFeatVisit", "C++", "Creo Toolkit", "Callbacks"],
+        "companies": ["PTC", "Capgemini", "L&T Technology Services", "GE Aerospace"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 7,
+        "question": "How is memory managed in Creo Toolkit using `ProArray`? What happens if you use standard `free()` or `delete` on Creo-allocated memory?",
+        "answer": "<p>Creo Toolkit manages dynamic arrays using an internal header structure located immediately before the pointer returned to the user (<code>ProArray</code>).</p><ul><li><strong>Allocation:</strong> <code>ProArrayAlloc(int n_objs, int obj_size, int reallocation_size, ProArray* p_array)</code></li><li><strong>Appending:</strong> <code>ProArrayObjectAdd()</code></li><li><strong>Deallocation:</strong> <code>ProArrayFree(ProArray* p_array)</code></li></ul><p>If you pass a <code>ProArray</code> or memory allocated by a Creo API function (like <code>ProSolidDispCompVisit</code> or <code>ProMdlMdlnameGet</code>) to standard C <code>free()</code> or C++ <code>delete</code>, it causes heap corruption and crashes Creo because the pointer points past Creo's internal metadata header, or belongs to a different CRT heap. Always use <code>ProArrayFree()</code> or the corresponding <code>Pro*Free()</code> function documented in the API header.</p>",
+        "tags": ["Memory Management", "ProArray", "C++", "Creo Toolkit", "Debugging"],
+        "companies": ["PTC", "HCLTech", "TCS", "Bosch"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 8,
+        "question": "What is a `ProAsmcomppath` and why is it critical when working with assemblies?",
+        "answer": "<p>In an assembly, the same part (<code>ProMdl</code>) can be instanced multiple times at different locations and sub-assembly levels. A <code>ProModelitem</code> alone only identifies a surface or datum inside the local coordinate system of the base part.</p><p><code>ProAsmcomppath</code> defines the exact hierarchical path from the top-level root assembly down to a specific component instance using an array of component feature IDs (<code>comp_id_table</code>) and the depth (<code>table_num</code>).</p><p>It is critical for:</p><ol><li>Computing the 4x4 transformation matrix (<code>ProAsmcomppathTrfGet</code>) from the component's local coordinate system to the top assembly coordinate system.</li><li>Creating <code>ProSelection</code> objects in an assembly context so mates/constraints reference the specific instance rather than an ambiguous part definition.</li></ol>",
+        "tags": ["Assemblies", "ProAsmcomppath", "Transformations", "Coordinate Systems"],
+        "companies": ["PTC", "Caterpillar", "John Deere", "Airbus", "L&T Technology Services"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 9,
+        "question": "How do you create a `ProSelection` programmatically without requiring interactive user picking (`ProSelect`)?",
+        "answer": "<p>Interactive <code>ProSelect()</code> pauses execution for user mouse clicks, which breaks unattended automation. To construct a <code>ProSelection</code> programmatically:</p><ol><li>Identify the target entity (<code>ProModelitem</code>) by visiting features/surfaces or finding it by name (<code>ProModelitemByNameInit</code>).</li><li>If selecting within a single part context, call <code>ProSelectionAlloc(NULL, &model_item, &p_selection)</code>.</li><li>If selecting a specific component instance's geometry inside an assembly, first initialize a <code>ProAsmcomppath</code> (<code>ProAsmcomppathInit</code>) with the root assembly and component ID path array, then call <code>ProSelectionAlloc(&asm_comp_path, &model_item, &p_selection)</code>.</li><li>Always free the selection after use with <code>ProSelectionFree(&p_selection)</code>.</li></ol>",
+        "tags": ["ProSelection", "Unattended Automation", "Geometry Selection", "Creo Toolkit"],
+        "companies": ["PTC", "TCS", "Siemens", "Cummins", "Alstom"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 10,
+        "question": "What is Feature Element Tree (`ProElement`) in Creo Toolkit, and how is it used to create or modify features?",
+        "answer": "<p>In Creo Toolkit, most features are defined parametrically as a hierarchical XML-like tree of elements called a Feature Element Tree (<code>ProElement</code>).</p><ul><li><strong>Root element:</strong> <code>PRO_E_FEATURE_TREE</code></li><li><strong>Sub-elements:</strong> Define feature type (<code>PRO_E_FEATURE_TYPE</code>), references, dimensions, options, and sketch data.</li></ul><p>Workflow to create/modify a feature:</p><ol><li>Allocate the root element (<code>ProElementAlloc(PRO_E_FEATURE_TREE, &root_elem)</code>), or extract an existing feature's tree (<code>ProFeatureElemtreeExtract</code>).</li><li>Populate child elements and set values (<code>ProElemtreeElementAdd</code>, <code>ProElementValuetypeGet</code>, <code>ProElementIntegerSet</code>, <code>ProElementReferenceSet</code>).</li><li>Create or redefine the feature using <code>ProFeatureWithoptionsCreate</code> or <code>ProFeatureWithoptionsRedefine</code>.</li><li>Free the element tree using <code>ProFeatureElemtreeFree</code>.</li></ol>",
+        "tags": ["Feature Creation", "ProElement", "Element Tree", "Creo Toolkit"],
+        "companies": ["PTC", "L&T Technology Services", "HCLTech", "Parker Hannifin"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 11,
+        "question": "How do you discover the structure of an unknown Feature Element Tree for a specific feature type?",
+        "answer": "<p>When the Creo Toolkit documentation (<code>proe_elem_trees</code>) is complex or incomplete for a specific feature option:</p><ol><li>Manually create the exact feature you want in Creo Parametric UI.</li><li>Write a diagnostic Toolkit utility that calls <code>ProFeatureElemtreeExtract()</code> on that selected feature.</li><li>Export the extracted <code>ProElement</code> tree to an XML file using <code>ProElemtreeWrite(elem_tree, PRO_ELEMTREE_XML, xml_file_path)</code>.</li><li>Inspect the generated XML file to see the exact hierarchy of <code>ProElemId</code> constants, value types (Integer, Double, Value, Reference), and compound structures required to build the feature programmatically.</li></ol>",
+        "tags": ["ProElement", "Debugging", "XML Export", "Feature Creation", "Best Practices"],
+        "companies": ["PTC", "TCS", "Capgemini", "Volvo", "Baker Hughes"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 12,
+        "question": "How do you read, create, and modify Model Parameters and Feature Parameters using Creo APIs?",
+        "answer": "<p>In Creo, parameters (<code>ProParameter</code>) are owned by a <code>ProModelitem</code> (either the <code>ProMdl</code> converted via <code>ProMdlToModelitem</code> for model-level parameters, or a <code>ProFeature</code> for feature-level parameters).</p><ol><li><strong>Initialize handle:</strong> <code>ProParameterInit(&owner_modelitem, L\"MATERIAL_CODE\", &param)</code>.</li><li><strong>Read value:</strong> <code>ProParameterValueGet(&param, &pro_param_value)</code> and inspect <code>pro_param_value.type</code> (<code>PRO_PARAM_DOUBLE</code>, <code>PRO_PARAM_STRING</code>, <code>PRO_PARAM_INTEGER</code>, <code>PRO_PARAM_BOOLEAN</code>).</li><li><strong>Create parameter:</strong> <code>ProParameterWithUnitsCreate(&owner_modelitem, L\"COST\", &pro_param_value, NULL, &param)</code>.</li><li><strong>Modify parameter:</strong> <code>ProParameterValueWithUnitsSet(&param, &new_value, NULL)</code>.</li><li><strong>Visit all parameters:</strong> <code>ProParameterVisit(&owner_modelitem, NULL, visit_func, app_data)</code>.</li></ol>",
+        "tags": ["Parameters", "ProParameter", "Metadata", "Creo Toolkit"],
+        "companies": ["Infosys", "Wipro", "TCS", "Whirlpool", "ABB"],
+        "role_level": "Jr"
+    },
+    {
+        "number": 13,
+        "question": "What is the Creo UI Dialog Designer, and how do `.res` resource files work in Creo Toolkit?",
+        "answer": "<p>Creo Toolkit provides a native, platform-independent UI toolkit (<code>ProUIDialog</code>) so custom dialogs match the native Creo look and feel.</p><ul><li><code>.res</code> files are plain-text hierarchical layout definition files stored in <code>&lt;text_dir&gt;/resource/</code>. They define Dialogs, Layout containers (GridLayout), PushButtons, InputPanels, OptionMenus, Tables, and DrawingAreas.</li><li>The Creo UI Dialog Editor (or manual editing) generates these <code>.res</code> files.</li></ul><p>In C/C++ code:</p><ol><li><code>ProUIDialogCreate(\"my_dialog_name\", \"my_dialog.res\")</code> loads the dialog into memory.</li><li><code>ProUIPushbuttonActivateActionSet()</code> attaches C callback functions to widget events.</li><li><code>ProUIDialogActivate()</code> displays the modal/modeless dialog and starts its event loop.</li><li><code>ProUIDialogDestroy()</code> unloads the dialog from memory.</li></ol>",
+        "tags": ["ProUIDialog", "UI Customization", "Resource Files", "Creo Toolkit"],
+        "companies": ["PTC", "TCS", "HCLTech", "L&T Technology Services"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 14,
+        "question": "How do you handle `wchar_t` strings vs `char` strings across older and modern versions of Creo Toolkit?",
+        "answer": "<p>Historically, Pro/TOOLKIT used <code>ProName</code> (<code>wchar_t[32]</code>), <code>ProLine</code> (<code>wchar_t[80]</code>), and <code>ProPath</code> (<code>wchar_t[260]</code>) fixed-size wide-character arrays, alongside <code>ProStringToWstring()</code> and <code>ProWstringToString()</code> conversion utilities.</p><p>Starting from Creo 3.0/4.0+, fixed-length arrays were largely deprecated in favor of dynamic wide strings allocated by Creo or standard <code>wchar_t*</code> pointers to support longer model names and paths:</p><ul><li>Use <code>ProWstringFree()</code> to free dynamically returned <code>wchar_t*</code> strings from functions like <code>ProMdlMdlnameGet()</code>.</li><li>On Windows, <code>wchar_t</code> is 2 bytes (UTF-16), whereas on Linux it was historically 4 bytes, which is why PTC introduced <code>ProWchar</code> typedefs. Always use <code>ProWstringCopy()</code>, <code>ProWstringLengthGet()</code>, and <code>ProWstringCompare()</code> for safe cross-version handling.</li></ul>",
+        "tags": ["Strings", "Unicode", "wchar_t", "Migration", "Creo Toolkit"],
+        "companies": ["PTC", "TCS", "Cognizant", "Capgemini"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 15,
+        "question": "How do you customize the Creo Parametric Ribbon UI and add custom commands in a Toolkit or J-Link application?",
+        "answer": "<p>Adding a button to the Creo Ribbon requires three steps:</p><ol><li><strong>Command Registration:</strong> In <code>user_initialize()</code> (or J-Link <code>start()</code>), register an action command using <code>ProCmdActionAdd(\"MyCustomCmd\", (uiCmdCmdActFn)MyActionCallback, uiProe2ndImmediate, MyAccessFunction, PRO_B_TRUE, PRO_B_TRUE, &cmd_id)</code>.</li><li><strong>Label & Icon Assignment:</strong> Call <code>ProCmdDesignate(cmd_id, \"BTN_LABEL\", \"BTN_HELP\", \"BTN_DESC\", msg_file)</code> to bind localized text from the message file and <code>ProCmdIconSet(cmd_id, \"my_icon.png\")</code> (placed in <code>&lt;text_dir&gt;/resource/</code>).</li><li><strong>Ribbon Placement:</strong> Customize the ribbon inside Creo UI, place the newly designated command into a tab/group, and export the customization as <code>toolkitribbonui.rbn</code>, placing it in <code>&lt;text_dir&gt;/resource/</code> so Creo automatically merges the ribbon tab when the application loads.</li></ol>",
+        "tags": ["Ribbon UI", "ProCmdActionAdd", "UI Customization", "toolkitribbonui.rbn"],
+        "companies": ["PTC", "Infosys", "Wipro", "Honeywell"],
+        "role_level": "Jr"
+    },
+    {
+        "number": 16,
+        "question": "What is the role of the Access Function (`uiCmdAccessFn`) in `ProCmdActionAdd`, and what are common pitfalls when implementing it?",
+        "answer": "<p>The Access Function (<code>uiCmdAccessFn</code>) determines whether a custom menu/ribbon button is visible, enabled (<code>ACCESS_AVAILABLE</code>), grayed out (<code>ACCESS_UNAVAILABLE</code>), or hidden (<code>ACCESS_INVISIBLE</code> / <code>ACCESS_REMOVE</code>) based on the current Creo context (e.g., only enable the button when a Drawing is active).</p><p><strong>Common Pitfall:</strong> Creo calls the Access Function extremely frequently—almost on every mouse movement, selection change, or UI refresh. If a developer puts heavy operations inside the Access Function (like traversing features, querying Windchill, reading files from disk, or checking license servers), Creo's UI becomes severely laggy and unresponsive. Access functions must only perform lightweight memory checks like <code>ProMdlCurrentGet</code> and <code>ProMdlTypeGet</code>.</p>",
+        "tags": ["UI Customization", "Performance", "uiCmdAccessFn", "Best Practices"],
+        "companies": ["PTC", "L&T Technology Services", "HCLTech", "Boeing"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 17,
+        "question": "How do Notification Callbacks (`ProNotificationSet`) work in Creo Toolkit? Give practical industrial use cases.",
+        "answer": "<p><code>ProNotificationSet(ProNotifyType type, ProFunction notify_func)</code> hooks a custom callback into internal Creo events before or after they occur.</p><p>Common Notification Types & Industrial Use Cases:</p><ol><li><code>PRO_MDL_SAVE_PRE</code>: Triggered right before a user saves a model. Used to enforce CAD standards (ModelCHECK validation, verifying mandatory Windchill parameters like MATERIAL or MASS are populated, blocking save by returning an error if checks fail).</li><li><code>PRO_FEAT_CREATE_POST</code> / <code>PRO_MDL_REGEN_POST</code>: Triggered after feature creation or regeneration to auto-update custom cost/weight parameters.</li><li><code>PRO_MDL_DISPLAY_POST</code>: Triggered when a user switches windows or opens a model, used to sync an external modeless dashboard.</li></ol>",
+        "tags": ["Notifications", "Events", "PRO_MDL_SAVE_PRE", "CAD Standards", "Creo Toolkit"],
+        "companies": ["PTC", "Caterpillar", "Cummins", "Schneider Electric", "TCS"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 18,
+        "question": "How do you automate 2D Drawing generation from 3D models in Creo Toolkit?",
+        "answer": "<p>Automated drawing generation typically uses a hybrid template + API approach:</p><ol><li><strong>Template Creation (<code>ProDrawingFromTmpltCreate</code>):</strong> Create a drawing from a pre-configured <code>.drw</code> template containing standard formats, tables (<code>&asm.mbr...</code> repeat regions), and predefined projection views.</li><li><strong>Manual View Creation:</strong> If views must be placed dynamically:<ul><li>Retrieve the solid model (<code>ProMdlInit</code>) and associate it with the drawing (<code>ProDrawingSolidAdd</code>).</li><li>Create a general view (<code>ProDrawingGeneralviewCreate</code>) specifying a 3D transformation matrix (front/top/isometric orientation) and 2D sheet coordinates (<code>ProPoint3d</code>).</li><li>Create projection views (<code>ProDrawingProjectedviewCreate</code>) relative to the parent general view.</li><li>Set view scale (<code>ProDrawingViewScaleSet</code>) and display style (<code>ProDrawingViewDisplaySet</code>).</li></ul></li><li><strong>Show Dimensions/Annotations:</strong> Call <code>ProDrawingDimShow()</code> or <code>ProAnnotationShow()</code> to automatically retrieve 3D driving dimensions onto appropriate views.</li></ol>",
+        "tags": ["Drawing Automation", "2D Drafting", "ProDrawing", "Templates", "Creo Toolkit"],
+        "companies": ["L&T Technology Services", "TCS", "ABB", "Siemens Energy", "Konecranes"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 19,
+        "question": "When automating 2D drawings, how do you prevent overlapping dimensions and balloons (annotation collision)?",
+        "answer": "<p>Dimension and balloon collision is one of the hardest challenges in 2D drawing automation:</p><ol><li><strong>Bounding Box Calculation:</strong> Extract the 2D screen/sheet bounding box of every placed dimension (<code>ProDimensionBoundboxGet</code>), note (<code>ProNoteBoundboxGet</code>), and view outline (<code>ProDrawingViewOutlineGet</code>).</li><li><strong>Spatial Sorting & Offset:</strong> Sort dimensions around the view perimeter (Top, Bottom, Left, Right) based on their attachment point coordinates relative to the view center.</li><li><strong>Staggering Algorithm:</strong> Group parallel dimensions on each side, sort them by length (shortest closest to the view, longest farthest out), and iteratively offset their placement coordinates (<code>ProDimensionLocationSet</code>) by a fixed spacing increment until their bounding boxes no longer intersect.</li><li><strong>For BOM Balloons:</strong> Use <code>ProDrawingBomballoonsCreate()</code> followed by radial/edge sorting and evenly distributing balloon attachment leaders along the drawing view margin box.</li></ol>",
+        "tags": ["Drawing Automation", "Collision Detection", "Dimensions", "BOM Balloons", "Algorithms"],
+        "companies": ["L&T Technology Services", "PTC", "GE Vernova", "Caterpillar", "HCLTech"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 20,
+        "question": "How do you extract the Bill of Materials (BOM) from a Creo Assembly, and how do you handle Family Table instances and Bulk Items?",
+        "answer": "<p>To extract a complete multi-level BOM programmatically:</p><ol><li>Recursively traverse the assembly starting from the root <code>ProSolid</code> using <code>ProSolidFeatVisit()</code> filtered to <code>PRO_FEAT_COMPONENT</code>.</li><li><strong>Check Feature Status:</strong> Ignore suppressed (<code>PRO_FEAT_SUPPRESSED</code>) or unplaced/packaged components if only active BOM is needed (<code>ProFeatureStatusGet</code>), or read the 'Include in BOM' status.</li><li><strong>Handle Bulk Items:</strong> Bulk items (grease, paint, adhesives) have component type <code>PRO_MDL_PART</code> (subtype <code>PRO_PART_BULK</code>). They lack 3D geometry, so <code>ProAsmcompMdlGet</code> retrieves the bulk item model where quantity is stored in parameters rather than geometric count.</li><li><strong>Family Tables:</strong> Use <code>ProFaminstanceGenericGet()</code> to determine if a component is a family table instance and extract both the instance name and generic model name if required by ERP/PLM.</li></ol>",
+        "tags": ["BOM Extraction", "Assemblies", "Family Tables", "Bulk Items", "PLM Integration"],
+        "companies": ["TCS", "Infosys", "PTC", "Ford", "Mahindra"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 21,
+        "question": "How do Family Tables work in Creo APIs, and how do you programmatically instantiate a new Family Table instance?",
+        "answer": "<p>A Family Table allows a single generic model (<code>ProMdl</code>) to manage multiple table-driven variations (instances) by overriding dimensions, parameters, features, or assembly components.</p><p>Programmatic Workflow:</p><ol><li><strong>Add Columns (<code>ProFamtableItem</code>):</strong> Initialize the generic model's family table (<code>ProFamtableInit</code>), define column items (<code>ProFamtableItemInit</code> for <code>PRO_FAM_DIMENSION</code>, <code>PRO_FAM_PARAMETER</code>, or <code>PRO_FAM_FEATURE</code>), and add them via <code>ProFamtableItemAdd</code>.</li><li><strong>Create Instance Row (<code>ProFaminstance</code>):</strong> Initialize a new instance (<code>ProFaminstanceInit(instance_name, &fam_table, &fam_inst)</code>) and add it (<code>ProFaminstanceAdd</code>).</li><li><strong>Set Cell Values:</strong> Populate cell values for that instance and column using <code>ProFaminstanceValueSet()</code>.</li><li><strong>Instantiate into Memory:</strong> Call <code>ProFaminstanceRetrieve(&fam_inst, &inst_mdl)</code> to generate and verify the 3D solid instance in session.</li></ol>",
+        "tags": ["Family Tables", "Design Automation", "ProFamtable", "ProFaminstance"],
+        "companies": ["PTC", "Schneider Electric", "Eaton", "Parker Hannifin", "TCS"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 22,
+        "question": "How do you assemble a component into an assembly programmatically and apply mates/constraints using Creo Toolkit?",
+        "answer": "<p>Programmatic assembly placement involves two phases:</p><ol><li><strong>Initial Placement:</strong> Call <code>ProAsmcompAssemble(owner_assembly, component_model, init_matrix, &new_comp_feat)</code> to insert the component into the assembly with an initial 4x4 transformation matrix.</li><li><strong>Applying Parametric Constraints (<code>ProAsmcompconstraint</code>):</strong><ul><li>Allocate a <code>ProArray</code> of <code>ProAsmcompconstraint</code>.</li><li>For each constraint (e.g., Coincident, Mate, Align, Distance, Default/CSYS), allocate a constraint struct (<code>ProAsmcompconstraintAlloc</code>).</li><li>Set the constraint type (<code>ProAsmcompconstraintTypeSet</code>, e.g., <code>PRO_ASM_ALIGN</code>, <code>PRO_ASM_MATE</code>).</li><li>Build <code>ProSelection</code> references for the assembly datum/surface (with full <code>ProAsmcomppath</code>) and the component datum/surface (<code>ProAsmcompconstraintAsmreferenceSet</code> and <code>ProAsmcompconstraintCompreferenceSet</code>).</li><li>Apply the constraint array to the component feature using <code>ProAsmcompConstraintsSet(NULL, &new_comp_feat, constraint_array)</code>.</li></ul></li></ol>",
+        "tags": ["Assembly Automation", "Constraints", "ProAsmcompAssemble", "Mates", "Creo Toolkit"],
+        "companies": ["PTC", "L&T Technology Services", "Caterpillar", "John Deere", "KUKA"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 23,
+        "question": "Explain how 4x4 Transformation Matrices (`ProMatrix`) are structured in Creo Toolkit, and how you transform a 3D point from a sub-component to the top assembly.",
+        "answer": "<p>In Creo Toolkit, <code>typedef double ProMatrix[4][4]</code> represents a 3D affine transformation:</p><ul><li>The top-left 3x3 submatrix (<code>m[0..2][0..2]</code>) represents the rotation/orientation vectors (X, Y, Z unit vectors of the local coordinate system expressed in target coordinates) plus any scale factor.</li><li>The bottom row (<code>m[3][0..2]</code>) represents the translation vector (origin offset X, Y, Z).</li><li>The rightmost column (<code>m[0..2][3]</code>) is <code>[0, 0, 0]^T</code> and <code>m[3][3]</code> is <code>1.0</code>.</li></ul><p>To transform a 3D point from a component to the top assembly:</p><ol><li>Call <code>ProAsmcomppathTrfGet(&comp_path, PRO_B_TRUE, trf_matrix)</code> (<code>PRO_B_TRUE</code> transforms from bottom-up: component to assembly).</li><li>Call <code>ProPntTrfEval(local_point, trf_matrix, assembly_point)</code> to compute the transformed coordinates.</li></ol>",
+        "tags": ["Mathematics", "ProMatrix", "Transformations", "3D Geometry", "Coordinate Systems"],
+        "companies": ["PTC", "Siemens", "Boeing", "Airbus", "Dassault/Capgemini"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 24,
+        "question": "What are persistent vs non-persistent IDs in Creo geometry, and what happens to `ProGeomitem` IDs when features are modified?",
+        "answer": "<p>Every <code>ProModelitem</code> / <code>ProGeomitem</code> (surface, edge, vertex) has an integer <code>id</code> assigned by Creo's kernel.</p><ul><li>Feature IDs and Datum IDs are generally persistent across regenerations.</li><li>Topology IDs (Surfaces, Edges) can split, merge, or change ID if an upstream sketch or feature is modified (the classic CAD 'Topological Naming Problem').</li></ul><p>If an automation program hardcodes surface IDs (e.g., <code>id = 45</code>), any upstream geometry change can break the automation.</p><p><strong>Best Practice:</strong> Instead of relying on raw integer IDs, tag critical mating faces/datums using <strong>Published Geometry</strong>, <strong>Surface Names</strong> (<code>ProModelitemNameSet</code> / <code>ProModelitemByNameInit</code>), or <strong>Model Colors/Parameters</strong>, and look them up dynamically by name at runtime.</p>",
+        "tags": ["Geometry Traversal", "Topological Naming", "ProGeomitem", "Best Practices", "Robustness"],
+        "companies": ["PTC", "John Deere", "Cummins", "L&T Technology Services", "HCLTech"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 25,
+        "question": "How do you traverse B-Rep topology (Surfaces, Contours, Edges, Vertices) of a solid model in Creo Toolkit?",
+        "answer": "<p>In Creo's Boundary Representation (B-Rep) hierarchy:</p><ol><li><code>ProSolid</code> contains multiple <code>ProSurface</code> entities (visited via <code>ProSolidSurfaceVisit</code>).</li><li>Each <code>ProSurface</code> contains one or more closed <code>ProContour</code> loops—one external outer boundary (<code>PRO_CONTOUR_TRAV_EXTERNAL</code>) and zero or more internal hole boundaries (<code>PRO_CONTOUR_TRAV_INTERNAL</code>), visited via <code>ProSurfaceContourVisit</code>.</li><li>Each <code>ProContour</code> consists of connected <code>ProEdge</code> entities, visited via <code>ProContourEdgeVisit</code>.</li><li>Each <code>ProEdge</code> connects two <code>ProVertex</code> endpoints and is shared by two adjacent surfaces (<code>ProEdgeNeighborsGet</code>).</li><li>Geometric properties (normal vectors, UV parameters, curvature, cylinder radius, plane normal) are queried via <code>ProSurfaceDataGet</code> or <code>ProSurfaceXyzdataEval</code>.</li></ol>",
+        "tags": ["B-Rep", "Geometry Traversal", "ProSurface", "ProContour", "ProEdge", "CAD Kernel"],
+        "companies": ["PTC", "ANSYS", "Hexagon", "Siemens", "Altair"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 26,
+        "question": "What are UV parameters on a `ProSurface`, and how do you evaluate the surface normal vector at a given 3D point?",
+        "answer": "<p>Every parametric surface in Creo is mathematically parameterized by two normalized coordinates <code>(u, v)</code>, forming a 2D domain.</p><p>To compute the outward normal vector at a known 3D point <code>(x, y, z)</code> lying on a surface:</p><ol><li>Convert the 3D point <code>(x, y, z)</code> to the surface's 2D <code>(u, v)</code> parameter space using <code>ProSurfaceParamEval(surface_handle, xyz_point, uv_param)</code>.</li><li>Evaluate the surface geometry at <code>(u, v)</code> using <code>ProSurfaceXyzdataEval(surface_handle, uv_param, xyz_point_out, deriv1, deriv2, normal_vector)</code>.</li><li>Note that the mathematical surface normal (<code>du x dv</code>) may point inward or outward depending on surface orientation (<code>ProSurfaceOrientationGet</code>). Check the orientation flag (<code>PRO_SURF_ORIENT_IN</code> vs <code>PRO_SURF_ORIENT_OUT</code>) and invert the vector if necessary to get the true outward solid normal.</li></ol>",
+        "tags": ["Computational Geometry", "UV Parameters", "Surface Normal", "ProSurface", "C++"],
+        "companies": ["PTC", "Hexagon", "Sandvik", "Baker Hughes", "L&T Technology Services"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 27,
+        "question": "How do you use `ProSolidRayIntersectionCompute` for ray-casting, and what are its practical applications in CAD automation?",
+        "answer": "<p><code>ProSolidRayIntersectionCompute(ProSolid model, double aperture_radius, ProRay* p_ray, ProSelection** p_sel_arr)</code> fires a 3D ray (defined by a start point <code>start_point</code> and direction vector <code>dir_vector</code>) through a part or assembly and returns an array of <code>ProSelection</code> hits sorted along the ray.</p><p>Practical applications:</p><ol><li><strong>Wall Thickness Analysis:</strong> Fire a ray inward along the inverted surface normal from a point on a face and measure distance to the first hit surface.</li><li><strong>Automated Balloon / Leader Placement:</strong> Fire rays to verify whether a feature is visible or occluded in a specific view direction.</li><li><strong>Automated Fastener Length Calculation:</strong> Fire a ray along a hole axis through stacked assembly plates to determine grip length and thread engagement depth.</li></ol>",
+        "tags": ["Ray Casting", "Computational Geometry", "ProSolidRayIntersectionCompute", "Fastener Automation"],
+        "companies": ["PTC", "Airbus", "Boeing", "Caterpillar", "GE Aerospace"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 28,
+        "question": "How do you detect interferences and clearances in a Creo Assembly using Toolkit APIs?",
+        "answer": "<p>Creo Toolkit provides dedicated global and pairwise interference calculation functions:</p><ol><li><strong>Global Assembly Interference (<code>ProFitGlobalinterferenceCompute</code>):</strong> Analyzes the entire assembly (<code>PRO_FIT_SUB_ASSEMBLY</code> or <code>PRO_FIT_WHOLE_ASSEMBLY</code>), optionally including quilts or fasteners, and returns an array of <code>ProInterferenceInfo</code> structures.</li><li>Each <code>ProInterferenceInfo</code> contains the two colliding <code>ProSelection</code> component paths (<code>part_1</code>, <code>part_2</code>) and <code>ProInterferenceData</code>.</li><li>Calling <code>ProFitInterferencevolumeCompute()</code> on <code>ProInterferenceData</code> calculates the exact interfering volume (<code>double volume</code>) and enclosure box.</li><li>For minimum clearance between two non-colliding components, use <code>ProSelectionPoint3dDistanceEval()</code> or <code>ProGeomitemDistanceEval()</code>.</li></ol>",
+        "tags": ["Interference Detection", "Clash Detection", "Assemblies", "Quality Checks"],
+        "companies": ["PTC", "Ford", "Tata Motors", "Volvo", "L&T Technology Services"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 29,
+        "question": "How does Creo Parametric interact with Windchill PDM in a Toolkit/J-Link automation environment?",
+        "answer": "<p>Creo provides Server Management APIs (<code>ProServer.h</code> / <code>pfcServer</code>) to interact with registered Windchill Workgroup Manager workspaces:</p><ol><li><strong>Register/Activate Server:</strong> <code>ProServerRegister()</code> or <code>ProServerActiveGet()</code> retrieves the active Windchill server alias.</li><li><strong>Workspace Management:</strong> <code>ProServerWorkspaceGet()</code> gets the current workspace. Objects are referenced via Windchill virtual paths: <code>wtpub://ServerAlias/Library/PartName.prt</code> or workspace paths <code>wtws://ServerAlias/WorkspaceName/PartName.prt</code>.</li><li><strong>Checkout / Checkin:</strong> Before modifying a PDM-controlled model in automation, call <code>ProServerObjectsCheckout()</code> to lock and make the object modifiable in the workspace. After modification and <code>ProMdlSave()</code>, call <code>ProServerObjectsCheckin()</code> or <code>ProServerObjectsUpload()</code> to push changes to Windchill.</li></ol>",
+        "tags": ["Windchill", "PLM Integration", "ProServer", "Checkin/Checkout", "Workspace"],
+        "companies": ["PTC", "TCS", "Infosys", "Capgemini", "ITC Infotech"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 30,
+        "question": "How do you optimize the performance of a Creo batch automation tool that processes thousands of parts or large assemblies?",
+        "answer": "<p>Key performance optimization strategies in Creo automation:</p><ol><li><strong>Suppress UI & Graphics Updates:</strong> Run Creo in non-graphics batch mode (<code>creo_parametric.exe -g:no_graphics -i:rpc_input</code>) so the GPU pipeline and window rendering are completely bypassed.</li><li><strong>Suppress Regeneration During Loops:</strong> Instead of calling <code>ProSolidRegenerate()</code> after every single parameter or feature tweak, batch all parameter/dimension changes first and call <code>ProSolidRegenerate()</code> once at the end using <code>PRO_REGEN_NO_RESOLVE_MODE</code>.</li><li><strong>Memory Management (<code>ProMdlEraseNotDisplayed</code>):</strong> Creo caches opened models in session RAM. When processing thousands of files sequentially, call <code>ProMdlEraseAll()</code> or <code>ProMdlEraseNotDisplayed()</code> after saving each model so session memory doesn't bloat and crash.</li><li><strong>Use Simplified Reps:</strong> Retrieve large assemblies using Master Rep (<code>ProAssemblySimprepMdlnameRetrieve</code>) or Graphics Rep when full component geometry isn't required.</li></ol>",
+        "tags": ["Performance Optimization", "Batch Processing", "Large Assemblies", "Memory Management"],
+        "companies": ["PTC", "Caterpillar", "John Deere", "ASML", "Applied Materials"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 31,
+        "question": "What happens when `ProSolidRegenerate` fails during unattended batch execution, and how do you handle regeneration failures safely?",
+        "answer": "<p>In interactive mode, a regeneration failure opens the Resolve Mode / Troubleshooter menu, halting execution waiting for user input. In unattended automation, this will hang the batch worker indefinitely.</p><p>To handle regeneration safely:</p><ol><li>Always pass the <code>PRO_REGEN_NO_RESOLVE_MODE</code> (or <code>PRO_REGEN_CAN_FIX</code> depending on configuration) flag to <code>ProSolidRegenerate(p_solid, PRO_REGEN_NO_RESOLVE_MODE)</code>.</li><li>Check the return status (<code>ProError</code>). If features fail (<code>PRO_TK_GENERAL_ERROR</code>), visit the model's features using <code>ProSolidFeatVisit</code> and check each feature's status via <code>ProFeatureStatusGet()</code> for <code>PRO_FEAT_FAILED</code> or <code>PRO_FEAT_CHILD_OF_FAILED</code>.</li><li>Log the failed feature IDs/names, revert to backup or skip check-in, and clean up the session.</li></ol>",
+        "tags": ["Regeneration", "Error Handling", "Unattended Automation", "ProSolidRegenerate"],
+        "companies": ["PTC", "TCS", "HCLTech", "L&T Technology Services", "Cummins"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 32,
+        "question": "How do you export neutral CAD formats (STEP, IGES, Parasolid, STL, 3D PDF, DXF) programmatically using Creo Toolkit?",
+        "answer": "<p>Creo provides <code>ProIntf3DFileWrite()</code> for 3D neutral exports and <code>ProOutputFileWrite()</code> / <code>Pro2dExport()</code> for 2D exports:</p><ol><li><strong>For 3D STEP/IGES/Parasolid/JT:</strong> Use <code>ProIntf3DFileWrite(ProSolid solid, ProIntf3DExportType file_type, ProPath output_file, ProOutputAssemblyConfiguration config, ProSelection ref_csys, ...)</code>.<ul><li><code>file_type</code> can be <code>PRO_INTF_EXPORT_STEP</code>, <code>PRO_INTF_EXPORT_IGES</code>, <code>PRO_INTF_EXPORT_PARASOLID</code>, <code>PRO_INTF_EXPORT_STL</code>.</li><li>Export profiles (<code>.dop</code> files) can be loaded via <code>ProOutputProfileLoad()</code> to control AP203/AP214/AP242 STEP settings, surface vs solid export, and datum inclusion.</li></ul></li><li><strong>For 2D PDF/DXF/DWG from Drawings:</strong> Use <code>Pro2dExport(PRO_DXF_FILE, drawing_mdl, filename, ...)</code> or <code>ProPrintExecute()</code> / <code>ProPDFExport()</code> with <code>ProPDFOptionsAlloc()</code> to configure vector vs raster, line weights, and searchable text.</li></ol>",
+        "tags": ["CAD Export", "STEP", "PDF", "DXF", "Batch Conversion", "ProIntf3DFileWrite"],
+        "companies": ["TCS", "Wipro", "Infosys", "PTC", "ITC Infotech"],
+        "role_level": "Jr"
+    },
+    {
+        "number": 33,
+        "question": "What are User-Defined Features (UDFs) in Creo, and how do you place a `.gph` UDF onto a part programmatically?",
+        "answer": "<p>A User-Defined Feature (UDF, <code>.gph</code> file) groups multiple features, sketches, parameters, and relations into a reusable macro feature.</p><p>Programmatic UDF Placement (<code>ProUdf.h</code>):</p><ol><li>Allocate UDF data: <code>ProUdfdataAlloc(&udf_data)</code>.</li><li>Specify the <code>.gph</code> library name: <code>ProUdfdataNameSet(udf_data, udf_name, instance_name)</code>.</li><li>Map External Prompts/References: A UDF requires external references (matched by prompt names defined when creating the UDF). For each reference prompt, allocate a <code>ProUdfreference</code> via <code>ProUdfreferenceAlloc(prompt_string, target_pro_selection, is_external, &udf_ref)</code> and add it via <code>ProUdfdataReferenceAdd(udf_data, udf_ref)</code>.</li><li>Override Variable Dimensions: Use <code>ProUdfvardimAlloc()</code> and <code>ProUdfdataVardimAdd()</code> to pass custom driving dimension values.</li><li>Create the UDF feature: <code>ProUdfCreate(owner_solid, udf_data, NULL, udf_options_array, &created_feat_array)</code>.</li></ol>",
+        "tags": ["UDF", "Design Automation", "ProUdfCreate", "Reusable Geometry", "Creo Toolkit"],
+        "companies": ["PTC", "L&T Technology Services", "Parker Hannifin", "Sandvik", "SKF"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 34,
+        "question": "How do you read and write Creo Relations (`Relations` dialog formulas) programmatically?",
+        "answer": "<p>In Creo, parametric relations (e.g., <code>d1 = d0 * 2.5 + OFFSET</code>) are stored on a <code>ProModelitem</code> (either at the model level or inside a specific feature).</p><ol><li><strong>Read existing relations:</strong> Call <code>ProRelsetInit(&model_item, &relset)</code> to initialize the relation set handle. If it returns <code>PRO_TK_E_NOT_FOUND</code>, create one via <code>ProRelsetCreate(&model_item, &relset)</code>. Then call <code>ProRelsetRelationsGet(&relset, &wstring_proarray)</code> to get the lines of relation code.</li><li><strong>Modify/Add relations:</strong> Append or edit strings in the <code>wchar_t**</code> ProArray and write them back via <code>ProRelsetRelationsSet(&relset, wstring_proarray, num_lines)</code>.</li><li><strong>Post-regen relations:</strong> Use <code>ProRelsetPostregrelationsGet</code> / <code>Set</code> for post-regeneration relations.</li><li><strong>Evaluate & Regenerate:</strong> Call <code>ProRelsetRegenerate(&relset)</code> followed by <code>ProSolidRegenerate()</code> to validate syntax and update driven dimensions.</li></ol>",
+        "tags": ["Relations", "ProRelset", "Parametric Design", "Design Automation"],
+        "companies": ["TCS", "Infosys", "HCLTech", "Whirlpool", "Carrier"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 35,
+        "question": "Explain the architecture of J-Link and how a Java application communicates with Creo Parametric.",
+        "answer": "<p>J-Link is PTC's synchronous Java API built around the <code>com.ptc.pfc.*</code> and <code>com.ptc.cipjava.*</code> packages (loaded from <code>pfc.jar</code>).</p><p>Architecture:</p><ol><li>When Creo starts and loads a <code>protk.dat</code> file with <code>startup java</code>, Creo launches an embedded or local JVM and invokes the static methods <code>public static void start()</code> and <code>public static void stop()</code> on the class specified by <code>java_app_class</code>.</li><li>Internally, <code>pfc.jar</code> uses JNI (Java Native Interface) C++ bridges compiled inside Creo to translate Java object method calls (like <code>pfcGlobal.GetProESession()</code>) directly into native Creo Toolkit calls.</li><li>Because J-Link is synchronous, UI listeners (<code>DefaultUICommandActionListener</code>, <code>DefaultModelActionListener</code>) run on the message loop triggered by Creo actions.</li></ol>",
+        "tags": ["J-Link", "Java", "Architecture", "JNI", "pfcSession"],
+        "companies": ["PTC", "TCS", "Cognizant", "Infosys", "ITC Infotech"],
+        "role_level": "Jr"
+    },
+    {
+        "number": 36,
+        "question": "What is OTK (Object Toolkit C++ / Java) and how does it differ from classic C Creo Toolkit and J-Link?",
+        "answer": "<p>Object Toolkit (OTK) is PTC's modern, object-oriented API layer (using namespaces <code>pfc</code>, <code>wfc</code>, <code>cip</code>).</p><ol><li><code>pfc</code> (Pro/ENGINEER Foundation Classes): The subset of classes shared with free J-Link and VB API.</li><li><code>wfc</code> (Wildfire Foundation Classes): The extended, full-featured classes (Direct Element Tree manipulation, advanced surface/edge evaluation, custom UI) that mirror the full power of C Creo Toolkit.</li></ol><p>Key Differences:</p><ul><li><strong>Memory Management:</strong> OTK uses smart pointers (<code>xrchandle</code> in C++ via <code>wfcSession_ptr</code>, <code>pfcModel_ptr</code>) with automatic reference counting, eliminating manual <code>ProArrayFree</code> bugs.</li><li><strong>Error Handling:</strong> Instead of checking <code>ProError</code> integer return codes on every single line of code, OTK throws structured <code>xthrowable</code> / <code>pfcXToolkitError</code> exceptions.</li></ul>",
+        "tags": ["OTK", "Object Toolkit", "C++", "J-Link", "Smart Pointers", "wfc", "pfc"],
+        "companies": ["PTC", "Siemens", "HCLTech", "L&T Technology Services", "Capgemini"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 37,
+        "question": "Can you mix classic C Creo Toolkit functions (`Pro*`) with Object Toolkit C++ (`wfc`/`pfc`) in the same project? How?",
+        "answer": "<p>Yes, in C++ you can seamlessly mix classic C Creo Toolkit functions and Object Toolkit C++ (OTK) within the same DLL.</p><p>PTC provides interoperability bridge headers (such as <code>wfcClient.h</code> and internal conversion methods) or you can extract the underlying handle:</p><ul><li>For <code>ProMdl</code>, you can retrieve the active model via <code>ProMdlCurrentGet</code> in C Toolkit or <code>wfcSession::GetCurrentModel()</code> in OTK.</li><li>Often, legacy codebases have thousands of lines of tested C Toolkit functions (<code>ProFeatureElemtreeExtract</code>, <code>ProSolidSurfaceVisit</code>), while new modules are written in OTK C++. Both share the exact same in-process Creo memory space and can be initialized together inside <code>user_initialize()</code>.</li></ul>",
+        "tags": ["OTK", "Creo Toolkit", "C++", "Interoperability", "Legacy Migration"],
+        "companies": ["PTC", "L&T Technology Services", "HCLTech", "Bosch"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 38,
+        "question": "How do you calculate Mass Properties (Mass, Volume, Center of Gravity, Inertia Tensor) using Creo Toolkit, and what common mistake causes inaccurate results?",
+        "answer": "<p>Use <code>ProSolidMassPropertyGet(ProSolid solid, ProName csys_name, ProMassProperty* mass_prop)</code>:</p><ul><li>Passing <code>NULL</code> for <code>csys_name</code> calculates properties relative to the default model coordinate system.</li><li>The <code>ProMassProperty</code> struct returns <code>volume</code>, <code>surface_area</code>, <code>density</code>, <code>mass</code>, <code>center_of_gravity[3]</code>, and inertia matrices (<code>coor_sys_inertia</code>, <code>cg_inertia</code>).</li></ul><p><strong>Common Mistake:</strong> If a part or sub-component in an assembly does not have an assigned Material (<code>ProMaterialCurrentGet</code>) or has the default dummy density of <code>1.0</code>, the computed mass and center of gravity of the assembly will be completely wrong. Furthermore, if unregenerated changes exist or simplified reps exclude components, <code>ProSolidMassPropertyGet</code> will reflect only the active representation.</p>",
+        "tags": ["Mass Properties", "Center of Gravity", "Materials", "ProSolidMassPropertyGet"],
+        "companies": ["Infosys", "TCS", "Airbus", "BAE Systems", "Mahindra"],
+        "role_level": "Jr"
+    },
+    {
+        "number": 39,
+        "question": "How do you manage Simplified Representations (`ProSimprep`) programmatically to improve large assembly performance?",
+        "answer": "<p>Simplified Representations (<code>ProSimprep</code>) control which components are loaded into memory and how they are displayed:</p><ol><li><strong>Initialize or Create:</strong> Use <code>ProSimprepInit(rep_name, rep_id, assembly_solid, &simprep)</code> to get an existing rep, or <code>ProSimprepCreate()</code> to build a new one.</li><li><strong>Configure Rules (<code>ProSimprepdata</code>):</strong> Allocate <code>ProSimprepdataAlloc()</code>, define default rules (<code>PRO_SIMPREP_EXCLUDE</code>, <code>PRO_SIMPREP_INCLUDE</code>, <code>PRO_SIMPREP_GRAPHICS</code>), and add specific component exceptions via <code>ProSimprepdataitemInit(comp_id_path, path_size, action, &item)</code> and <code>ProSimprepdataitemAdd()</code>.</li><li><strong>Activate:</strong> Call <code>ProSimprepActivate(assembly_solid, &simprep)</code>.</li><li><strong>Partial Retrieval:</strong> Most importantly, open the assembly directly in the lightweight rep without loading excluded components into RAM using <code>ProAssemblySimprepMdlnameRetrieve()</code>.</li></ol>",
+        "tags": ["Simplified Reps", "Large Assemblies", "ProSimprep", "Performance"],
+        "companies": ["PTC", "Caterpillar", "John Deere", "Komatsu", "Alstom"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 40,
+        "question": "How do you automate Drawing Repeat Regions and BOM Tables in 2D Drawings (`ProDwgtable`)?",
+        "answer": "<p>In Creo drawings, tables (<code>ProDwgtable</code>) can be static or driven by Repeat Regions (which dynamically expand based on assembly BOM):</p><ol><li>Visit tables on a drawing using <code>ProDrawingTableVisit()</code>.</li><li>Check if a table has repeat regions or read cell text via <code>ProDwgtableCelltextGet(table, col, row, mode, &lines)</code>.<ul><li><code>mode = PRO_VALUE_TYPE</code> returns the evaluated string value (e.g., <code>\"STEEL_PLATE\"</code>).</li><li><code>mode = PRO_SYMBOL_TYPE</code> returns the underlying report symbol (e.g., <code>\"&asm.mbr.name\"</code>).</li></ul></li><li><strong>Update/Sort Repeat Regions:</strong> Use <code>ProDwgtableRepeatregionAdd()</code> or <code>ProDrawingTablesUpdate(drawing)</code> to refresh BOM tables after assembly modifications.</li><li><strong>Static Table Manipulation:</strong> Insert rows/columns with <code>ProDwgtableRowInsert()</code> and write text with <code>ProDwgtableCellNoteGet()</code> / <code>ProNoteTextSet()</code>.</li></ol>",
+        "tags": ["Drawing Automation", "ProDwgtable", "Repeat Regions", "BOM Tables"],
+        "companies": ["TCS", "L&T Technology Services", "Wipro", "ABB", "Siemens"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 41,
+        "question": "How do you create and manipulate 3D Model-Based Definition (MBD) Annotations, GTOLs, and Surface Finish symbols via Creo Toolkit?",
+        "answer": "<p>For Model-Based Definition (MBD), annotations live in 3D Annotation Planes (<code>ProAnnotationplane</code>) and Combined States (<code>ProCombstate</code>):</p><ol><li><strong>Annotation Plane:</strong> Create or retrieve an annotation plane defining the 3D orientation (<code>ProAnnotationplaneCreate</code>).</li><li><strong>3D Notes:</strong> Create a 3D note (<code>ProMdlNoteCreate</code>), set its text (<code>ProNoteTextSet</code>), attach it to a geometry selection (<code>ProNoteAttachmentSet</code>), and assign it to an annotation plane (<code>ProAnnotationelemAnnotationSet</code>).</li><li><strong>Geometric Tolerances (GTOL):</strong> Use <code>ProMdlGtolCreate()</code> with <code>ProGtolleaderAlloc()</code> and set datum references, tolerance type (flatness, position, concentricity), and tolerance values.</li><li><strong>Combined States:</strong> Assign annotations to specific MBD views (<code>ProCombstateAnnotationsAdd</code>) before exporting to STEP AP242 or 3D PDF.</li></ol>",
+        "tags": ["MBD", "GD&T", "GTOL", "3D Annotations", "STEP AP242", "Creo Toolkit"],
+        "companies": ["PTC", "Boeing", "Lockheed Martin", "GE Aerospace", "Rolls-Royce"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 42,
+        "question": "How do you debug a synchronous C++ Creo Toolkit DLL when it crashes or behaves unexpectedly inside Creo Parametric?",
+        "answer": "<p>Because a synchronous DLL runs in-process inside <code>xtop.exe</code> (Creo's main executable):</p><ol><li><strong>Compile Configuration:</strong> Compile the C++ DLL with <code>/MD</code> (Multi-threaded DLL runtime—CRITICAL: never use <code>/MDd</code> debug CRT runtime even with <code>/Zi</code> symbols, because Creo <code>xtop.exe</code> links against the release MSVCRT, and mixing CRTs causes heap corruption crashes). Enable Debug Symbols (<code>/Zi</code>) and disable optimizations (<code>/Od</code>).</li><li><strong>Attach Debugger:</strong> Start Creo Parametric (<code>xtop.exe</code>), open Visual Studio, go to <code>Debug -&gt; Attach to Process...</code>, and select <code>xtop.exe</code>.</li><li><strong>Debugging <code>user_initialize()</code>:</strong> If you need to debug code inside <code>user_initialize()</code> before the UI loads, either set <code>delay_start TRUE</code> in <code>protk.dat</code> (attach to <code>xtop.exe</code> first, then start the app from Auxiliary Applications), or temporarily place <code>MessageBoxW(NULL, L\"Attach Debugger Now\", L\"Debug\", MB_OK);</code> at the first line of <code>user_initialize()</code>.</li></ol>",
+        "tags": ["Debugging", "Visual Studio", "xtop.exe", "C++", "CRT Heap", "Creo Toolkit"],
+        "companies": ["PTC", "HCLTech", "TCS", "L&T Technology Services", "Capgemini"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 43,
+        "question": "Why does a C++ Creo Toolkit DLL compiled with Visual Studio `/MDd` (Debug Runtime) crash randomly when freeing memory or passing STL objects?",
+        "answer": "<p>Creo Parametric (<code>xtop.exe</code>) is compiled and linked by PTC against the Windows Release C Runtime (<code>/MD</code> - <code>ucrtbase.dll</code> / <code>msvcrt.dll</code>).</p><p>When a developer compiles their Toolkit DLL with <code>/MDd</code> (<code>ucrtbased.dll</code> / <code>msvcp140d.dll</code>):</p><ol><li>Two separate heap managers exist inside the same <code>xtop.exe</code> process.</li><li>Struct layouts for debug STL containers (<code>std::string</code>, <code>std::vector</code>) change size due to <code>_ITERATOR_DEBUG_LEVEL=2</code>.</li><li>Any memory allocated in one CRT and freed or reallocated in the other triggers an immediate <code>STATUS_HEAP_CORRUPTION</code> (<code>0xC0000374</code>) crash.</li></ol><p><strong>Solution:</strong> For a Debug build configuration in Visual Studio, always set Runtime Library to <code>/MD</code> (Release DLL), disable compiler optimization (<code>/Od</code>), and enable Program Database (<code>/Zi</code>) so you get full step-through debugging without CRT mismatch.</p>",
+        "tags": ["C++", "Visual Studio", "Compiler Flags", "Heap Corruption", "Debugging"],
+        "companies": ["PTC", "Siemens", "Bosch", "HCLTech", "L&T Technology Services"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 44,
+        "question": "Explain how Asynchronous VB API / .NET applications connect to Creo (`CCpfcAsyncConnection`) and how you troubleshoot `XToolkitCantStart` or `nmsd` issues.",
+        "answer": "<p>In the Creo VB API (<code>pfclscom.exe</code> COM server):</p><ol><li><strong>Connection Methods:</strong><ul><li><code>AsyncConnection.Connect(null, null, null, timeout)</code>: Connects to an already running interactive Creo session.</li><li><code>AsyncConnection.Start(creo_cmd_path, text_dir)</code>: Spawns a new Creo process.</li></ul></li><li><strong>Role of <code>nmsd.exe</code> and <code>pfclscom.exe</code>:</strong> <code>nmsd</code> (PTC Name Server Daemon) brokers RPC communication between external processes and <code>xtop.exe</code>. <code>pfclscom.exe</code> is the COM wrapper registered in Windows Registry.</li><li><strong>Troubleshooting <code>XToolkitCantStart</code> / <code>XToolkitGeneralError</code>:</strong><ul><li>Ensure <code>PRO_COMM_MSG_EXE</code> environment variable points to the exact path of <code>pro_comm_msg.exe</code> in the Creo installation (<code>.../Common Files/x86e_win64/obj/pro_comm_msg.exe</code>).</li><li>Run <code>vb_api_register.bat</code> as Administrator to register <code>pfclscom.exe</code> in the Windows Registry.</li><li>Verify <code>nmsd.exe</code> is running and not blocked by Windows Firewall.</li></ul></li></ol>",
+        "tags": ["VB API", ".NET", "Asynchronous Mode", "PRO_COMM_MSG_EXE", "Troubleshooting"],
+        "companies": ["TCS", "Wipro", "Infosys", "Cognizant", "Parker Hannifin"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 45,
+        "question": "What are Trail Files (`trail.txt.*`) and Mapkeys in Creo, and why should you avoid relying on `ProMacroLoad` for enterprise-grade automation?",
+        "answer": "<ul><li><strong>Trail Files</strong> record every UI event, dialog click, and command executed during a Creo session for crash recovery or replay.</li><li><strong>Mapkeys</strong> are keyboard macros stored in <code>config.pro</code> that can be invoked via API using <code>ProMacroLoad(L\"~ Activate `main_dlg_cur`...\")</code>.</li></ul><p>Why <code>ProMacroLoad</code> is discouraged in enterprise automation:</p><ol><li><strong>Fragility:</strong> Mapkeys record exact UI widget names, menu order, and dialog states. Any Creo version upgrade (e.g., Creo 7 to Creo 10), user UI customization, or unexpected warning dialog shifts focus and causes the macro to click the wrong buttons.</li><li><strong>Asynchronous Execution:</strong> <code>ProMacroLoad</code> queues macro strings to be executed only when control returns to Creo's main UI loop (<code>ProMacroExecute</code>), making error handling and return-status verification nearly impossible.</li></ol><p>Use native API calls first; only use <code>ProMacroLoad</code> as a last resort when no API exists for a specific UI command.</p>",
+        "tags": ["Mapkeys", "ProMacroLoad", "Trail Files", "Best Practices", "Architecture"],
+        "companies": ["PTC", "TCS", "Capgemini", "HCLTech", "Cummins"],
+        "role_level": "Mid"
+    },
+    {
+        "number": 46,
+        "question": "How do you programmatically create or modify a 2D Sketch (`ProSection`) inside a Sketch-based Feature (like Extrude or Revolve)?",
+        "answer": "<p>In Creo Toolkit, 2D sketches are represented by <code>ProSection</code> handles inside a feature's element tree (<code>PRO_E_STD_SECTION</code>):</p><ol><li>Extract or allocate the <code>ProSection</code> from the feature element tree (<code>ProElementSpecialvalueGet</code>).</li><li><strong>Add 2D Entities (<code>Pro2dEntdef</code>):</strong> Create 2D geometry structures such as <code>Pro2dLinedef</code>, <code>Pro2dCircledef</code>, or <code>Pro2dArcdef</code> and add them to the section using <code>ProSectionEntityAdd(section, (Pro2dEntdef*)&line_def, &ent_id)</code>.</li><li><strong>Project External References:</strong> Project 3D datum axes/edges into the 2D sketch plane using <code>ProSectionLocationGet()</code> or adding reference entities.</li><li><strong>Auto-Intent / Solve (<code>ProSectionAutodim</code>):</strong> Call <code>ProSectionAutodim(section, &error_info)</code> so Creo's 2D sketch solver automatically applies geometric constraints and driving dimensions (<code>ProSectionSolve</code>).</li></ol>",
+        "tags": ["Sketch Automation", "ProSection", "2D Geometry", "Feature Creation", "Creo Toolkit"],
+        "companies": ["PTC", "L&T Technology Services", "Siemens", "HCLTech", "Baker Hughes"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 47,
+        "question": "How do you manage External Data (`ProExtobj` / Application Data) inside a Creo model file so custom metadata survives saves without cluttering user-visible parameters?",
+        "answer": "<p>When a custom application needs to store proprietary binary data, JSON blobs, or custom graph structures directly inside a <code>.prt</code> or <code>.asm</code> file without exposing them in the standard Creo <code>Parameters</code> UI table:</p><ol><li><strong>Create an External Object Class:</strong> Call <code>ProExtobjClassCreate(&ext_obj_class)</code> to register your application's custom data class.</li><li><strong>Create an External Object on the Model:</strong> Call <code>ProExtobjCreate(&ext_obj_class, &owner_modelitem, &ext_obj)</code>.</li><li><strong>Write Custom Data (<code>PRO_EXTOBJ_WRITEDATA</code>):</strong> Attach arbitrary streams or structs using <code>ProExtobjDataSet(&ext_obj, ...)</code>.</li><li><strong>Persistence:</strong> Because <code>ProExtobj</code> lives inside the native Creo database stream, it is saved directly inside the <code>.prt</code>/<code>.asm</code> file and checked into Windchill automatically, invisible to end users.</li></ol>",
+        "tags": ["ProExtobj", "Data Persistence", "Metadata", "Architecture", "Creo Toolkit"],
+        "companies": ["PTC", "ANSYS", "Hexagon", "Dassault", "Siemens"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 48,
+        "question": "What considerations are required when migrating a Creo Toolkit C++ application across major Creo versions (e.g., Creo 4.0 to Creo 10.0 / 11.0)?",
+        "answer": "<p>Migrating a C++ Toolkit application across major Creo releases involves:</p><ol><li><strong>Compiler & Toolchain Upgrade:</strong> Each Creo version mandates a specific Visual Studio C++ toolset (e.g., VS 2019/2022 <code>v142</code>/<code>v143</code>) and Windows SDK version documented in the PTC Hardware/Software Compatibility Matrix. Binary compatibility across major Creo versions is not guaranteed—you must recompile against the target version's <code>protk_dll_NU.lib</code>.</li><li><strong>Deprecated Functions:</strong> Replace deprecated functions (such as <code>ProMdlInit</code> -&gt; <code>ProMdlnameInit</code>, <code>ProMdlRetrieve</code> -&gt; <code>ProMdlnameRetrieve</code>, <code>ProMdlNameGet</code> -&gt; <code>ProMdlMdlnameGet</code>) which support longer model names (<code>ProMdlName</code> vs old 31-char <code>ProName</code>) and multi-CAD extensions.</li><li><strong>Multibody Support (Creo 7.0+):</strong> Parts can now contain multiple solid bodies (<code>ProBody</code>). Legacy code assuming a single solid body per <code>.prt</code> may need updates to query specific bodies (<code>ProSolidBodyVisit</code>).</li><li><strong>Unlocking DLLs:</strong> Run <code>protk_unlock.bat</code> using a valid Creo Toolkit development license for the new release.</li></ol>",
+        "tags": ["Migration", "Creo 10", "Multibody", "Deprecation", "C++", "Compilation"],
+        "companies": ["PTC", "TCS", "HCLTech", "Infosys", "L&T Technology Services", "Capgemini"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 49,
+        "question": "How does Multibody Design (introduced in Creo 7.0+) impact Creo Toolkit automation, and what APIs are used to handle bodies?",
+        "answer": "<p>Prior to Creo 7.0, a <code>.prt</code> file represented a single solid volume. Starting in Creo 7.0, a single part can contain multiple independent solid bodies (<code>ProBody</code>, <code>PRO_BODY</code>), each with its own material, appearance, and boolean operations (Body Merge, Body Subtract, Body Split).</p><p>API Impact:</p><ol><li><strong>Visiting Bodies:</strong> Use <code>ProSolidBodyVisit(ProSolid part, ProSolidBodyVisitAction visit_action, ProSolidBodyFilterAction filter_action, ProAppData app_data)</code> to iterate over all bodies in a part.</li><li><strong>Body Surfaces:</strong> To get surfaces belonging only to a specific body rather than the whole part, use <code>ProBodySurfaceVisit()</code>.</li><li><strong>Body Mass & Material:</strong> Materials can be assigned per body (<code>ProBodyMaterialSet</code>), and mass properties can be evaluated per body (<code>ProBodyMassPropertyGet</code>).</li><li><strong>Feature Creation:</strong> Extrude/Revolve element trees now include body contribution options (<code>PRO_E_BODY_USE</code> / target body references).</li></ol>",
+        "tags": ["Multibody", "Creo 7+", "ProBody", "Geometry Traversal", "Creo Toolkit"],
+        "companies": ["PTC", "John Deere", "Caterpillar", "Siemens", "HCLTech"],
+        "role_level": "Sr"
+    },
+    {
+        "number": 50,
+        "question": "How do you design an end-to-end Knowledge-Based Engineering (KBE) / Configure-to-Order (CTO) CAD automation architecture using Creo?",
+        "answer": "<p>An enterprise Configure-to-Order (CTO) / KBE system typically follows a decoupled 3-tier architecture:</p><ol><li><strong>Web Configurator / CPQ Frontend:</strong> Engineers or sales users input product specifications (dimensions, loads, options) in a web UI, which validates business rules and outputs a structured JSON/XML configuration payload.</li><li><strong>Message Queue & Worker Pool:</strong> The JSON payload is pushed to a queue (RabbitMQ / Azure Service Bus). A fleet of headless Windows VM workers runs a custom .NET/Python orchestrator service.</li><li><strong>Headless Creo Execution Engine:</strong><ul><li>The worker starts or connects to a headless Creo Parametric process (<code>-g:no_graphics</code>) loaded with a synchronous C++ Creo Toolkit / OTK DLL.</li><li>The Toolkit app checks out master generic template assemblies/parts from Windchill (<code>ProServer</code>), clones/renames them (<code>ProMdlCopy</code>), applies parameters (<code>ProParameter</code>), switches Family Table instances (<code>ProFaminstance</code>), regenerates (<code>ProSolidRegenerate</code>), generates 2D Drawings (<code>ProDrawing</code>), exports STEP/PDF deliverables (<code>ProIntf3DFileWrite</code>), and checks everything into Windchill.</li><li>Watchdog timers monitor <code>xtop.exe</code> to kill hung processes and recover gracefully.</li></ul></li></ol>",
+        "tags": ["KBE", "System Architecture", "Configure-to-Order", "Headless Batch", "Windchill", "Enterprise Automation"],
+        "companies": ["PTC", "Siemens", "ABB", "Schneider Electric", "Kone", "L&T Technology Services"],
+        "role_level": "Sr"
+    }
+]

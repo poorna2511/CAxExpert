@@ -1,0 +1,612 @@
+[
+    {
+        "number": 1,
+        "question": "What is the difference between a reference and a pointer?",
+        "answer": "<p>Both provide indirect access to variables, but with key differences:</p><ul><li><strong>Initialization:</strong> A reference must be initialized upon declaration. A pointer can be uninitialized or initialized later.</li><li><strong>Nullability:</strong> Pointers can be assigned <code>nullptr</code>. References must always point to a valid object.</li><li><strong>Reassignment:</strong> Pointers can be reassigned. A reference remains firmly bound to its original object.</li><li><strong>Syntax:</strong> Pointers require dereferencing (<code>*</code> or <code>-&gt;</code>), while references are used exactly like the object itself.</li></ul>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 2,
+        "question": "Explain the difference between int x; int x(); and int x{};",
+        "answer": "<ul><li><code>int x;</code> Default initialization. If it's a local variable, its value is undefined (contains garbage data).</li><li><code>int x();</code> Function declaration. This is known as the <em>most vexing parse</em>\u2014it declares a function <code>x</code> that takes no arguments and returns an <code>int</code>.</li><li><code>int x{};</code> Value initialization (C++11). Safely initializes the integer to zero.</li></ul>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Jr/Mid"
+    },
+    {
+        "number": 3,
+        "question": "assert(sizeof(int) != sizeof(long)); Is this statement always true?",
+        "answer": "<p><strong>No</strong>, it is not always true.</p><p>The C++ standard only guarantees that <code>sizeof(int) &lt;= sizeof(long)</code>. The actual sizes depend on the compiler and the underlying architecture's data model. For example, on 64-bit Windows (LLP64 data model), both <code>int</code> and <code>long</code> are strictly 4 bytes, so the assertion would fail.</p>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 4,
+        "question": "What will the following line of code print out and why? unsigned int x = -1; std::cout << x;",
+        "answer": "<p>It will print the <strong>maximum value representable by an <code>unsigned int</code></strong> (typically <code>4294967295</code> on a 32-bit system).</p><p><strong>Why:</strong> Unsigned integers use modulo arithmetic. When you assign a negative number to an unsigned type, it wraps around via two's complement representation, resulting in the maximum possible value.</p>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 5,
+        "question": "Can you explain the difference between new and new[]? Is it possible to delete memory using delete[] allocated within the new operator?",
+        "answer": "<p><code>new</code> is used to allocate memory for a <em>single</em> object and calls its constructor. <code>new[]</code> allocates contiguous memory for an <em>array</em> of objects and calls the default constructor for each.</p><p><strong>No</strong>, you cannot mix them. Using <code>delete[]</code> on memory allocated by <code>new</code> results in <strong>Undefined Behavior (UB)</strong>, often leading to heap corruption or application crashes.</p>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Jr/Mid"
+    },
+    {
+        "number": 6,
+        "question": "What is the difference between new/malloc or delete/free?",
+        "answer": "<ul><li><strong>Type Awareness:</strong> <code>new/delete</code> are operators that call object constructors/destructors. <code>malloc/free</code> are C library functions that just allocate raw byte streams.</li><li><strong>Return Type:</strong> <code>new</code> returns a correctly typed pointer. <code>malloc</code> returns a <code>void*</code> that must be cast.</li><li><strong>Error Handling:</strong> <code>new</code> throws a <code>std::bad_alloc</code> exception on failure. <code>malloc</code> returns <code>NULL</code>.</li></ul>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 7,
+        "question": "What is the difference between stack and heap allocation?",
+        "answer": "<ul><li><strong>Stack:</strong> Memory is managed automatically by the compiler. It is fast, contiguous, and strictly scoped (destroyed when leaving the block). However, it has a limited size.</li><li><strong>Heap:</strong> Memory is managed manually via dynamic allocation (e.g., <code>new</code>). It is larger and meant for objects whose lifetimes extend beyond their scope, but it is slower to allocate and susceptible to memory fragmentation and leaks.</li></ul>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 8,
+        "question": "What is the evaluation order of the function parameters in C++?",
+        "answer": "<p>Before C++17, the evaluation order of function parameters was <strong>unspecified</strong>, meaning the compiler could evaluate them in any order, often leading to unpredictable side effects. </p><p>Since C++17, the exact order (left-to-right vs right-to-left) is still unspecified, but parameter evaluations are now strictly <strong>sequenced</strong>, meaning they will not interleave.</p>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 9,
+        "question": "What is the construction order of global variables?",
+        "answer": "<p>Within a single file (Translation Unit), global variables are constructed sequentially from top to bottom.</p><p>Across different Translation Units, the order is <strong>undefined</strong>. Relying on the initialization order of global variables across different files leads to the classic <em>Static Initialization Order Fiasco</em>.</p>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Sr"
+    },
+    {
+        "number": 10,
+        "question": "What is the forward declaration of classes? What is it used for?",
+        "answer": "<p>Forward declaration is declaring a class identifier without providing its full definition (e.g., <code>class Shape;</code>). </p><p>It is heavily used in header files to avoid `#include` circular dependencies and to reduce compilation times. You can use forward-declared types as pointers or references, but you cannot instantiate them or access their members until the full definition is provided.</p>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Jr/Mid"
+    },
+    {
+        "number": 11,
+        "question": "What is the meaning of a const keyword and how can it be used?",
+        "answer": "<p><code>const</code> implies semantic immutability. It guarantees that the specified entity cannot be modified.</p><ul><li><strong>Variables:</strong> Makes the value strictly read-only.</li><li><strong>Pointers:</strong> Can define a pointer to constant data, a constant pointer, or both.</li><li><strong>Methods:</strong> A <code>const</code> member function guarantees it will not modify any non-static member variables of the class.</li></ul>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 12,
+        "question": "What is the meaning of a static keyword and how can it be used?",
+        "answer": "<ul><li><strong>In a function:</strong> The variable retains its state between function calls (lifetime is the duration of the program).</li><li><strong>In a class:</strong> The member is shared across all instances of the class rather than being duplicated per object.</li><li><strong>In a file (namespace scope):</strong> Gives the variable or function <em>internal linkage</em>, meaning it is only visible within that specific Translation Unit.</li></ul>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Jr/Mid"
+    },
+    {
+        "number": 13,
+        "question": "What are the advantages of using friend classes?",
+        "answer": "<p>A <code>friend</code> class is explicitly granted access to the private and protected members of the class declaring the friendship.</p><p><strong>Advantages:</strong> It is highly useful for tightly coupled systems where encapsulation should strictly block external usage but allow internal modules to interact. For example, a <code>MeshRenderer</code> might need internal access to a <code>Mesh</code> node's hidden vertex buffer without exposing that data publicly.</p>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Jr/Mid"
+    },
+    {
+        "number": 14,
+        "question": "What is an abstract class? What is the pure virtual function?",
+        "answer": "<p>An <strong>abstract class</strong> is a class that serves exclusively as an interface or base class; it cannot be instantiated directly.</p><p>A <strong>pure virtual function</strong> is a virtual function explicitly marked with <code>= 0</code> (e.g., <code>virtual void draw() = 0;</code>). A class becomes abstract as soon as it contains at least one pure virtual function.</p>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 15,
+        "question": "How do you create a virtual constructor and virtual destructor for a class? Why would you do it?",
+        "answer": "<p><strong>Virtual Destructor:</strong> Created by adding <code>virtual</code> to the destructor (<code>virtual ~MyClass()</code>). It is mandatory for base classes to ensure that deleting a derived object via a base class pointer calls the proper derived destructor, preventing resource leaks.</p><p><strong>Virtual Constructor:</strong> C++ <em>does not</em> support virtual constructors. Instead, you simulate one using the <strong>Prototype pattern</strong> by defining a virtual <code>clone()</code> method that returns a deep copy of the derived object (<code>virtual Base* clone() const = 0;</code>).</p>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 16,
+        "question": "What is a vtable and how does it work?",
+        "answer": "<p>The <strong>vtable</strong> (virtual table) is a compiler-generated lookup array of function pointers used to achieve dynamic dispatch. </p><p>When a class contains virtual functions, the compiler creates a vtable for the class. Each instance of the class is injected with a hidden pointer (<code>vptr</code>) pointing to this table. At runtime, when a virtual function is called through a base pointer, the program dereferences the <code>vptr</code> to call the correct derived function.</p>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Sr"
+    },
+    {
+        "number": 17,
+        "question": "Initialization order of Bases and Members.",
+        "answer": "<p>Regardless of the order in the initializer list, initialization follows a strict hierarchy:</p><ol><li>Virtual base classes</li><li>Direct non-virtual base classes (in order of inheritance declaration)</li><li>Member variables (in the exact order they are declared in the class header)</li><li>The constructor body</li></ol>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 18,
+        "question": "Is it possible to call a virtual function inside of a constructor/destructor?",
+        "answer": "<p><strong>Yes</strong>, but it rarely does what you want. </p><p>During execution of a base constructor or destructor, dynamic dispatch does <em>not</em> go down to the derived class. The type is treated as the base class type. This prevents the base class from accessing derived members that haven't been fully constructed yet, or have already been destroyed.</p>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Sr"
+    },
+    {
+        "number": 19,
+        "question": "What is a template and how is it used?",
+        "answer": "<p>Templates are the foundation of generic programming in C++. They act as blueprints that tell the compiler how to auto-generate classes or functions for various data types.</p><p>Usage: <code>template &lt;typename T&gt; void swap(T&amp; a, T&amp; b) { ... }</code>. This avoids writing duplicate code for different data types.</p>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Jr/Mid"
+    },
+    {
+        "number": 20,
+        "question": "What is specialization? How can it help to improve efficiency?",
+        "answer": "<p><strong>Specialization</strong> allows you to provide a custom, overridden implementation of a template for a specific data type.</p><p><strong>Efficiency:</strong> It helps when a generic algorithm is inefficient for a specific type. For example, <code>std::vector&lt;bool&gt;</code> is a well-known specialization that optimizes memory by packing booleans into individual bits rather than allocating standard bytes.</p>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Sr"
+    },
+    {
+        "number": 21,
+        "question": "struct Vector{ int* data; int size; }; Write copy constructor, operator= and destructor for the struct Vector.",
+        "answer": "<pre><code>struct Vector {\n    int* data;\n    int size;\n\n    // 1. Copy Constructor\n    Vector(const Vector&amp; other) : size(other.size), data(new int[other.size]) {\n        std::copy(other.data, other.data + size, data);\n    }\n\n    // 2. Copy Assignment Operator (Copy-and-Swap Idiom)\n    Vector&amp; operator=(Vector other) {\n        std::swap(size, other.size);\n        std::swap(data, other.data);\n        return *this;\n    }\n\n    // 3. Destructor\n    ~Vector() {\n        delete[] data;\n    }\n};</code></pre>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 22,
+        "question": "What is an iterator? What iterator types do you know?",
+        "answer": "<p>An iterator is an object that generalizes the concept of a pointer, allowing algorithms to traverse containers uniformly.</p><p><strong>Types:</strong></p><ul><li>Input / Output Iterators (single pass)</li><li>Forward Iterators (multi-pass, forward only)</li><li>Bidirectional Iterators (can step forwards and backwards, e.g., <code>std::list</code>)</li><li>Random Access Iterators (can jump `N` steps, e.g., <code>std::vector</code>)</li><li>Contiguous Iterators (C++17, elements strictly adjacent in memory)</li></ul>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Jr/Mid"
+    },
+    {
+        "number": 23,
+        "question": "What is RAII?",
+        "answer": "<p><strong>Resource Acquisition Is Initialization (RAII)</strong> is a core C++ idiom. It dictates that managing resources (memory, file handles, mutex locks) should be tied to the lifetime of an object on the stack.</p><p>When an object is created, its constructor acquires the resource. When it falls out of scope, stack unwinding automatically triggers the destructor, releasing the resource safely, even in the event of an exception.</p>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 24,
+        "question": "When should you use std::unique_ptr vs. std::shared_ptr?",
+        "answer": "<ul><li><code>std::unique_ptr</code>: Use by default. It enforces strict, exclusive ownership of a resource with zero runtime memory overhead.</li><li><code>std::shared_ptr</code>: Use only when multiple owners must share a resource, and the resource should remain alive until the <em>last</em> owner drops it. It carries performance overhead due to thread-safe reference counting.</li></ul>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 25,
+        "question": "How should runtime errors be handled in C++? What general approaches do you know?",
+        "answer": "<p>General approaches:</p><ul><li><strong>Exceptions (<code>std::exception</code>):</strong> The standard C++ way. Best for exceptional, out-of-bounds conditions where the current function cannot recover.</li><li><strong>Error Codes / Enums:</strong> Good for high-performance or embedded environments where exceptions are disabled.</li><li><strong>Monadic returns:</strong> Using <code>std::optional</code> (if merely checking existence) or <code>std::expected</code> (C++23, returning a value OR an error object) to provide robust, strictly-checked data flows.</li></ul>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Sr"
+    },
+    {
+        "number": 26,
+        "question": "What will happen if the exception will be thrown within a constructor?",
+        "answer": "<p>If an exception escapes a constructor, the object is considered <em>not fully constructed</em>. Therefore, its <strong>destructor will not be called</strong>.</p><p>However, the destructors for any fully constructed sub-objects (like base classes or class members initialized before the exception) <em>will</em> execute, and the raw memory allocated for the object is safely released.</p>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 27,
+        "question": "C++ supports multiple inheritance. What is the \"diamond problem\" that can occur with multiple inheritance? Give an example.",
+        "answer": "<p>The <strong>Diamond Problem</strong> occurs when two classes inherit from the same base class, and a fourth class inherits from both, creating ambiguity and duplicating the base class sub-object.</p><p><strong>Example:</strong> `class GeometricEntity` is inherited by `Curve` and `Surface`. If `TrimmedSurface` inherits from both `Curve` and `Surface`, it will inherit two separate instances of `GeometricEntity`. To solve this, C++ uses <code>virtual</code> inheritance (e.g., <code>class Curve : public virtual GeometricEntity</code>).</p>",
+        "tags": [
+            "C++"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 28,
+        "question": "How to create a new thread and give it an execution function? Give an example of a simple function.",
+        "answer": "<pre><code>#include &lt;thread&gt;\n#include &lt;iostream&gt;\n\nvoid computeTask(int value) {\n    std::cout &lt;&lt; \"Task running with \" &lt;&lt; value &lt;&lt; std::endl;\n}\n\nint main() {\n    std::thread t(computeTask, 42); // create thread and pass argument\n    t.join(); // wait for execution to finish\n    return 0;\n}</code></pre>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Jr/Mid"
+    },
+    {
+        "number": 29,
+        "question": "What two modes of execution of the thread function can you name?",
+        "answer": "<ul><li><strong>Joinable:</strong> The parent thread waits for the spawned thread to finish its execution using <code>t.join()</code>.</li><li><strong>Detached:</strong> The spawned thread is separated from the parent using <code>t.detach()</code>, running independently in the background (like a daemon).</li></ul>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 30,
+        "question": "What C++ features can we use to protect data between multiple threads?",
+        "answer": "<ul><li><strong>Mutexes:</strong> <code>std::mutex</code>, <code>std::shared_mutex</code> (for read/write locks).</li><li><strong>Lock Guards:</strong> RAII wrappers like <code>std::lock_guard</code>, <code>std::unique_lock</code>, or <code>std::scoped_lock</code>.</li><li><strong>Atomics:</strong> <code>std::atomic&lt;T&gt;</code> for lock-free data protection.</li></ul>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 31,
+        "question": "How can we synchronize data between threads?",
+        "answer": "<ul><li><strong>Condition Variables:</strong> <code>std::condition_variable</code> allows threads to block until signaled.</li><li><strong>Futures/Promises:</strong> <code>std::future</code> and <code>std::promise</code> for safely passing data asynchronously.</li><li><strong>C++20 Synchronization Primitives:</strong> <code>std::barrier</code>, <code>std::latch</code>, and atomic wait/notify APIs.</li></ul>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 32,
+        "question": "There is an algorithm that is divided into 5 parts. They must be executed one by one in different threads, using the result of the previous step. How do you implement it?",
+        "answer": "<p>You can chain them elegantly using <strong>futures and promises</strong>. Thread 1 calculates part 1, and populates <code>promise_1</code>. Thread 2 waits on <code>future_1</code>, processes the result, and sets <code>promise_2</code>. This creates a sequential async pipeline.</p><p>Alternatively, C++20/TS additions allow <code>std::future::then()</code> to directly chain continuations.</p>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Sr"
+    },
+    {
+        "number": 33,
+        "question": "What is the difference between using std::async and std::thread?",
+        "answer": "<ul><li><code>std::async</code> is a higher-level abstraction. It automatically manages thread execution, captures return values and exceptions, and returns a <code>std::future</code>. (It might even execute synchronously depending on launch policies).</li><li><code>std::thread</code> is low-level. It maps directly to OS threads, doesn't provide a direct way to return values or catch exceptions, and requires explicit lifecycle management (join/detach).</li></ul>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 34,
+        "question": "There is a thread that reads the data, and there is a thread that uses the received data. These threads run independently. How do you implement synchronization between these threads?",
+        "answer": "<p>This is the classic <strong>Producer-Consumer</strong> pattern. It is implemented using a shared data structure (like a <code>std::queue</code>), protected by a <code>std::mutex</code>. A <code>std::condition_variable</code> is used to synchronize them: the reading thread pushes data and calls <code>notify_one()</code>, while the consuming thread uses <code>wait()</code> on the condition variable until data is available.</p>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Sr"
+    },
+    {
+        "number": 35,
+        "question": "What does the co_yield function do?",
+        "answer": "<p>Introduced in C++20 Coroutines, <code>co_yield</code> suspends the current execution of a coroutine, yields a value back to the caller, and crucially, <strong>maintains the local state</strong> of the function so it can be resumed right where it left off on the next call.</p>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 36,
+        "question": "Explain the difference between sleep_for and sleep_until functions.",
+        "answer": "<ul><li><code>std::this_thread::sleep_for()</code> pauses execution for a specific <em>relative duration</em> (e.g., sleep for 500 milliseconds).</li><li><code>std::this_thread::sleep_until()</code> pauses execution until an <em>absolute time point</em> is reached (e.g., sleep until 12:00 PM today).</li></ul>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Jr/Mid"
+    },
+    {
+        "number": 37,
+        "question": "Is it possible to find out how many threads are available for parallel work using C++ tools?",
+        "answer": "<p><strong>Yes.</strong> You can call <code>std::thread::hardware_concurrency()</code>. It returns a hint indicating the number of concurrent hardware threads available on the system (like logical CPU cores). If the value cannot be computed, it may return 0.</p>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 38,
+        "question": "There are two mutexes. How do you securely acquire them?",
+        "answer": "<p>To prevent deadlocks, use <code>std::scoped_lock</code> (introduced in C++17):</p><pre><code>std::scoped_lock lock(mutex1, mutex2);</code></pre><p>It uses deadlock-avoidance algorithms under the hood to ensure both mutexes are locked safely without locking order issues.</p>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 39,
+        "question": "You have a function that needs to be called once, no matter how many threads you have. How will you do it?",
+        "answer": "<p>Use <code>std::call_once</code> in conjunction with a <code>std::once_flag</code>.</p><pre><code>std::once_flag flag;\nstd::call_once(flag, myInitFunction);</code></pre><p>This guarantees that the initialization function is executed exactly once, in a fully thread-safe manner.</p>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 40,
+        "question": "What is std::promises used for?",
+        "answer": "<p><code>std::promise</code> acts as the \"push\" end of a one-way communication channel between threads. A thread uses a promise to set a value or an exception, which will later be retrieved asynchronously by another thread holding the associated <code>std::future</code>.</p>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Sr"
+    },
+    {
+        "number": 41,
+        "question": "What is std::packaged_task used for?",
+        "answer": "<p><code>std::packaged_task</code> acts as a wrapper around any callable target (function, lambda, etc.). It executes the callable and automatically stores its return value (or exception) in an associated <code>std::future</code>. It\u2019s highly useful for queuing tasks in thread pools.</p>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 42,
+        "question": "What is std::future used for?",
+        "answer": "<p><code>std::future</code> represents the \"pull\" end of an asynchronous operation. It allows a thread to safely block and wait for a result (or an exception) that will eventually be provided by a <code>std::promise</code>, <code>std::packaged_task</code>, or <code>std::async</code>.</p>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 43,
+        "question": "Is it possible to return an exception from a thread? If yes, please explain.",
+        "answer": "<p><strong>Yes.</strong> Using a <code>std::promise</code>, you can catch an exception inside the thread and call <code>promise.set_exception(std::current_exception())</code>. Later, when the parent thread calls <code>future.get()</code>, the exact exception will be re-thrown and can be safely caught in the parent thread.</p>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 44,
+        "question": "Does adding multithreading always improve the result?",
+        "answer": "<p><strong>No.</strong> Multithreading can degrade performance if not used properly. Bottlenecks can occur due to:</p><ul><li>Context switching overhead</li><li>Lock contention (threads waiting on mutexes)</li><li>False sharing (cache invalidation loops)</li><li>Amdahl's Law (execution time is limited by strictly sequential portions of code)</li></ul>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 45,
+        "question": "Is there an alternative to a mutex in C++ to ensure data protection?",
+        "answer": "<p><strong>Yes.</strong> Lock-free programming alternatives include:</p><ul><li>Using atomic operations (<code>std::atomic</code>) which rely on CPU-level hardware instructions (like Compare-And-Swap).</li><li>Thread Local Storage (<code>thread_local</code>), where each thread maintains its own exclusive copy of a variable.</li></ul>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 46,
+        "question": "What can you tell about std::atomic?",
+        "answer": "<p><code>std::atomic&lt;T&gt;</code> is a template that provides thread-safe access to a variable. It ensures that operations like read, write, and increment are handled as completely indivisible operations, preventing data races without the heavy performance overhead of mutex locks.</p>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Sr"
+    },
+    {
+        "number": 47,
+        "question": "What is a race condition in a multi-threaded application?",
+        "answer": "<p>A race condition occurs when two or more threads access a shared block of data concurrently, at least one of the threads attempts to modify it, and the final state of the data unpredictably depends on the exact timing of thread scheduling by the OS.</p>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Jr/Mid"
+    },
+    {
+        "number": 48,
+        "question": "What are coroutines?",
+        "answer": "<p>Introduced in C++20, coroutines are functions that have the ability to suspend their execution, yield control back to the caller, and later be resumed from the exact point they suspended. Unlike standard threads, they are typically <em>stackless</em> and do not require OS-level context switches, making them extremely lightweight.</p>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 49,
+        "question": "What is std::jthread? Can you explain the difference between std::jthread and std::thread?",
+        "answer": "<p><code>std::jthread</code> (joining thread) was introduced in C++20.</p><p><strong>Differences:</strong></p><ul><li><strong>RAII Compliant:</strong> Unlike <code>std::thread</code>, a <code>jthread</code> will automatically invoke <code>join()</code> upon destruction, preventing program crashes.</li><li><strong>Cancellation:</strong> It natively supports cooperative interruption via a built-in <code>std::stop_token</code>, allowing you to easily signal the thread to stop executing safely.</li></ul>",
+        "tags": [
+            "C++",
+            "Multithreading"
+        ],
+        "companies": [
+            "AMC Bridge"
+        ],
+        "role_level": "Mid/Sr"
+    }
+]

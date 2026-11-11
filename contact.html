@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — CAx🧠Expert</title>
+  <meta name="description" content="Get in touch with CAx🧠Expert to suggest new questions or topics.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script>
+    (function () {
+      var stored = localStorage.getItem("CAx_theme");
+      var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (stored === "dark" || (!stored && prefersDark)) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">CAx<span>🧠Expert</span></a>
+
+      <nav class="nav-primary" aria-label="Primary">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="interview.html" class="nav-link">Interview questions</a>
+      </nav>
+
+      <div class="header-actions">
+        <nav class="nav-secondary" aria-label="More">
+          <a href="about.html" class="nav-link">About</a>
+          <a href="contact.html" class="nav-link is-active">Contact</a>
+        </nav>
+        <button type="button" id="themeToggle" class="icon-btn" aria-label="Toggle theme">
+          <span class="theme-label theme-label--light">Light</span>
+          <span class="theme-label theme-label--dark">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container layout">
+    <aside class="sidebar" aria-label="Interview topics">
+      <p class="sidebar-label">Top questions</p>
+      <nav id="topicNav" class="topic-nav">
+        <a class="topic-link" href="interview.html" data-topic="all">All questions</a>
+        <a class="topic-link" href="computational-geometry.html" data-topic="computational-geometry">Computational Geometry</a>
+        <a class="topic-link" href="catia-caa.html" data-topic="catia-caa">CAA CATIA</a>
+        <a class="topic-link" href="solidworks-api.html" data-topic="solidworks">SolidWorks API</a>
+        <a class="topic-link" href="creo-proe-automation.html" data-topic="creo-proe">Creo Pro/E Automation</a>
+        <a class="topic-link" href="autocad-automation.html" data-topic="autocad">AutoCAD Automation</a>
+        <a class="topic-link" href="cam.html" data-topic="cam">CAM</a>
+        <a class="topic-link" href="cae.html" data-topic="cae">CAE</a>
+        <a class="topic-link" href="DSA.html" data-topic="DSA">Data Structures & Algorithms</a>
+      </nav>
+    </aside>
+
+    <main class="site-main">
+      <section id="tab-contact" class="tab-panel is-visible">
+        <h1>Contact</h1>
+        <p class="prose" style="margin-top: 0.5rem;">Have questions, corrections, or topics you would like to see added? Send a message.</p>
+        <form id="contactForm" class="contact-form" novalidate>
+          <label>
+            Name
+            <input type="text" name="name" required placeholder="Your name">
+          </label>
+          <label>
+            Email
+            <input type="email" name="email" required placeholder="name@example.com">
+          </label>
+          <label>
+            Message
+            <textarea name="message" rows="4" required placeholder="Your message"></textarea>
+          </label>
+          <button type="submit" class="btn btn-primary">Send Message</button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>© 2026 CAx🧠Expert</p>
+      <nav aria-label="Footer">
+        <a href="index.html">Home</a>
+        <a href="interview.html">Interview</a>
+        <a href="terms.html">Terms</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/common.js"></script>
+</body>
+</html>

@@ -1,0 +1,744 @@
+[
+    {
+        "number": 1,
+        "question": "What is the primary interface used to connect to the SolidWorks application?",
+        "answer": "<p>The <strong>ISldWorks</strong> interface is the primary object in the SolidWorks API hierarchy.</p><ul><li>It represents the SolidWorks application itself.</li><li>It is used to open, create, and close documents.</li><li>It provides access to the active document via <code>IActiveDoc2</code>.</li><li>It allows developers to handle application-level events and access the <code>CommandManager</code>.</li></ul>",
+        "tags": [
+            "API Basics",
+            "ISldWorks"
+        ],
+        "companies": [
+            "Dassault Syst\u00e8mes",
+            "HCL",
+            "Geometric"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 2,
+        "question": "Explain the role of the ModelDoc2 interface.",
+        "answer": "<p>The <strong>IModelDoc2</strong> interface represents a SOLIDWORKS document (Part, Assembly, or Drawing).</p><p>It provides methods and properties to:</p><ul><li>Save, close, and rebuild documents.</li><li>Access specific managers like <code>SelectionManager</code>, <code>SketchManager</code>, and <code>ConfigurationManager</code>.</li><li>Handle document-level events.</li></ul><p>Specific document types can be accessed by casting <code>IModelDoc2</code> to <code>IPartDoc</code>, <code>IAssemblyDoc</code>, or <code>IDrawingDoc</code>.</p>",
+        "tags": [
+            "ModelDoc2",
+            "Document Management"
+        ],
+        "companies": [
+            "Infosys",
+            "TCS",
+            "AMC Bridge"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 3,
+        "question": "How do you traverse the FeatureManager design tree?",
+        "answer": "<p>Traversing the feature tree is done recursively starting from the first feature.</p><ol><li>Get the first feature using <code>IModelDoc2::FirstFeature()</code>.</li><li>Process the feature (e.g., check its name or type using <code>IFeature::GetTypeName2()</code>).</li><li>Get the next feature using <code>IFeature::GetNextFeature()</code>.</li><li>Loop until the next feature is <i>null</i>.</li></ol><p>To traverse sub-features, use <code>IFeature::GetFirstSubFeature()</code> and recursively iterate.</p>",
+        "tags": [
+            "FeatureManager",
+            "Traversal",
+            "Algorithm"
+        ],
+        "companies": [
+            "Wipro",
+            "Capgemini",
+            "L&T Technology Services"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 4,
+        "question": "What is the SelectionMgr and how is it used?",
+        "answer": "<p>The <strong>ISelectionMgr</strong> interface is used to access entities currently selected in the SOLIDWORKS user interface.</p><ul><li>Retrieve it using <code>IModelDoc2::SelectionManager</code>.</li><li>Count selected objects using <code>GetSelectedObjectCount2()</code>.</li><li>Retrieve a specific object using <code>GetSelectedObject6()</code>, which usually requires casting to the specific interface (e.g., <code>IFace2</code>, <code>IEdge</code>, <code>IFeature</code>).</li></ul>",
+        "tags": [
+            "SelectionMgr",
+            "UI Interaction"
+        ],
+        "companies": [
+            "AMC Bridge",
+            "Neilsoft"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 5,
+        "question": "How do you traverse assembly components recursively?",
+        "answer": "<p>Assembly traversal requires navigating the component hierarchy:</p><ol><li>Get the root component using <code>IAssemblyDoc::GetRootComponent3()</code>.</li><li>Get its children using <code>IComponent2::GetChildren()</code>, which returns an array of child components.</li><li>Iterate through the array and recursively call the traversal function for each child component.</li></ol><p><em>Note:</em> Suppressed components can be skipped or included based on the argument passed to <code>GetChildren()</code>.</p>",
+        "tags": [
+            "Assembly",
+            "Traversal",
+            "IComponent2"
+        ],
+        "companies": [
+            "Dassault Syst\u00e8mes",
+            "HCL"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 6,
+        "question": "What are the required methods to implement an ISwAddin?",
+        "answer": "<p>To create a SOLIDWORKS Add-in, a class must implement the <strong>ISwAddin</strong> interface, which requires two methods:</p><ul><li><code><strong>ConnectToSW(object ThisSW, int Cookie)</strong></code>: Called when the Add-in is loaded. It is used to cache the <code>ISldWorks</code> pointer, set up the CommandManager, add UI elements, and attach event handlers.</li><li><code><strong>DisconnectFromSW()</strong></code>: Called when the Add-in is unloaded. Used to release COM objects, remove UI elements, and detach event handlers to prevent memory leaks.</li></ul>",
+        "tags": [
+            "Add-in",
+            "ISwAddin",
+            "Architecture"
+        ],
+        "companies": [
+            "Geometric",
+            "TCS"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 7,
+        "question": "How do you create a custom PropertyManager Page (PMP)?",
+        "answer": "<p>Creating a PMP involves the <strong>IPropertyManagerPage2</strong> interface.</p><ol><li>Create the page using <code>ISldWorks::CreatePropertyManagerPage()</code>.</li><li>Implement the <code>IPropertyManagerPage2Handler9</code> interface to handle UI events (e.g., button clicks, selection changes).</li><li>Add groups and controls (buttons, checkboxes, selection boxes) using <code>IPropertyManagerPage2::AddGroupBox()</code> and <code>IPropertyManagerPageGroupBox::AddControl()</code>.</li><li>Display the page using <code>IPropertyManagerPage2::Show()</code>.</li></ol>",
+        "tags": [
+            "UI Customization",
+            "PropertyManagerPage"
+        ],
+        "companies": [
+            "L&T Technology Services",
+            "Capgemini"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 8,
+        "question": "What is the difference between early binding and late binding in SOLIDWORKS macros?",
+        "answer": "<p><strong>Early Binding:</strong> Requires adding a reference to the SOLIDWORKS type library during development. It provides IntelliSense, compile-time type checking, and better performance.</p><p><strong>Late Binding:</strong> Does not require referencing the type library at compile time. Objects are declared as generic types (e.g., <code>Object</code> in VBA/C#) and instantiated at runtime using <code>CreateObject()</code> or <code>Activator.CreateInstance()</code>. It is more flexible across different SOLIDWORKS versions but lacks compile-time checks.</p>",
+        "tags": [
+            "Binding",
+            "VBA",
+            "C#"
+        ],
+        "companies": [
+            "Wipro",
+            "Infosys"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 9,
+        "question": "Explain the difference between IBody2 and IComponent2.",
+        "answer": "<p><strong>IComponent2</strong> represents an instance of a part or sub-assembly within an assembly. It holds transform data (position/orientation) relative to the assembly.</p><p><strong>IBody2</strong> represents the actual topological geometry (solid, surface, or sheet body) consisting of faces, edges, and vertices.</p><p><em>Key workflow:</em> To get the geometry of an assembly component, you call <code>IComponent2::GetBody()</code> to retrieve the <code>IBody2</code> transformed into assembly space.</p>",
+        "tags": [
+            "Topology",
+            "Assembly",
+            "IBody2",
+            "IComponent2"
+        ],
+        "companies": [
+            "Dassault Syst\u00e8mes",
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 10,
+        "question": "What is the SolidWorks Document Manager (SwDocumentMgr) API?",
+        "answer": "<p>The <strong>SwDocumentMgr API</strong> is a standalone COM API that allows developers to access and manipulate SOLIDWORKS files (.sldprt, .sldasm, .slddrw) <em>without</em> having SOLIDWORKS installed or running.</p><ul><li>It is incredibly fast for reading custom properties, BOMs, and references.</li><li>It requires a separate license key provided by SOLIDWORKS.</li><li>It cannot manipulate geometry or create new features.</li></ul>",
+        "tags": [
+            "SwDocMgr",
+            "Performance",
+            "Metadata"
+        ],
+        "companies": [
+            "HCL",
+            "Neilsoft"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 11,
+        "question": "How do you extract custom properties from a ModelDoc2?",
+        "answer": "<p>Custom properties are accessed via the <strong>ICustomPropertyManager</strong> interface.</p><ol><li>Get the ModelDocExtension: <code>IModelDocExtension ext = model.Extension;</code></li><li>Get the CustomPropertyManager for a specific configuration (or empty string for custom info): <code>ICustomPropertyManager propMgr = ext.get_CustomPropertyManager(\"\");</code></li><li>Use <code>propMgr.Get5()</code> to read values, or <code>propMgr.Add3()</code> / <code>propMgr.Set2()</code> to write values.</li></ol>",
+        "tags": [
+            "Custom Properties",
+            "Metadata"
+        ],
+        "companies": [
+            "TCS",
+            "Geometric"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 12,
+        "question": "How does MathTransform work for component positioning?",
+        "answer": "<p>A <strong>IMathTransform</strong> object represents a 4x4 transformation matrix used to translate and rotate components in 3D space.</p><ul><li>Obtain a component's transform using <code>IComponent2::Transform2</code>.</li><li>The matrix includes a 3x3 rotation matrix, a 1x3 translation vector, and a scaling factor.</li><li>To move a component, you create a new <code>IMathTransform</code> using <code>IMathUtility</code>, apply translations/rotations, and set it using <code>IComponent2::Transform2</code>.</li></ul>",
+        "tags": [
+            "MathUtility",
+            "Transformation",
+            "Matrix"
+        ],
+        "companies": [
+            "AMC Bridge",
+            "Dassault Syst\u00e8mes"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 13,
+        "question": "What are Temporary Bodies and why are they useful?",
+        "answer": "<p><strong>Temporary Bodies</strong> are non-parametric, exact geometric bodies created strictly in memory using <code>IModeler</code>.</p><ul><li>They are created using methods like <code>IModeler::CreateSweeppedBody()</code> or <code>IModeler::CreateExtrudedBody()</code>.</li><li><strong>Use cases:</strong> Performing fast boolean operations (intersect, add, subtract) in the background without modifying the actual Feature tree, useful for interference detection, custom volume calculations, or visual previews.</li></ul>",
+        "tags": [
+            "Temporary Bodies",
+            "IModeler",
+            "Performance"
+        ],
+        "companies": [
+            "HCL",
+            "L&T Technology Services"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 14,
+        "question": "How do you release COM objects in C# to prevent memory leaks in SolidWorks?",
+        "answer": "<p>In .NET, the Garbage Collector handles memory, but SOLIDWORKS uses unmanaged COM objects. Failing to release them keeps the <code>SLDWORKS.exe</code> process running in the background.</p><p>Best practices:</p><ul><li>Use <code>System.Runtime.InteropServices.Marshal.ReleaseComObject(obj)</code> on SolidWorks objects when done.</li><li>Set the reference to <code>null</code>.</li><li>Avoid chaining COM calls (e.g., avoid <code>swApp.ActiveDoc.Extension.CustomPropertyManager</code>) as it creates hidden COM references. Assign intermediate objects to variables and release them.</li></ul>",
+        "tags": [
+            "C#",
+            "COM",
+            "Memory Management"
+        ],
+        "companies": [
+            "TCS",
+            "Capgemini",
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 15,
+        "question": "How do you attach event listeners (Notifications) in SOLIDWORKS API?",
+        "answer": "<p>Event listeners (Notifications) allow an add-in to respond to user actions like saving a document or adding a component.</p><ol><li>Cast the object (e.g., <code>SldWorks</code> or <code>ModelDoc2</code>) to its events interface (e.g., <code>DSldWorksEvents_Event</code>, <code>DPartDocEvents_Event</code>).</li><li>Subscribe to the event using the <code>+=</code> operator in C#.</li><li>Example: <code>swDoc.FileSaveNotify += new DPartDocEvents_FileSaveNotifyEventHandler(OnSave);</code></li></ol><p>Always unsubscribe (<code>-=</code>) in the <code>DisconnectFromSW</code> method to prevent memory leaks.</p>",
+        "tags": [
+            "Events",
+            "Notifications",
+            "Delegates"
+        ],
+        "companies": [
+            "Infosys",
+            "Wipro"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 16,
+        "question": "Explain how to calculate mass properties of a part via API.",
+        "answer": "<p>Mass properties are calculated using the <strong>IMassProperty</strong> interface.</p><ol><li>Get the ModelDocExtension: <code>IModelDocExtension ext = model.Extension;</code></li><li>Create the MassProperty object: <code>IMassProperty massProp = ext.CreateMassProperty();</code></li><li>(Optional) Set specific bodies using <code>massProp.AddBodies()</code> if you don't want the whole part.</li><li>Retrieve values: <code>massProp.Mass</code>, <code>massProp.CenterOfMass</code>, <code>massProp.Volume</code>, etc.</li></ol>",
+        "tags": [
+            "Mass Properties",
+            "IMassProperty"
+        ],
+        "companies": [
+            "Geometric",
+            "L&T Technology Services"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 17,
+        "question": "How do you extract the bounding box of a part or assembly?",
+        "answer": "<p>You can extract the bounding box using the <code>IModelDocExtension::GetBoundingBox()</code> or <code>IPartDoc::GetPartBox()</code> methods.</p><p>Alternatively, for more precise bounding boxes on specific bodies, use <code>IBody2::GetBodyBox()</code>.</p><p>These methods return an array of 6 doubles representing the X, Y, Z coordinates of the minimum and maximum points of the bounding box.</p>",
+        "tags": [
+            "Bounding Box",
+            "Geometry",
+            "Algorithm"
+        ],
+        "companies": [
+            "Dassault Syst\u00e8mes",
+            "AMC Bridge"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 18,
+        "question": "What is the IAttribute interface used for?",
+        "answer": "<p><strong>IAttribute</strong> is used to attach invisible, custom meta-data to specific topological entities (Faces, Edges, Vertices) or Features within a SOLIDWORKS model.</p><ul><li>Unlike Custom Properties (which are document-level or configuration-level), Attributes stick to specific geometry.</li><li>Requires defining an <code>IAttributeDef</code> (Attribute Definition) first.</li><li>Crucial for CAM/CAE developers to track machined faces or mesh constraints even if the model geometry changes.</li></ul>",
+        "tags": [
+            "Attributes",
+            "Metadata",
+            "Topology"
+        ],
+        "companies": [
+            "HCL",
+            "TCS"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 19,
+        "question": "How do you handle multi-threading with the SOLIDWORKS API?",
+        "answer": "<p>The SOLIDWORKS API is <strong>Single-Threaded Apartment (STA)</strong> based and is <strong>not thread-safe</strong>.</p><ul><li>You cannot call SOLIDWORKS API methods directly from a background thread (e.g., <code>Task.Run</code>).</li><li>Doing so will result in COM exceptions (RPC_E_WRONG_THREAD).</li><li><strong>Solution:</strong> Perform heavy non-API computations on background threads, and use <code>Control.Invoke</code> or <code>Dispatcher.Invoke</code> to marshal API calls back to the main UI thread.</li></ul>",
+        "tags": [
+            "Multi-threading",
+            "COM",
+            "Architecture"
+        ],
+        "companies": [
+            "AMC Bridge",
+            "Capgemini"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 20,
+        "question": "How do you create a sketch and add a line using the API?",
+        "answer": "<p>To automate sketch creation:</p><ol><li>Select a plane using <code>IModelDocExtension::SelectByID2()</code>.</li><li>Insert a new sketch using <code>ISketchManager::InsertSketch()</code>.</li><li>Create geometry: <code>ISketchManager::CreateLine(x1, y1, z1, x2, y2, z2)</code>.</li><li>Exit the sketch using <code>ISketchManager::InsertSketch(true)</code>.</li></ol>",
+        "tags": [
+            "SketchManager",
+            "Geometry Creation"
+        ],
+        "companies": [
+            "Neilsoft",
+            "Geometric"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 21,
+        "question": "Explain the use of Pack and Go API.",
+        "answer": "<p>The <strong>Pack and Go API</strong> is used to gather a file and all its referenced documents (parts, assemblies, drawings, decals) and save them to a new folder or zip file.</p><ol><li>Access it via <code>IModelDocExtension::GetPackAndGo()</code>.</li><li>Use <code>IPackAndGo::GetDocumentNames()</code> to see what will be packed.</li><li>Modify output paths using <code>IPackAndGo::SetSaveToName()</code>.</li><li>Execute using <code>IModelDocExtension::SavePackAndGo()</code>.</li></ol>",
+        "tags": [
+            "Pack and Go",
+            "File Management"
+        ],
+        "companies": [
+            "Wipro",
+            "Infosys"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 22,
+        "question": "How do you export a model to STEP format via API?",
+        "answer": "<p>Exporting to neutral formats like STEP or IGES is done using the standard Save As method.</p><ol><li>Use <code>IModelDocExtension::SaveAs3()</code> or <code>IModelDocExtension::SaveAs()</code>.</li><li>Provide the file path with the <code>.step</code> or <code>.stp</code> extension.</li><li>SOLIDWORKS automatically determines the export translator based on the file extension.</li><li>Use <code>ISldWorks::SetUserPreferenceIntegerValue</code> to set specific STEP export options (like AP203 vs AP214) before saving.</li></ol>",
+        "tags": [
+            "Export",
+            "STEP",
+            "SaveAs"
+        ],
+        "companies": [
+            "L&T Technology Services",
+            "TCS"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 23,
+        "question": "What is Ray Intersections and how is it used?",
+        "answer": "<p>The <strong>RayIntersections</strong> API (<code>IModelDoc2::RayIntersections</code> or <code>IModeler::GetRayIntersections2</code>) fires a mathematical ray (vector) from a point into the 3D model and returns the hit points, faces, and bodies.</p><ul><li><strong>Use cases:</strong> Thickness analysis, clearance checking, extracting surface normals at a point, or simulating optical/laser sensors.</li><li>Returns an array of intersected entities and distance parameters.</li></ul>",
+        "tags": [
+            "Ray Tracing",
+            "Algorithm",
+            "Geometry"
+        ],
+        "companies": [
+            "Dassault Syst\u00e8mes",
+            "AMC Bridge"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 24,
+        "question": "How do you add a Mate between two components in an Assembly?",
+        "answer": "<p>Adding mates programmatically requires the <strong>IAssemblyDoc::AddMate5</strong> method.</p><ol><li>Select the entities (faces, edges, planes) to mate using <code>IModelDocExtension::SelectByID2()</code> with <code>Mark</code> values to differentiate selection 1 and 2.</li><li>Call <code>AddMate5()</code> passing the mate type (e.g., Coincident, Concentric), alignment, distance/angle values, and whether it should flip.</li><li>Clear selections using <code>IModelDoc2::ClearSelection2()</code>.</li></ol>",
+        "tags": [
+            "Assembly",
+            "Mates",
+            "Automation"
+        ],
+        "companies": [
+            "Geometric",
+            "HCL"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 25,
+        "question": "What is the SOLIDWORKS PDM API and what is IEdmVault?",
+        "answer": "<p>The <strong>PDM Professional API</strong> is separate from the core SolidWorks API. It is used to automate data management tasks.</p><ul><li><strong>IEdmVault</strong> (typically <code>IEdmVault5</code> or <code>IEdmVault21</code>) is the root interface representing the vault connection.</li><li>It is used to login (<code>LoginAuto</code>), search files (<code>IEdmSearch</code>), transition workflows (<code>IEdmFile::ChangeState</code>), and check-in/check-out documents.</li></ul>",
+        "tags": [
+            "PDM API",
+            "IEdmVault",
+            "Data Management"
+        ],
+        "companies": [
+            "Capgemini",
+            "Neilsoft"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 26,
+        "question": "How do you extract triangulation/tessellation data from a SolidWorks model?",
+        "answer": "<p>Tessellation (mesh) data is critical for graphics, WebGL exports, or finite element meshing.</p><ul><li>Use <code>IPartDoc::GetTessTriangles()</code> or <code>IFace2::GetTessTriangles()</code>.</li><li>It returns a flat array of floats representing normal vectors and vertex coordinates <code>[Nx, Ny, Nz, v1x, v1y, v1z, v2x, v2y, v2z, v3x, v3y, v3z]</code>.</li><li>For assemblies, you must apply the component's <code>MathTransform</code> to map local vertices to global assembly coordinates.</li></ul>",
+        "tags": [
+            "Tessellation",
+            "Mesh",
+            "Graphics"
+        ],
+        "companies": [
+            "AMC Bridge",
+            "3DPLM"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 27,
+        "question": "How do you suppress or unsuppress a component in an assembly?",
+        "answer": "<p>Use the <code>IComponent2::SetSuppression2()</code> method.</p><ul><li>Pass the state: <code>swComponentSuppressionState_e.swComponentSuppressed</code>, <code>swComponentResolved</code>, or <code>swComponentLightweight</code>.</li><li>This method can be applied to an array of components using <code>IAssemblyDoc::SetComponentState()</code> for better performance when modifying multiple parts.</li></ul>",
+        "tags": [
+            "Assembly",
+            "States",
+            "IComponent2"
+        ],
+        "companies": [
+            "Wipro",
+            "TCS"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 28,
+        "question": "What is the purpose of the IEquationMgr interface?",
+        "answer": "<p>The <strong>IEquationMgr</strong> interface manages equations, global variables, and linked dimensions in a document.</p><ul><li>Accessed via <code>IModelDoc2::GetEquationMgr()</code>.</li><li>Use <code>GetCount()</code> to loop through equations.</li><li>Use <code>SetEquationAndConfigurationOption()</code> to add or modify an equation.</li><li>Call <code>EvaluateAll()</code> after changes to update the model.</li></ul>",
+        "tags": [
+            "Equations",
+            "Parametric",
+            "Design"
+        ],
+        "companies": [
+            "Infosys",
+            "Geometric"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 29,
+        "question": "What is a Macro Feature?",
+        "answer": "<p>A <strong>Macro Feature</strong> is a custom feature in the FeatureManager tree whose behavior (rebuild, edit, security) is driven by custom API code.</p><ul><li>Inserted using <code>IFeatureManager::InsertMacroFeature3()</code>.</li><li>It allows developers to embed custom parametric logic (like specialized CAM toolpaths or complex algorithmic geometry) that looks and behaves like a native SolidWorks feature to the user.</li></ul>",
+        "tags": [
+            "Macro Feature",
+            "Advanced API"
+        ],
+        "companies": [
+            "Dassault Syst\u00e8mes",
+            "HCL"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 30,
+        "question": "How can you speed up a macro that iterates through thousands of faces?",
+        "answer": "<p>Performance optimization techniques include:</p><ul><li>Disabling the graphics update: <code>IModelView::EnableGraphicsUpdate = false</code>.</li><li>Pausing the Feature Tree update: <code>IFeatureManager::EnableFeatureTree = false</code>.</li><li>Using early binding instead of late binding.</li><li>Extracting data in bulk (e.g., using <code>IFace2::GetTessTriangles()</code> instead of iterating point-by-point).</li><li>Running SOLIDWORKS in invisible mode if it's a batch process.</li></ul>",
+        "tags": [
+            "Performance",
+            "Optimization"
+        ],
+        "companies": [
+            "AMC Bridge",
+            "L&T Technology Services"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 31,
+        "question": "How do you determine if a document has unsaved changes?",
+        "answer": "<p>Use the <code>IModelDoc2::GetSaveFlag()</code> method. It returns <code>true</code> if the document has been modified since it was last saved (the \"dirty\" flag is set), and <code>false</code> otherwise.</p>",
+        "tags": [
+            "Document Management",
+            "Utility"
+        ],
+        "companies": [
+            "Neilsoft",
+            "Wipro"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 32,
+        "question": "Explain how to extract Bill of Materials (BOM) data from a Drawing.",
+        "answer": "<p>To extract BOM data:</p><ol><li>Find the BOM feature in the Feature tree using <code>IFeature::GetTypeName2()</code> == \"BomFeat\".</li><li>Get the specific BOM feature object: <code>IBomFeature</code>.</li><li>Get the BOM table annotation: <code>IBomTableAnnotation</code>.</li><li>Iterate through rows and columns using <code>ITableAnnotation::GetText(row, col)</code>.</li></ol>",
+        "tags": [
+            "Drawing",
+            "BOM",
+            "ITableAnnotation"
+        ],
+        "companies": [
+            "Capgemini",
+            "TCS"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 33,
+        "question": "What is the CommandManager and how do you add a custom toolbar?",
+        "answer": "<p>The <strong>CommandManager</strong> manages Add-in menus, toolbars, and the CommandManager tabs (ribbon).</p><ol><li>Get the manager: <code>ISldWorks::GetCommandManager()</code>.</li><li>Create a command group: <code>ICommandManager::CreateCommandGroup2()</code>.</li><li>Add buttons to the group, assigning callbacks to Add-in methods.</li><li>Activate the command group. The SolidWorks UI will automatically generate the toolbar and menu items based on the group definitions.</li></ol>",
+        "tags": [
+            "UI Customization",
+            "CommandManager",
+            "Ribbon"
+        ],
+        "companies": [
+            "Geometric",
+            "Infosys"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 34,
+        "question": "How do you detect Interference between assembly components via API?",
+        "answer": "<p>Use the <strong>IInterferenceDetectionMgr</strong> interface.</p><ol><li>Access it via <code>IAssemblyDoc::InterferenceDetectionManager</code>.</li><li>Specify components to check or check the whole assembly.</li><li>Set options like treating coincident faces as interference.</li><li>Run the check: <code>IInterferenceDetectionMgr::GetInterferences()</code>.</li><li>Iterate through the returned <code>IInterference</code> objects to get volume and intersecting components.</li></ol>",
+        "tags": [
+            "Assembly",
+            "Interference",
+            "CAE"
+        ],
+        "companies": [
+            "AMC Bridge",
+            "Dassault Syst\u00e8mes"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 35,
+        "question": "What is the difference between GetFirstFace() and GetFaces()?",
+        "answer": "<p>Both methods belong to the <code>IBody2</code> interface.</p><ul><li><code>GetFirstFace()</code>: Returns a single <code>IFace2</code> object. You must then use a <code>while</code> loop with <code>IFace2::GetNextFace()</code> to traverse the linked list of faces. Slower but consumes less initial memory.</li><li><code>GetFaces()</code>: Returns a flat, zero-indexed Array (or object array in C#) containing all <code>IFace2</code> objects at once. Generally preferred in modern C# for cleaner <code>foreach</code> loops and faster execution.</li></ul>",
+        "tags": [
+            "Topology",
+            "IFace2",
+            "Iteration"
+        ],
+        "companies": [
+            "HCL",
+            "L&T Technology Services"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 36,
+        "question": "How do you convert a 2D sketch coordinate to 3D model space?",
+        "answer": "<p>Sketch points are defined in the 2D local space of the sketch.</p><ol><li>Get the sketch transform using <code>ISketch::ModelToSketchTransform</code>.</li><li>Invert the transform using <code>IMathTransform::Inverse()</code> to get Sketch-To-Model transform.</li><li>Create an <code>IMathPoint</code> using the 2D sketch coordinates (X, Y, 0).</li><li>Multiply the math point by the inverted transform using <code>IMathPoint::MultiplyTransform()</code> to get 3D global coordinates.</li></ol>",
+        "tags": [
+            "MathTransform",
+            "Sketch",
+            "Geometry"
+        ],
+        "companies": [
+            "3DPLM",
+            "AMC Bridge"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 37,
+        "question": "What is IEnvironment and how is it used?",
+        "answer": "<p>The <strong>IEnvironment</strong> interface provides access to the computer's environment paths and SolidWorks installation paths.</p><ul><li>Retrieve using <code>ISldWorks::GetEnvironment()</code>.</li><li>Useful for finding the executable path, default templates path, or checking system directories without relying on standard .NET <code>Environment</code> variables which might lack SW-specific paths.</li></ul>",
+        "tags": [
+            "Utility",
+            "System"
+        ],
+        "companies": [
+            "Neilsoft",
+            "Wipro"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 38,
+        "question": "How do you create an Extrude feature programmatically?",
+        "answer": "<p>Use the <code>IFeatureManager::FeatureExtrusion3()</code> method.</p><ol><li>Select the sketch you want to extrude.</li><li>Call <code>FeatureExtrusion3</code> passing numerous boolean and double parameters defining: direction, blind vs through-all, depth, draft angle, and merge boolean flag.</li><li>It returns an <code>IFeature</code> object representing the new Boss-Extrude.</li></ol>",
+        "tags": [
+            "FeatureManager",
+            "Modeling",
+            "Extrude"
+        ],
+        "companies": [
+            "Geometric",
+            "TCS"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 39,
+        "question": "Explain how to modify a dimension value using the API.",
+        "answer": "<p>To modify a dimension:</p><ol><li>Select the dimension or access it via <code>IModelDoc2::Parameter(\"D1@Sketch1\")</code>. This returns a <code>IDimension</code> object.</li><li>Set the new value (in meters) using <code>IDimension::SystemValue = newValue</code>.</li><li>Force the model to rebuild to apply the changes using <code>IModelDoc2::EditRebuild3()</code>.</li></ol>",
+        "tags": [
+            "Parametric",
+            "IDimension",
+            "Update"
+        ],
+        "companies": [
+            "Infosys",
+            "Capgemini"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 40,
+        "question": "How do you access sheet metal specific properties like bend allowance?",
+        "answer": "<p>You must access the specific sheet metal features.</p><ol><li>Find the \"SheetMetal\" feature in the tree.</li><li>Get its specific feature data object using <code>IFeature::GetDefinition()</code>.</li><li>Cast it to <code>ISheetMetalFeatureData</code>.</li><li>Access it using <code>AccessSelections()</code>, modify the custom bend allowance, k-factor, or thickness, and then call <code>ModifyDefinition()</code>.</li></ol>",
+        "tags": [
+            "Sheet Metal",
+            "FeatureData",
+            "CAM"
+        ],
+        "companies": [
+            "AMC Bridge",
+            "Dassault Syst\u00e8mes"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 41,
+        "question": "What is the purpose of SafeEntities in SolidWorks API?",
+        "answer": "<p>Standard topological objects (like <code>IFace2</code> or <code>IEdge</code>) become invalid (null reference) as soon as the model is rebuilt because the geometry is regenerated.</p><p><strong>SafeEntities</strong> (<code>IEntity::GetSafeEntity()</code>) create a persistent pointer to that entity that survives a rebuild. This is critical when your Add-in holds onto face selections while executing a feature creation that triggers a rebuild.</p>",
+        "tags": [
+            "IEntity",
+            "Memory",
+            "Topology"
+        ],
+        "companies": [
+            "HCL",
+            "3DPLM"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 42,
+        "question": "How do you extract the flat pattern of a sheet metal part programmatically?",
+        "answer": "<p>To export a flat pattern to DXF/DWG without creating a drawing:</p><ol><li>Use <code>IPartDoc::ExportToDWG2()</code>.</li><li>Pass the <code>Action</code> parameter as <code>1</code> (Export flat pattern).</li><li>Configure the export options to include bend lines, bounding box, or sketches.</li><li>Specify the output file path. SolidWorks flattens the part in the background and exports it.</li></ol>",
+        "tags": [
+            "Sheet Metal",
+            "Export",
+            "DXF"
+        ],
+        "companies": [
+            "L&T Technology Services",
+            "Neilsoft"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 43,
+        "question": "How do you handle SolidWorks API version compatibility?",
+        "answer": "<p>Best practices for version compatibility:</p><ul><li>Develop against the lowest SolidWorks version you intend to support (e.g., SW 2020 interop DLLs). The add-in will generally be forward-compatible with newer versions (2021, 2022).</li><li>Avoid using deprecated methods; check the API help for methods ending in higher numbers (e.g., use <code>SelectByID2</code> over <code>SelectByID</code>).</li><li>Use Late Binding if you must write a standalone executable that connects to whatever version of SolidWorks the user currently has open.</li></ul>",
+        "tags": [
+            "Architecture",
+            "Deployment",
+            "Versioning"
+        ],
+        "companies": [
+            "TCS",
+            "Wipro"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 44,
+        "question": "What is the IDisplayDimension interface?",
+        "answer": "<p><strong>IDisplayDimension</strong> represents the visual representation of a dimension in a drawing or the 3D graphics area.</p><ul><li>While <code>IDimension</code> handles the actual mathematical value and parametric link, <code>IDisplayDimension</code> controls the text location, font, arrows, and tolerance display.</li><li>Accessed via <code>IAnnotation::GetSpecificAnnotation()</code>.</li></ul>",
+        "tags": [
+            "Drawing",
+            "Annotations",
+            "UI"
+        ],
+        "companies": [
+            "Geometric",
+            "Capgemini"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 45,
+        "question": "How do you create a custom macro button on the SolidWorks toolbar manually vs API?",
+        "answer": "<p><strong>Manually:</strong> Go to Tools > Customize > Commands tab > Macro. Drag the New Macro Button to a toolbar. Assign the macro path, icon, and method.</p><p><strong>Via API:</strong> An Add-in uses <code>ICommandManager::CreateCommandGroup2</code> and <code>AddCommandItem2</code>, passing the image paths, tooltips, and the Add-in callback function name to programmatically insert the button.</p>",
+        "tags": [
+            "Macros",
+            "UI",
+            "CommandManager"
+        ],
+        "companies": [
+            "Infosys",
+            "HCL"
+        ],
+        "role_level": "Jr"
+    },
+    {
+        "number": 46,
+        "question": "How do you retrieve the exact coordinates of a vertex?",
+        "answer": "<p>To get vertex coordinates:</p><ol><li>Get the <code>IVertex</code> object from an edge or face.</li><li>Call <code>IVertex::GetPoint()</code>.</li><li>It returns an array of three doubles <code>[x, y, z]</code> in meters.</li><li>If the vertex is part of an assembly component, multiply this point by the component's <code>IMathTransform</code> to get global assembly coordinates.</li></ol>",
+        "tags": [
+            "Topology",
+            "IVertex",
+            "Geometry"
+        ],
+        "companies": [
+            "AMC Bridge",
+            "Dassault Syst\u00e8mes"
+        ],
+        "role_level": "Mid"
+    },
+    {
+        "number": 47,
+        "question": "Explain the concept of IFeature::GetDefinition().",
+        "answer": "<p><code>GetDefinition()</code> returns the specific <strong>Feature Data</strong> object for a feature (e.g., <code>IExtrudeFeatureData2</code>, <code>IChamferFeatureData</code>).</p><p>This allows you to read or modify the exact parameters used to build that feature (depth, selected edges, draft angle). To change values, you must bracket the changes with <code>AccessSelections()</code> and <code>ModifyDefinition()</code>.</p>",
+        "tags": [
+            "FeatureManager",
+            "FeatureData",
+            "Parametric"
+        ],
+        "companies": [
+            "TCS",
+            "L&T Technology Services"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 48,
+        "question": "What is the GetCorresponding API method used for?",
+        "answer": "<p>When traversing an assembly, a component holds a pointer to its underlying Part document (the reference model).</p><p>If you have an <code>IFace2</code> from the reference Part document, but you need the instance of that face in the Assembly (to apply a mate or highlight it), you use <code>IModelDocExtension::GetCorresponding()</code> or <code>IComponent2::GetCorresponding()</code> to map the reference entity to the assembly instance entity.</p>",
+        "tags": [
+            "Assembly",
+            "Topology",
+            "Mapping"
+        ],
+        "companies": [
+            "AMC Bridge",
+            "3DPLM"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 49,
+        "question": "How do you implement Undo/Redo support for your Add-in actions?",
+        "answer": "<p>SolidWorks API provides the <code>IModelDocExtension::StartRecordingUndoObject()</code> and <code>FinishRecordingUndoObject()</code> methods.</p><ul><li>Wrap your API operations between these two calls.</li><li>Provide a string name for the action.</li><li>This groups all the API modifications into a single undo step in the SolidWorks Undo list, allowing the user to press Ctrl+Z to revert the macro's changes cleanly.</li></ul>",
+        "tags": [
+            "Architecture",
+            "Undo",
+            "UX"
+        ],
+        "companies": [
+            "Dassault Syst\u00e8mes",
+            "Geometric"
+        ],
+        "role_level": "Sr"
+    },
+    {
+        "number": 50,
+        "question": "How can you programmatically close all open documents without saving?",
+        "answer": "<p>Use the <code>ISldWorks::CloseAllDocuments()</code> method. To ensure it closes without prompting the user to save, pass <code>true</code> to the method argument.</p><p>Alternatively, loop through visible documents using <code>ISldWorks::GetFirstDocument()</code> and <code>ISldWorks::CloseDoc()</code>.</p>",
+        "tags": [
+            "Document Management",
+            "Utility"
+        ],
+        "companies": [
+            "Wipro",
+            "Infosys"
+        ],
+        "role_level": "Jr"
+    }
+]

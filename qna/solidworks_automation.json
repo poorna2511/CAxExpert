@@ -1,0 +1,836 @@
+[
+  {
+    "number": 1,
+    "question": "What is the SolidWorks API, what underlying architecture does it rely on, and what languages are supported?",
+    "answer": "<p>The <strong>SolidWorks API</strong> (Application Programming Interface) is a COM-based interface that exposes internal SolidWorks objects, methods, properties, and events to external software.</p><ul><li><strong>Core Architecture:</strong> Built on Microsoft's <strong>Component Object Model (COM)</strong> architecture. All SolidWorks objects inherit from COM dispatch interfaces.</li><li><strong>Execution Model:</strong> Follows a <strong>Single-Threaded Apartment (STA)</strong> model, meaning all API calls that interact with the CAD session must run on the primary UI thread.</li><li><strong>Supported Languages:</strong> C#, VB.NET, C++ (native COM/ATL), and VBA (Visual Basic for Applications). External scripts can also communicate via COM bridges using Python (via <code>pywin32</code>).</li></ul>",
+    "tags": [
+      "Architecture",
+      "COM",
+      "Basics",
+      ".NET"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "HCLTech",
+      "Tata Technologies"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 2,
+    "question": "What is the difference between Early Binding and Late Binding in SolidWorks API automation?",
+    "answer": "<p>Binding refers to how method calls and property access are mapped to the SolidWorks COM objects at compile time versus runtime.</p><table border=\"1\" cellpadding=\"6\" style=\"border-collapse: collapse; width: 100%;\"><thead><tr style=\"background-color: #f2f2f2;\"><th>Feature</th><th>Early Binding</th><th>Late Binding</th></tr></thead><tbody><tr><td><strong>Type Resolution</strong></td><td>Compile time (requires direct reference to interop DLLs)</td><td>Runtime (uses <code>CreateObject</code> / dynamic dispatch)</td></tr><tr><td><strong>Performance</strong></td><td><strong>Fast</strong>: Direct vtable function calls</td><td><strong>Slower</strong>: Overhead of <code>IDispatch::GetIDsOfNames</code> and <code>Invoke</code></td></tr><tr><td><strong>IntelliSense & Safety</strong></td><td>Full IntelliSense, strict type safety, compile-time error detection</td><td>No IntelliSense, errors surface only at runtime</td></tr><tr><td><strong>Version Compatibility</strong></td><td>Bound to referenced version; requires compatible interops</td><td>More resilient to minor version shifts across installations</td></tr></tbody></table><p><strong>Recommendation:</strong> Always use <strong>Early Binding</strong> for enterprise add-ins and standalone automation tools written in C# or VB.NET.</p>",
+    "tags": [
+      "C#",
+      "COM",
+      "Performance",
+      "Interop"
+    ],
+    "companies": [
+      "Capgemini",
+      "Quest Global",
+      "Tata Technologies"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 3,
+    "question": "What is the difference between a Standalone Executable (.exe) and an In-Process SolidWorks Add-in (.dll)?",
+    "answer": "<p>SolidWorks customization typically falls into two deployment architectures:</p><ul><li><strong>In-Process Add-in (DLL):</strong> Runs inside the <code>SLDWORKS.exe</code> memory space. It implements <code>ISwAddin</code>, hooks directly into the CommandManager, registers custom menus/toolbars, responds instantly to document events, and offers maximum execution speed without inter-process IPC overhead.</li><li><strong>Standalone Application (EXE):</strong> Runs as a distinct external Windows process. It attaches to or starts SolidWorks via COM (<code>Activator.CreateInstance</code> or <code>Marshal.GetActiveObject</code>). Useful for scheduled batch converters, ERP sync agents, and background queue workers.</li></ul><p><strong>Key Tradeoff:</strong> Standalone apps suffer slight IPC marshaling latency across COM boundaries, whereas Add-ins have zero IPC latency but can crash the entire CAD session if unhandled exceptions occur.</p>",
+    "tags": [
+      "Add-in",
+      "Architecture",
+      "COM",
+      "Process"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Cummins",
+      "Boeing"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 4,
+    "question": "Explain the role of the ISwAddin interface and its mandatory lifecycle methods.",
+    "answer": "<p>The <code>ISwAddin</code> interface (from <code>SolidWorks.Interop.swpublished</code>) is the core contract required by SolidWorks to recognize, load, and unload a .NET class library as an in-process Add-in.</p><p>It defines two required lifecycle methods:</p><ol><li><code><strong>ConnectToSW(object ThisSW, int Cookie)</strong></code>: Invoked when the add-in is loaded. Here, you cast <code>ThisSW</code> to <code>ISldWorks</code>, cache the session pointer and cookie ID, instantiate UI controls via <code>ICommandManager</code>, and attach document event listeners. Return <code>true</code> to signal successful initialization.</li><li><code><strong>DisconnectFromSW()</strong></code>: Invoked when the add-in is unloaded or SolidWorks closes. Here, you must tear down command tabs, remove UI toolbars, unhook all event handlers, and invoke <code>Marshal.ReleaseComObject</code> on COM instances to prevent dangling memory leaks.</li></ol>",
+    "tags": [
+      "ISwAddin",
+      "Add-in",
+      "Lifecycle",
+      "C#"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "HCLTech",
+      "Wipro"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 5,
+    "question": "How do you connect to an active SolidWorks session or launch a new instance using C#?",
+    "answer": "<p>Depending on whether SolidWorks is currently running, you use either <code>Marshal.GetActiveObject</code> (or .NET Core/5+ equivalent) or <code>Activator.CreateInstance</code>.</p><pre><code>// Connect to existing instance or create a new one\nISldWorks swApp;\ntry {\n    swApp = (ISldWorks)Marshal.GetActiveObject(\"SldWorks.Application\");\n} catch (COMException) {\n    Type swType = Type.GetTypeFromProgID(\"SldWorks.Application\");\n    swApp = (ISldWorks)Activator.CreateInstance(swType);\n    swApp.Visible = true;\n}</code></pre><p><strong>Important Note:</strong> In .NET Core / .NET 6+, <code>Marshal.GetActiveObject</code> was removed; developers must either pinvoke <code>oleaut32.dll GetActiveObject</code> via custom interop or use the Running Object Table (ROT).</p>",
+    "tags": [
+      "C#",
+      "Automation",
+      "COM",
+      "Process"
+    ],
+    "companies": [
+      "Quest Global",
+      "Collins Aerospace",
+      "L&T Technology Services"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 6,
+    "question": "Explain the SolidWorks Document Object Model hierarchy (ISldWorks, IModelDoc2, IPartDoc, etc.).",
+    "answer": "<p>The SolidWorks object model follows a strict parent-child tree hierarchy:</p><ul><li><code><strong>ISldWorks</strong></code>: The root application object representing the running CAD session. Controls global settings, file opening/creation, licensing, and document collections.</li><li><code><strong>IModelDoc2</strong></code>: The generic document interface inherited by all 3 document types. Contains shared logic like configurations, selection manager, custom properties, and rebuild actions.</li><li><code><strong>IPartDoc</strong></code>, <code><strong>IAssemblyDoc</strong></code>, <code><strong>IDrawingDoc</strong></code>: Type-specific interfaces cast from <code>IModelDoc2</code> based on <code>IModelDoc2.GetType()</code>:<ul><li><code>swDocPART (1)</code> &rarr; cast to <code>IPartDoc</code></li><li><code>swDocASSEMBLY (2)</code> &rarr; cast to <code>IAssemblyDoc</code></li><li><code>swDocDRAWING (3)</code> &rarr; cast to <code>IDrawingDoc</code></li></ul></li></ul>",
+    "tags": [
+      "Object Model",
+      "IModelDoc2",
+      "Basics"
+    ],
+    "companies": [
+      "Tata Technologies",
+      "Cyient",
+      "HCLTech"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 7,
+    "question": "Why is COM reference counting critical in .NET SolidWorks development, and how do you handle Marshal.ReleaseComObject?",
+    "answer": "<p>The .NET Common Language Runtime (CLR) wraps unmanaged COM pointers in <strong>Runtime Callable Wrappers (RCW)</strong>. The .NET Garbage Collector is unaware of unmanaged COM memory pressure.</p><p><strong>The Danger:</strong> If references to SolidWorks objects (e.g. <code>IModelDoc2</code>, <code>ISelectionMgr</code>, <code>IFeature</code>) are held by an RCW without explicit release, SolidWorks cannot unload files from memory, locks files on disk, or continues running in Task Manager as a ghost process after closing.</p><p><strong>Best Practice:</strong></p><ol><li>Explicitly call <code>Marshal.ReleaseComObject(obj)</code> or <code>Marshal.FinalReleaseComObject(obj)</code> in a <code>finally</code> block for long-running batch loops.</li><li>Avoid the \"two-dot rule\" in COM calls (e.g., avoid <code>swApp.ActiveDoc.SelectionManager.GetSelectedObject6(...)</code> because the intermediate wrapper becomes orphaned). Assign each to an intermediate variable and release it.</li></ol>",
+    "tags": [
+      "Memory Management",
+      "COM",
+      "Garbage Collection",
+      "C#"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Tesla",
+      "Boeing"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 8,
+    "question": "How do you traverse features in a Part or Assembly document?",
+    "answer": "<p>Feature traversal can be done using the linked list exposed by <code>IModelDoc2</code> via <code>IFeature.GetNextFeature()</code> or using <code>FeatureManager.GetFeatures()</code>.</p><p><strong>Linked List Traversal Example:</strong></p><pre><code>IFeature swFeat = (IFeature)swModel.FirstFeature();\nwhile (swFeat != null) {\n    string featName = swFeat.Name;\n    string featType = swFeat.GetTypeName2();\n    \n    // Traverse sub-features (e.g., sketch under an extrusion)\n    IFeature swSubFeat = (IFeature)swFeat.GetFirstSubFeature();\n    while (swSubFeat != null) {\n        // Process sub-feature...\n        swSubFeat = (IFeature)swSubFeat.GetNextSubFeature();\n    }\n    \n    swFeat = (IFeature)swFeat.GetNextFeature();\n}</code></pre><p><strong>Important:</strong> Always check for sub-features if you need access to underlying sketches, bend lines, or cosmetic threads.</p>",
+    "tags": [
+      "IFeature",
+      "Traversal",
+      "Part",
+      "Assembly"
+    ],
+    "companies": [
+      "HCLTech",
+      "Tata Technologies",
+      "Cummins"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 9,
+    "question": "What is the SelectionManager, and how do you extract selected objects and selection marks?",
+    "answer": "<p>The <code>ISelectionMgr</code> interface accesses items currently selected by the user or programmatically in the active document.</p><ul><li><strong>Retrieval:</strong> <code>ISelectionMgr swSelMgr = (ISelectionMgr)swModel.SelectionManager;</code></li><li><strong>Count:</strong> <code>int count = swSelMgr.GetSelectedObjectCount2(-1);</code> (-1 checks all selection marks).</li><li><strong>Object Extraction:</strong> <code>object selObj = swSelMgr.GetSelectedObject6(index, mark);</code></li><li><strong>Selection Type:</strong> <code>swSelectType_e type = (swSelectType_e)swSelMgr.GetSelectedObjectType3(index, mark);</code></li></ul><p><strong>Selection Marks:</strong> Marks (integers: 0, 1, 2, 4...) allow grouping different inputs for complex commands. For instance, when creating a Loft feature, Profiles use Mark <code>1</code> while Guide Curves use Mark <code>2</code>.</p>",
+    "tags": [
+      "ISelectionMgr",
+      "Selection",
+      "Modeling"
+    ],
+    "companies": [
+      "Capgemini",
+      "Quest Global",
+      "John Deere"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 10,
+    "question": "How do you read, write, and delete Custom Properties and Configuration-specific Properties?",
+    "answer": "<p>SolidWorks uses the <code>CustomPropertyManager</code> interface to handle both file-level and configuration-level metadata.</p><pre><code>// Accessing file-level vs config-level\nCustomPropertyManager propMgr;\n// For general/file-level:\npropMgr = swModel.Extension.get_CustomPropertyManager(\"\");\n// For specific configuration:\npropMgr = swModel.Extension.get_CustomPropertyManager(\"Default\");\n\n// 1. Add or Update Property\npropMgr.Add3(\"PartNumber\", (int)swCustomInfoType_e.swCustomInfoText, \n             \"PN-90210\", (int)swCustomPropertyAddOption_e.swCustomPropertyReplaceValue);\n\n// 2. Read Property (Resolved vs Evaluated Expression)\nstring valOut, evalValOut;\nbool wasResolved;\npropMgr.Get6(\"Weight\", false, out valOut, out evalValOut, out wasResolved, out _);\n// evalValOut gives evaluated mass like '12.45 kg' when valOut is '\"SW-Mass@Part1.SLDPRT\"'\n\n// 3. Delete Property\npropMgr.Delete2(\"LegacyCode\");</code></pre>",
+    "tags": [
+      "Custom Properties",
+      "Metadata",
+      "Configurations"
+    ],
+    "companies": [
+      "Tata Technologies",
+      "Caterpillar",
+      "Cummins"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 11,
+    "question": "How do you traverse all components in an assembly recursively, and what is the difference between resolved and suppressed components?",
+    "answer": "<p>In an assembly, the component tree is traversed starting from the root component via <code>IConfiguration.GetRootComponent3()</code>.</p><pre><code>public void TraverseComponent(IComponent2 comp) {\n    object[] children = (object[])comp.GetChildren();\n    if (children == null) return;\n    \n    foreach (IComponent2 child in children) {\n        // Check suppression state\n        swComponentSuppressionState_e state = (swComponentSuppressionState_e)child.GetSuppression2();\n        if (state == swComponentSuppressionState_e.swComponentSuppressed) {\n            continue; // Suppressed: geometry not loaded in memory\n        }\n        \n        string compName = child.Name2;\n        IModelDoc2 compModel = (IModelDoc2)child.GetModelDoc2(); // null if lightweight or not loaded!\n        \n        // Recursive step for sub-assemblies\n        TraverseComponent(child);\n    }\n}</code></pre><p><strong>Important Difference:</strong></p><ul><li><strong>Resolved:</strong> Model document and geometry are fully loaded into RAM. <code>child.GetModelDoc2()</code> returns a valid pointer.</li><li><strong>Suppressed:</strong> Component is excluded from calculations and memory. <code>child.GetModelDoc2()</code> returns <code>null</code>.</li><li><strong>Lightweight:</strong> Only graphics cache is loaded; must be resolved using <code>child.SetSuppression2()</code> before querying internal geometry.</li></ul>",
+    "tags": [
+      "Assembly",
+      "IComponent2",
+      "Recursion",
+      "Performance"
+    ],
+    "companies": [
+      "Boeing",
+      "Collins Aerospace",
+      "Quest Global"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 12,
+    "question": "What is MathTransform, and how do you transform coordinates between Component Space and Assembly Space?",
+    "answer": "<p>Each component in an assembly has a <strong>Transformation Matrix</strong> (<code>MathTransform</code>) that defines its translation, rotation, and scaling relative to the top-level assembly origin.</p><ul><li><strong>Component Space:</strong> Local coordinate system where vertices, faces, and sketches are defined inside the part file.</li><li><strong>Assembly Space:</strong> Global world coordinate system of the parent assembly.</li></ul><p><strong>Transforming Coordinates:</strong></p><pre><code>IMathTransform compXform = comp.Transform2;\nIMathUtility mathUtil = (IMathUtility)swApp.GetMathUtility();\n\n// Define point in part local coordinates (x, y, z)\ndouble[] ptCoords = new double[] { 10.0 / 1000, 20.0 / 1000, 0 }; // in meters!\nIMathPoint localPt = (IMathPoint)mathUtil.CreatePoint(ptCoords);\n\n// Multiply point by transform to get Assembly World Position\nIMathPoint worldPt = (IMathPoint)localPt.MultiplyTransform(compXform);\ndouble[] worldCoords = (double[])worldPt.ArrayData;</code></pre><p>To convert from Assembly space down to Component space, use <code>compXform.Inverse()</code>.</p>",
+    "tags": [
+      "MathTransform",
+      "Assembly",
+      "MathUtility",
+      "Geometry"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Tesla",
+      "Quest Global"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 13,
+    "question": "How do you programmatically add assembly mates between two components using the API?",
+    "answer": "<p>Assembly mates are created by pre-selecting the target geometric entities (faces, axes, or planes) with specific selection marks and calling <code>IAssemblyDoc.AddMate5</code>.</p><ol><li><strong>Select Entity 1:</strong> <code>modelDocExt.SelectByID2(\"Face1@Part1-1@Assem\", \"FACE\", 0, 0, 0, true, 1, null, 0);</code> (Mark = 1)</li><li><strong>Select Entity 2:</strong> <code>modelDocExt.SelectByID2(\"Face2@Part2-1@Assem\", \"FACE\", 0, 0, 0, true, 1, null, 0);</code> (Mark = 1)</li><li><strong>Invoke AddMate5:</strong><pre><code>swAssembly.AddMate5(\n    (int)swMateType_e.swMateCOINCIDENT,          // Mate Type\n    (int)swMateAlign_e.swMateAlignALIGNED,       // Alignment\n    false,                                       // Flip\n    0, 0, 0, 0, 0,                               // Distance / Angle params\n    0, 0, 0,                                     // Tolerances\n    false, false,                                // ForPositioningOnly, LockRotation\n    0, out int mateError                         // Output error code\n);</code></pre></li></ol><p>Always check <code>mateError == (int)swAddMateError_e.swAddMateError_NoError</code> to verify mate solver convergence.</p>",
+    "tags": [
+      "Assembly",
+      "Mates",
+      "IAssemblyDoc"
+    ],
+    "companies": [
+      "Caterpillar",
+      "John Deere",
+      "Tata Technologies"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 14,
+    "question": "How do you automate Drawing generation, view creation, and scale adjustments?",
+    "answer": "<p>Automating drawing sheets involves <code>IDrawingDoc</code> methods:</p><ol><li><strong>Create Drawing from Template:</strong> <code>swApp.NewDocument(drawingTemplatePath, 0, 0, 0)</code></li><li><strong>Create Standard 3 Views:</strong> <code>swDrawing.Create3rdAngleViews2(partFilePath)</code> or custom model views: <code>swDrawing.CreateDrawViewFromModelView3(partFilePath, \"*Isometric\", x, y, z)</code></li><li><strong>Adjust View Scale:</strong><pre><code>IView swView = (IView)swDrawing.GetFirstView(); // Note: 1st view is always sheet background!\nswView = (IView)swView.GetNextView();          // 2nd view is the first drawing view\n\nswView.ScaleDecimal = 0.5; // Set 1:2 scale\nswDrawing.ForceRebuild();</code></pre></li><li><strong>Insert Projected View:</strong> Select parent view, then call <code>swDrawing.CreateUnfoldedViewAt3(x, y, z, false)</code>.</li></ol>",
+    "tags": [
+      "Drawing",
+      "IDrawingDoc",
+      "IView",
+      "Automation"
+    ],
+    "companies": [
+      "HCLTech",
+      "Wipro",
+      "L&T Technology Services"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 15,
+    "question": "How do you insert and export a Bill of Materials (BOM) table in a drawing or assembly?",
+    "answer": "<p>SolidWorks allows inserting standard BOM tables using <code>InsertBomTable3</code>.</p><pre><code>// In an active drawing view\nIView swView = (IView)swDrawing.ActiveDrawingView;\nstring templatePath = @\"C:\\SolidWorks\\templates\\bom-standard.sldbomtbt\";\n\nIBomTableAnnotation bomAnn = swView.InsertBomTable3(\n    false,                                           // Dock to anchor\n    0.02, 0.02,                                      // X, Y positions (meters)\n    (int)swBOMConfigurationAnchorType_e.swBOMConfigurationAnchor_TopLeft,\n    (int)swBomType_e.swBomType_TopLevelOnly,         // Top-level, Parts only, Indented\n    \"Default\",                                       // Configuration name\n    templatePath,\n    false\n);\n\n// Export BOM directly to CSV or Excel\nITableAnnotation tableAnn = (ITableAnnotation)bomAnn;\ntableAnn.SaveAsText(@\"C:\\Output\\AssemblyBOM.csv\", \",\");</code></pre>",
+    "tags": [
+      "Drawing",
+      "BOM",
+      "Tables",
+      "Export"
+    ],
+    "companies": [
+      "Cummins",
+      "Capgemini",
+      "Tata Technologies"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 16,
+    "question": "What is the SolidWorks Document Manager (SwDocumentMgr) API, and when must you use it instead of the full SolidWorks API?",
+    "answer": "<p>The <strong>SolidWorks Document Manager API</strong> is a standalone COM library (requiring a separate Dassault license key) that reads and writes file metadata <em>without starting or needing SolidWorks installed on the host machine</em>.</p><table border=\"1\" cellpadding=\"6\" style=\"border-collapse: collapse; width: 100%;\"><thead><tr style=\"background-color: #f2f2f2;\"><th>SolidWorks API</th><th>Document Manager API</th></tr></thead><tbody><tr><td>Requires full SolidWorks desktop license installed</td><td>Requires lightweight DLL + Document Manager key</td></tr><tr><td>Spawns heavy CAD engine (high RAM & CPU footprint)</td><td>Ultra-fast header parser (milliseconds per file)</td></tr><tr><td>Full access to 3D B-Rep geometry, sketches, rebuilding</td><td>Metadata only: Custom properties, Configurations, BOM, Parasolid stream, XML, Cut lists</td></tr><tr><td>Desktop client automation</td><td>Server-side indexing, ERP/PLM integrations, batch cloud extractors</td></tr></tbody></table>",
+    "tags": [
+      "Document Manager",
+      "SwDocumentMgr",
+      "PLM",
+      "Performance"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Siemens",
+      "Capgemini"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 17,
+    "question": "How do you optimize execution speed during batch automation in SolidWorks?",
+    "answer": "<p>Executing thousands of model updates can be throttled by graphics rendering, UI tree repainting, and disk I/O. Use these optimizations:</p><ol><li><strong>Disable Graphics Rendering:</strong> Set <code>swModel.Visible = false</code> or open files silently with <code>swOpenDocOptions_Silent</code>.</li><li><strong>Freeze Feature Tree & UI:</strong><pre><code>swModel.FeatureManager.EnableFeatureTree = false;\nswApp.CommandInProgress = true;\nswApp.EnableBackgroundProcessing = true;</code></pre></li><li><strong>Suppress Dialogs:</strong> Set <code>swApp.SetUserPreferenceToggle((int)swUserPreferenceToggle_e.swDisplayAllAnnotations, false)</code>.</li><li><strong>Open in Quick-View or LightWeight:</strong> For assemblies where only metadata or BOM is checked, load without full geometry.</li><li><strong>Batch File Closing:</strong> Always close documents without saving if read-only: <code>swApp.CloseDoc(swModel.GetTitle())</code>.</li></ol>",
+    "tags": [
+      "Performance",
+      "Optimization",
+      "Batch Processing"
+    ],
+    "companies": [
+      "Boeing",
+      "HCLTech",
+      "Tesla"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 18,
+    "question": "What is the B-Rep topology hierarchy in SolidWorks (Body, Face, Loop, Edge, Vertex)?",
+    "answer": "<p>SolidWorks represents 3D solid and surface models using <strong>Boundary Representation (B-Rep)</strong>, which separates topological connectivity from underlying geometry:</p><ul><li><code><strong>IBody2</strong></code>: Represents an individual continuous manifold solid, sheet body, or wire body.</li><li><code><strong>IFace2</strong></code>: A bounded piece of surface (underlying geometry is <code>ISurface</code>: Cylindrical, Planar, Spline, etc.).</li><li><code><strong>ILoop2</strong></code>: A connected boundary of edges defining outer or inner holes on a face.</li><li><code><strong>IEdge2</strong></code>: An intersection between two faces (underlying geometry is <code>ICurve</code>: Line, Circle, B-Spline).</li><li><code><strong>IVertex</strong></code>: A topological corner point (underlying geometry is <code>IPoint</code>).</li></ul><p><em>Rule of Thumb:</em> Topology links the entities together (e.g., face sharing edge), while Surface/Curve defines mathematical shapes.</p>",
+    "tags": [
+      "B-Rep",
+      "Topology",
+      "Geometry",
+      "IBody2"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Autodesk",
+      "Siemens"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 19,
+    "question": "How do you traverse all Faces and Edges of a Solid Body?",
+    "answer": "<p>You retrieve bodies using <code>IPartDoc.GetBodies2</code>, then iterate through faces and edges.</p><pre><code>IPartDoc swPart = (IPartDoc)swModel;\nobject[] bodies = (object[])swPart.GetBodies2((int)swBodyType_e.swSolidBody, true);\n\nforeach (IBody2 body in bodies) {\n    IFace2 face = (IFace2)body.GetFirstFace();\n    while (face != null) {\n        // Inspect underlying surface\n        ISurface surface = (ISurface)face.GetSurface();\n        bool isPlanar = surface.IsPlane();\n        \n        // Get Edges belonging to this face\n        object[] edges = (object[])face.GetEdges();\n        foreach (IEdge2 edge in edges) {\n            ICurve curve = (ICurve)edge.GetCurve();\n            double length = edge.GetLength();\n        }\n        \n        face = (IFace2)face.GetNextFace();\n    }\n}</code></pre>",
+    "tags": [
+      "B-Rep",
+      "IBody2",
+      "IFace2",
+      "Geometry"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Quest Global",
+      "Altair"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 20,
+    "question": "What is the difference between IModelDocExtension::SelectByID2 and selecting directly through entity pointers?",
+    "answer": "<p>Both methods place items into the selection queue, but work very differently:</p><ul><li><code><strong>SelectByID2(name, type, x, y, z, append, mark, callout, options)</strong></code>:<ul><li>Identifies objects via string identifiers (e.g. <code>\"Top Plane\"</code>, <code>\"Sketch1\"</code>, <code>\"Face1@Part1-1@Assem\"</code>) or spatial ray hits at coordinates <code>(x, y, z)</code>.</li><li>Prone to broken references if user names change or feature tree renames occur.</li><li>Requires string parsing overhead.</li></ul></li><li><code><strong>Entity::Select4(append, data)</strong></code>:<ul><li>Directly called on the unmanaged COM pointer (<code>IEntity</code>, <code>IFace2</code>, <code>IFeature</code>).</li><li>100% immune to rename bugs and coordinate rounding issues.</li><li>Significantly faster and more robust for programmatic loops and algorithmic operations.</li></ul></li></ul>",
+    "tags": [
+      "Selection",
+      "SelectByID2",
+      "IEntity",
+      "Best Practices"
+    ],
+    "companies": [
+      "Tata Technologies",
+      "Cummins",
+      "HCLTech"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 21,
+    "question": "How do you create and register a custom PropertyManager Page (PMP) in an Add-in?",
+    "answer": "<p>A <strong>PropertyManager Page (PMP)</strong> embeds interactive UI inside the left panel of SolidWorks, standardizing user experience alongside native CAD commands.</p><ol><li>Implement <code>IPropertyManagerPage2Handler9</code> in a listener class to handle button clicks, checkboxes, and slider changes.</li><li>Call <code>swApp.CreatePropertyManagerPage(\"Title\", options, pmpHandler, out int errors)</code> inside your add-in.</li><li>Add controls using <code>IPage.AddGroupBox</code>, <code>IGroup.AddControl2(id, (short)swPropertyManagerPageControlType_e.swControlType_XYZ, ...)</code>.</li><li>Show page using <code>pmpPage.Show()</code> and destroy or hide with <code>pmpPage.Close(true)</code>.</li></ol>",
+    "tags": [
+      "PropertyManagerPage",
+      "UI",
+      "Add-in",
+      "C#"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Quest Global",
+      "Capgemini"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 22,
+    "question": "How does Event Handling work in the SolidWorks API, and what are common traps?",
+    "answer": "<p>SolidWorks exposes events at the application level (<code>DSldWorksEvents</code>), document level (<code>PartDocEvents</code>, <code>AssemblyDocEvents</code>, <code>DrawingDocEvents</code>), and feature level.</p><p><strong>Common Traps & Solutions:</strong></p><ul><li><strong>Event Unhooking Memory Leaks:</strong> Every delegate attached (<code>swModel.DestroyNotify += OnDestroy;</code>) must be explicitly unhooked (<code>swModel.DestroyNotify -= OnDestroy;</code>) when documents close. Otherwise, delegates prevent garbage collection.</li><li><strong>Re-entrant Event Loops:</strong> Modifying a model inside a <code>ModifyNotify</code> or <code>RegenNotify</code> event fires another regeneration, triggering an infinite recursive loop and crashing the process. Guard with a <code>private bool _isUpdating</code> re-entrancy flag.</li><li><strong>Dynamic Document Attachment:</strong> When new files open, listen to <code>swApp.FileOpenPostNotify</code> to hook the new document's individual events.</li></ul>",
+    "tags": [
+      "Events",
+      "COM",
+      "Add-in",
+      "Memory Leaks"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Collins Aerospace",
+      "Boeing"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 23,
+    "question": "What is a Macro Feature in SolidWorks, and when would you develop one?",
+    "answer": "<p>A <strong>Macro Feature</strong> (<code>IMacroFeatureData</code>) is a custom, developer-defined parametric feature that lives directly in the SolidWorks FeatureManager design tree like any native Boss-Extrude or Fillet.</p><ul><li><strong>Core Callback Methods:</strong><ul><li><code><strong>Regeneration Method</strong></code>: Executes when the model rebuilds. Generates custom B-Rep geometry and merges or cuts bodies using <code>IBody2.Operations()</code>.</li><li><code><strong>Edit Definition Method</strong></code>: Opens custom UI (PMP) when the user right-clicks \"Edit Feature\".</li><li><code><strong>Security/Dimensions Method</strong></code>: Controls dimension display and handles parameter dragging.</li></ul></li><li><strong>Use Cases:</strong> Creating proprietary algorithmic geometry (e.g., custom gear generators, automated cooling ribs, custom perforations, dynamic lattice structures).</li></ul>",
+    "tags": [
+      "Macro Feature",
+      "IMacroFeatureData",
+      "Advanced"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Autodesk",
+      "Altair"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 24,
+    "question": "How do you read and modify Dimensions programmatically in SolidWorks?",
+    "answer": "<p>Dimensions in SolidWorks are accessed via <code>IDimension</code> or <code>IDisplayDimension</code>.</p><pre><code>// 1. Get dimension from Model Parameter Name\nIDimension swDim = (IDimension)swModel.Parameter(\"D1@Sketch1\");\n\n// 2. Read System Value (Always in METERS / RADIANS regardless of document display units!)\ndouble systemValue = swDim.SystemValue;\n\n// 3. Modify Dimension Value in Active Configuration\n// Set to 50 mm (converted to meters: 0.05 m)\nswDim.SetSystemValue3(0.05, (int)swSetValueInConfiguration_e.swSetValue_InThisConfiguration, null);\n\n// 4. Force Rebuild to update graphics\nswModel.EditRebuild3();</code></pre><p><strong>Golden Rule:</strong> Always perform internal calculations in <strong>SI Units (Meters, Radians, Kilograms, Seconds)</strong>. <code>SystemValue</code> ignores inch/millimeter document settings.</p>",
+    "tags": [
+      "Dimensions",
+      "Parameters",
+      "Units",
+      "Modeling"
+    ],
+    "companies": [
+      "Tata Technologies",
+      "Cummins",
+      "John Deere"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 25,
+    "question": "How do you automate Sheet Metal operations (Flat Pattern, Bends, Cut Lists)?",
+    "answer": "<p>Sheet metal parts contain specialized features and folder collections:</p><ul><li><strong>Unfolding / Flat Pattern:</strong> Find the <code>FlatPattern</code> feature in the tree. To unsuppress: <code>swFeat.SetSuppression2((int)swFeatureSuppressionAction_e.swUnSuppressFeature, ...);</code></li><li><strong>Export to DXF:</strong> Use <code>IPartDoc.ExportToDWG2</code> with <code>ExportOptions = 1</code> (export flat pattern geometry directly without creating a drawing sheet).</li><li><strong>Cut List Automation:</strong> Traverse feature tree for <code>CutListFolder</code> sub-features. Access <code>swCutListFeat.GetCustomPropertyManager()</code> to read sheet thickness, bend allowance, blank size, and bounding box dimensions.</li></ul>",
+    "tags": [
+      "Sheet Metal",
+      "Flat Pattern",
+      "DXF",
+      "Cut List"
+    ],
+    "companies": [
+      "Caterpillar",
+      "Tata Technologies",
+      "HCLTech"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 26,
+    "question": "What is the SolidWorks PDM Professional (Enterprise PDM) API, and what key interfaces are used?",
+    "answer": "<p>The <strong>SolidWorks PDM API</strong> (<code>EdmLib</code>) allows custom add-ins and standalone tasks to automate file vault workflows, card variables, check-ins, and version controls.</p><p><strong>Key Interfaces:</strong></p><ul><li><code><strong>IEdmVault5 / IEdmVault15</strong></code>: Entry point. Handles vault login (<code>LoginAuto</code>), database connections, and folder retrieval.</li><li><code><strong>IEdmFile5</strong></code>: Represents vault files; handles <code>LockFile</code> (Check out), <code>UnlockFile</code> (Check in), <code>GetFileCopy</code>, and version retrieval.</li><li><code><strong>IEdmFolder5</strong></code>: Represents vault directories.</li><li><code><strong>IEdmEnumeratorVariable5</strong></code>: Reads and writes data card variables (e.g., Revision, Approver, ECO Number).</li><li><code><strong>IEdmPos5</strong></code>: Linked list iterator for navigating tree structures and file history.</li></ul>",
+    "tags": [
+      "PDM",
+      "EdmLib",
+      "Workflows",
+      "Enterprise"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Cummins",
+      "Boeing"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 27,
+    "question": "How do you automate checking out a file, updating a card variable, and checking it back in using PDM API?",
+    "answer": "<p>A common PDM automation workflow implemented with <code>EdmLib</code> in C#:</p><pre><code>IEdmVault5 vault = new EdmVault5();\nvault.LoginAuto(\"EngineeringVault\", 0);\n\nIEdmFolder5 parentFolder;\nIEdmFile5 file = vault.GetFileFromPath(@\"C:\\Vault\\Part1.SLDPRT\", out parentFolder);\n\n// 1. Check out (Lock)\nif (!file.IsLocked) {\n    file.LockFile(parentFolder.ID, 0, (int)EdmLockFlag.EdmLock_Simple);\n}\n\n// 2. Update Card Variable\nIEdmEnumeratorVariable5 varEnum = file.GetEnumeratorVariable();\nvarEnum.SetVar(\"ApprovedBy\", \"@\", \"AutoWorker\"); // \"@\" represents file-level tab\nvarEnum.CloseFile(true); // Commit variables\n\n// 3. Check in (Unlock)\nfile.UnlockFile(0, \"Automated approval stamp via API\");</code></pre>",
+    "tags": [
+      "PDM",
+      "EdmLib",
+      "Automation",
+      "Workflows"
+    ],
+    "companies": [
+      "Collins Aerospace",
+      "Boeing",
+      "Capgemini"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 28,
+    "question": "How does Ray Intersection (IModelDoc2::RayIntersections) work, and what are its practical use cases?",
+    "answer": "<p><code>IModelDoc2.RayIntersections</code> fires a mathematical ray vector through the model from a specific origin and returns all solid bodies, faces, and coordinates where the ray hits.</p><pre><code>// Parameters: Bodies array, Ray Origin (X,Y,Z), Ray Vector (dX,dY,dZ), options...\nint hitCount = swModel.RayIntersections(\n    bodiesToTest, originArray, directionArray,\n    (int)swRayIntersectionOptions_e.swRayHitFace, 0.0001, 0.0001, out object hitFaces, out object hitPoints\n);</code></pre><p><strong>Applications:</strong> Clearance checks, sensor line-of-sight validation, automated wall thickness estimation, and custom 3D point projection algorithms.</p>",
+    "tags": [
+      "RayIntersections",
+      "Math",
+      "Collision",
+      "Geometry"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Tesla",
+      "Quest Global"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 29,
+    "question": "How do you handle configurations programmatically (adding, activating, suppressing features per config)?",
+    "answer": "<p>Configurations are managed via <code>IConfigurationManager</code> and <code>IConfiguration</code>:</p><pre><code>IConfigurationManager configMgr = swModel.ConfigurationManager;\n\n// 1. Add new configuration\nconfigMgr.AddConfiguration2(\n    \"Machined_Version\", \"Machined state comments\", \"Alternate part\", \n    (int)swConfigurationOptions2_e.swConfigOption_DontActivate, \"\", \"\", true\n);\n\n// 2. Activate configuration\nswModel.ShowConfiguration2(\"Machined_Version\");\n\n// 3. Set Feature Suppression in Specific Config\nIFeature swFeat = (IFeature)swModel.FeatureByName(\"Fillet_Cast\");\nstring[] targetConfigs = new string[] { \"Machined_Version\" };\nswFeat.SetSuppression2(\n    (int)swFeatureSuppressionAction_e.swSuppressFeature, \n    (int)swInConfigurationOpts_e.swSpecifyConfiguration, \n    targetConfigs\n);</code></pre>",
+    "tags": [
+      "Configurations",
+      "IConfiguration",
+      "Features"
+    ],
+    "companies": [
+      "Tata Technologies",
+      "Caterpillar",
+      "Cummins"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 30,
+    "question": "How do you export SolidWorks models to neutral formats like STEP, IGES, Parasolid, and 3D PDF?",
+    "answer": "<p>SolidWorks uses <code>IModelDocExtension.SaveAs3</code> or <code>SaveAs</code> with explicit export preferences.</p><pre><code>IModelDocExtension modelExt = swModel.Extension;\n\n// Configure STEP version export setting (e.g. AP214 or AP242)\nswApp.SetUserPreferenceIntegerValue(\n    (int)swUserPreferenceIntegerValue_e.swStepExportPreference, \n    (int)swStepExportPreference_e.swStepExportPreference_AP214\n);\n\n// Export to STEP file\nint errors = 0, warnings = 0;\nbool success = modelExt.SaveAs3(\n    @\"C:\\Export\\Bracket.STEP\", \n    (int)swSaveAsVersion_e.swSaveAsCurrentVersion, \n    (int)swSaveAsOptions_e.swSaveAsOptions_Silent, \n    null, null, ref errors, ref warnings\n);</code></pre><p>Supported extensions are automatically determined by file extension: <code>.x_t</code> (Parasolid), <code>.step</code>, <code>.igs</code>, <code>.pdf</code>, <code>.stl</code>.</p>",
+    "tags": [
+      "Export",
+      "STEP",
+      "SaveAs",
+      "Automation"
+    ],
+    "companies": [
+      "HCLTech",
+      "Wipro",
+      "Quest Global"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 31,
+    "question": "What is the difference between Pack and Go via API vs manual assembly file copy?",
+    "answer": "<p>Manually copying assembly files using Windows Explorer breaks internal file paths, causing missing components and suppressed reference errors upon opening.</p><p><code><strong>IPackAndGo</strong></code> handles this programmatically:</p><ul><li>Extracts complete dependency trees including parts, sub-assemblies, drawings, design tables, and simulation results.</li><li>Enables programmatic prefixing/suffixing of all filenames (e.g., adding project codes).</li><li>Redirects all child references so the cloned assembly opens seamlessly.</li></ul><p>Accessed via <code>swModelDocExt.GetPackAndGo()</code>, configured with output folders and file rename lists, and committed using <code>swModelDocExt.SavePackAndGo(packAndGoObj)</code>.</p>",
+    "tags": [
+      "PackAndGo",
+      "Assembly",
+      "File Management"
+    ],
+    "companies": [
+      "Collins Aerospace",
+      "Boeing",
+      "Tata Technologies"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 32,
+    "question": "How do you automate Sketch creation, constraints, and dimensions via API?",
+    "answer": "<p>Sketches are created using <code>ISketchManager</code>:</p><pre><code>ISketchManager skMgr = swModel.SketchManager;\n\n// 1. Select Plane or Face\nswModel.Extension.SelectByID2(\"Front Plane\", \"PLANE\", 0, 0, 0, false, 0, null, 0);\n\n// 2. Insert Sketch Mode\nskMgr.InsertSketch(true);\n\n// 3. Create Geometry (Units: Meters!)\nISketchSegment line = (ISketchSegment)skMgr.CreateLine(0, 0, 0, 0.1, 0, 0);\nISketchArc circle = (ISketchArc)skMgr.CreateCircleByRadius(0.1, 0, 0, 0.05);\n\n// 4. Add Constraints (Geometric Relations)\nswModel.ClearSelection2(true);\nline.Select4(true, null);\nswModel.Extension.SelectByID2(\"Point1@Origin\", \"EXTSKETCHPOINT\", 0, 0, 0, true, 0, null, 0);\nswModel.SketchAddConstraints(\"sgCOINCIDENT\");\n\n// 5. Exit Sketch\nskMgr.InsertSketch(true);</code></pre>",
+    "tags": [
+      "Sketch",
+      "ISketchManager",
+      "Constraints",
+      "Modeling"
+    ],
+    "companies": [
+      "Capgemini",
+      "Tata Technologies",
+      "Cyient"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 33,
+    "question": "What is the SolidWorks CommandManager, and how do you build custom tabs and icons in an Add-in?",
+    "answer": "<p>The <code>ICommandManager</code> interface provides native UI integration in the SolidWorks ribbon toolbar:</p><ol><li>Call <code>iCmdMgr.CreateCommandGroup2(groupID, groupTitle, toolTip, ...);</code></li><li>Add toolbar command buttons with <code>cmdGroup.AddCommandItem2(\"Button Title\", index, \"Tooltip\", \"Hint\", imageIndex, callbackMethodName, enableMethodName, ...);</code></li><li>Create a dedicated Ribbon Tab using <code>iCmdMgr.AddCommandTab((int)swDocumentTypes_e.swDocPART, \"MyTabTitle\");</code></li><li>Add command boxes to the tab corresponding to the group command IDs.</li><li>Call <code>cmdGroup.Activate()</code> to register controls in the CAD session.</li></ol>",
+    "tags": [
+      "CommandManager",
+      "UI",
+      "Add-in",
+      "Ribbon"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Quest Global",
+      "HCLTech"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 34,
+    "question": "How do you detect and report interference between components in an assembly programmatically?",
+    "answer": "<p>Interference detection is automated via <code>IInterferenceDetectionMgr</code>:</p><pre><code>IAssemblyDoc swAssem = (IAssemblyDoc)swModel;\nIInterferenceDetectionMgr intfMgr = swAssem.InterferenceDetectionManager;\n\n// Configuration flags\nintfMgr.TreatCoincidenceAsInterference = false;\nintfMgr.MakeInterferingPartsTransparent = true;\n\n// Calculate interferences\nobject[] intfs = (object[])intfMgr.GetInterferences();\nif (intfs != null) {\n    foreach (IInterference intf in intfs) {\n        double volume = intf.Volume; // in cubic meters\n        object[] compArray = (object[])intf.Components;\n        // compArray contains the conflicting IComponent2 references\n    }\n}\nintfMgr.Done(); // Cleanup solver buffers</code></pre>",
+    "tags": [
+      "Interference",
+      "Assembly",
+      "Quality Control"
+    ],
+    "companies": [
+      "Tesla",
+      "Boeing",
+      "Caterpillar"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 35,
+    "question": "How do you handle multi-body parts and distinguish between solid bodies and surface bodies?",
+    "answer": "<p>Parts can contain multiple independent bodies (e.g. weldments, mold designs, split parts). You query bodies using <code>IPartDoc.GetBodies2</code>:</p><pre><code>// swBodyType_e enum flags:\n// swSolidBody = 0, swSheetBody (Surface) = 1, swWireBody = 2\n\nobject[] solidBodies = (object[])swPart.GetBodies2((int)swBodyType_e.swSolidBody, false);\nobject[] surfaceBodies = (object[])swPart.GetBodies2((int)swBodyType_e.swSheetBody, false);\n\nforeach (IBody2 body in solidBodies) {\n    string bodyName = body.Name;\n    double[] massProps = (double[])body.GetMassProperties(0);\n    double bodyVolume = massProps[3];\n}</code></pre><p>Multi-body boolean operations (union, subtract, intersect) are executed using <code>IBody2.Operations2</code>.</p>",
+    "tags": [
+      "Multi-body",
+      "IBody2",
+      "Surface",
+      "Weldments"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Tata Technologies",
+      "Cyient"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 36,
+    "question": "How do you perform Unit Conversion cleanly across the SolidWorks API?",
+    "answer": "<p>The SolidWorks API strictly expects and returns values in <strong>MKS units (Meters, Kilograms, Seconds, Radians)</strong> across all internal methods, regardless of the UI settings (e.g., Inches, MMGS).</p><ul><li><strong>Length:</strong> <code>1 mm = 0.001 m</code> | <code>1 inch = 0.0254 m</code></li><li><strong>Angle:</strong> <code>Radians = Degrees * (Math.PI / 180.0)</code></li><li><strong>User Preference Units:</strong> Query active document display units using <code>swModel.GetUserPreferenceDoubleValue((int)swUserPreferenceDoubleValue_e.swLengthUnitType)</code> to format numbers back to user expectations when displaying UI dialogs.</li></ul><p><em>Pro Tip:</em> Centralize unit conversions into a dedicated static helper utility class (e.g. <code>Units.ToMeters(double mm)</code>) across your codebase.</p>",
+    "tags": [
+      "Units",
+      "Best Practices",
+      "Architecture"
+    ],
+    "companies": [
+      "Cummins",
+      "John Deere",
+      "L&T Technology Services"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 37,
+    "question": "How do you automate Weldment and Cut List properties generation in C#?",
+    "answer": "<p>Weldment structural members generate a special <strong>Cut-List</strong> structure in the feature tree. To automate them:</p><ol><li>Traverse the feature tree and locate features with type <code>CutListFolder</code>.</li><li>Cast feature to <code>BodyFolder</code>: <code>IBodyFolder bodyFolder = (IBodyFolder)swFeat.GetSpecificFeature2();</code></li><li>Call <code>bodyFolder.UpdateCutList();</code> to guarantee bounding box and cut angles are recomputed.</li><li>Query cut list metadata through <code>swFeat.CustomPropertyManager</code> to extract standard properties like <code>\"LENGTH\"</code>, <code>\"ANGLE1\"</code>, <code>\"ANGLE2\"</code>, and <code>\"Total Weight\"</code>.</li></ol>",
+    "tags": [
+      "Weldments",
+      "Cut List",
+      "Automation",
+      "Structural"
+    ],
+    "companies": [
+      "Caterpillar",
+      "Tata Technologies",
+      "HCLTech"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 38,
+    "question": "What is the difference between IModelDoc2::Rebuild vs IModelDoc2::ForceRebuild3?",
+    "answer": "<p>Rebuilding model geometry has different scope levels:</p><ul><li><code><strong>EditRebuild3()</strong></code>: Standard dirty rebuild. Only recalculates features that have been modified or marked as dirty in the current session. Fast, but may miss indirect dependencies in complex assembly contexts.</li><li><code><strong>ForceRebuild3(bool topOnly)</strong></code>: Ignores dirty flags and completely recalculates every feature in the design tree from top to bottom. Slower, but ensures 100% geometric integrity, updates mate matrices, and synchronizes cross-document equations.</li></ul>",
+    "tags": [
+      "Rebuild",
+      "Performance",
+      "IModelDoc2"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Quest Global",
+      "Capgemini"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 39,
+    "question": "How do you automate SolidWorks Task Scheduler to run batch scripts off-peak?",
+    "answer": "<p>The <strong>SolidWorks Task Scheduler</strong> can be automated programmatically using the <code>TaskScheduler64</code> type library:</p><ul><li>Instantiate the scheduler service: <code>ITaskScheduler app = new TaskScheduler();</code></li><li>Add tasks such as <code>app.CreateTask(swTaskType_e.swTaskUpdateFiles)</code> or custom executable scripts.</li><li>Configure target directories, recurse subfolders, file types (<code>*.sldprt;*.sldasm</code>), and start timestamps.</li><li>Run tasks automatically overnight to generate PDFs, rebuild drawings, or export STEP files without tying up engineer workstations during the day.</li></ul>",
+    "tags": [
+      "Task Scheduler",
+      "Batch Processing",
+      "Automation"
+    ],
+    "companies": [
+      "Boeing",
+      "Collins Aerospace",
+      "Tata Technologies"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 40,
+    "question": "How do you create and manage Equations programmatically using IEquationMgr?",
+    "answer": "<p>Global variables and mathematical equations are driven by the <code>IEquationMgr</code>:</p><pre><code>IEquationMgr eqnMgr = swModel.GetEquationMgr();\nint count = eqnMgr.GetCount();\n\n// 1. Add global variable: \"Width\" = 150mm\neqnMgr.Add2(-1, \"\\\"Width\\\" = 150mm\", true);\n\n// 2. Add relation: \"D1@Sketch1\" = \"Width\" * 2\neqnMgr.Add2(-1, \"\\\"D1@Sketch1\\\" = \\\"Width\\\" * 2\", true);\n\n// 3. Re-evaluate equations\neqnMgr.EvaluateAll();\nswModel.ForceRebuild3(false);</code></pre><p>Pass <code>-1</code> as index to append the equation to the end of the equation list.</p>",
+    "tags": [
+      "Equations",
+      "IEquationMgr",
+      "Parametric"
+    ],
+    "companies": [
+      "Tesla",
+      "Cummins",
+      "HCLTech"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 41,
+    "question": "Why should you never use multi-threading to call SolidWorks API methods directly from background threads?",
+    "answer": "<p>SolidWorks is fundamentally a single-threaded COM application built on the <strong>Single-Threaded Apartment (STA)</strong> model.</p><ul><li><strong>The Risk:</strong> Calling any SolidWorks COM pointer from a background thread (e.g. <code>Task.Run()</code> or <code>ThreadPool</code>) causes deadlocks, memory access violations, <code>RPC_E_WRONG_THREAD</code> COM exceptions, or silent CAD crashes.</li><li><strong>Proper Architecture:</strong><ul><li>Keep all SolidWorks API calls on the main STA thread.</li><li>Run heavy non-CAD workloads (database queries, network API requests, ERP lookups, JSON serialization) on background worker threads.</li><li>Marshal results back to the SolidWorks UI thread using <code>SynchronizationContext</code>, <code>Dispatcher</code>, or Windows Forms <code>Invoke</code> before making CAD API calls.</li></ul></li></ul>",
+    "tags": [
+      "Threading",
+      "STA",
+      "Concurrency",
+      "Architecture"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Boeing",
+      "Tesla"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 42,
+    "question": "How do you automate Balloon placement and Bill of Materials linking in SolidWorks Drawings?",
+    "answer": "<p>Balloons are inserted and bound to drawing views via <code>IModelDocExtension.InsertBOMBalloon2</code> or <code>AutoBalloon5</code>.</p><pre><code>IDrawingDoc swDrawing = (IDrawingDoc)swModel;\nswDrawing.ActivateView(\"Drawing View1\");\n\nAutoBalloonOptions opts = swDrawing.CreateAutoBalloonOptions();\nopts.Layout = (int)swBalloonLayoutType_e.swDetailingBalloonLayout_Square;\nopts.Layername = \"Balloons\";\nopts.Style = (int)swBalloonStyle_e.swBS_Circle;\nopts.Size = (int)swBalloonFit_e.swBF_2Chars;\n\n// Automatically generate balloons on all view components\nswDrawing.AutoBalloon5(opts);</code></pre>",
+    "tags": [
+      "Drawing",
+      "Balloons",
+      "BOM",
+      "Drafting"
+    ],
+    "companies": [
+      "John Deere",
+      "Caterpillar",
+      "Tata Technologies"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 43,
+    "question": "How do you register and deploy a SolidWorks C# Add-in on client machines?",
+    "answer": "<p>SolidWorks discovers add-ins through specific Windows Registry keys and COM interop registration:</p><ol><li><strong>Assembly Attributes:</strong> Decorate the <code>ISwAddin</code> implementation class with:<pre><code>[Guid(\"YOUR-GUID-HERE\")]\n[ComVisible(true)]\npublic class MyAddin : ISwAddin { ... }</code></pre></li><li><strong>COM Registration:</strong> Run <code>regasm /codebase MyAddin.dll</code> to register COM vtables.</li><li><strong>SolidWorks Add-in Registry Keys:</strong> Add entries under:<br/><code>HKEY_LOCAL_MACHINE\\SOFTWARE\\SolidWorks\\Addins\\{YOUR-GUID}</code> (or HKCU). Set <code>Default = 1</code> (enabled) and <code>Title / Description</code> strings.</li><li><strong>Startup Flags:</strong> Add DWORD under <code>AddInsStartup</code> to control whether it loads automatically on boot.</li></ol>",
+    "tags": [
+      "Deployment",
+      "Registry",
+      "Add-in",
+      "COM"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Quest Global",
+      "Wipro"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 44,
+    "question": "How do you extract Mass Properties (Center of Mass, Moments of Inertia, Volume) via API?",
+    "answer": "<p>Mass properties are queried using <code>IModelDocExtension.CreateMassProperty</code>:</p><pre><code>IMassProperty massProp = swModel.Extension.CreateMassProperty();\n// Set active coordinate system if needed:\n// massProp.SetCoordinateSystem(swCoordSys);\n\ndouble mass = massProp.Mass;                     // in kilograms\ndouble volume = massProp.Volume;                 // in cubic meters\ndouble surfaceArea = massProp.SurfaceArea;       // in square meters\ndouble[] com = (double[])massProp.CenterOfMass; // [X, Y, Z] in meters\ndouble[] moi = (double[])massProp.GetMomentOfInertia(\n    (int)swMassPropertyMoment_e.swMassPropertyMomentAboutCenterOfMass\n);</code></pre>",
+    "tags": [
+      "Mass Properties",
+      "Physics",
+      "IModelDocExtension"
+    ],
+    "companies": [
+      "Tesla",
+      "Boeing",
+      "Cummins"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 45,
+    "question": "What is the difference between Silent Mode and UserControl when launching SolidWorks programmatically?",
+    "answer": "<p>When launching SolidWorks from a background automation service:</p><ul><li><code><strong>swApp.UserControl = false;</strong></code>: Specifies that SolidWorks is controlled by an automated process. If the user closes the CAD window, SolidWorks will not terminate until the API releases the process. Prevents interactive prompts.</li><li><code><strong>swOpenDocOptions_Silent</strong></code>: Passed to <code>OpenDoc6</code> to suppress all missing font prompts, resolved reference warnings, and dialog boxes during file load.</li><li><strong>Background Process Trap:</strong> If an exception terminates your external app without calling <code>swApp.ExitApp()</code> when <code>UserControl = false</code>, <code>SLDWORKS.exe</code> will remain trapped in Windows Task Manager consuming licenses and RAM.</li></ul>",
+    "tags": [
+      "Automation",
+      "Silent Mode",
+      "Process Management"
+    ],
+    "companies": [
+      "Quest Global",
+      "Capgemini",
+      "Tata Technologies"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 46,
+    "question": "How do you capture high-resolution preview images or thumbnails of models without opening them in the CAD GUI?",
+    "answer": "<p>There are two primary methods:</p><ol><li><strong>SolidWorks Document Manager API:</strong> Use <code>ISwDMDocument13.GetPreviewBitmap()</code> or <code>GetPreviewBitmapBytes()</code> to extract embedded PNG/BMP thumbnails directly from file headers in under 15 milliseconds.</li><li><strong>SolidWorks API (Offscreen):</strong> Open file silently in background: <code>swApp.OpenDoc6(..., swOpenDocOptions_Silent, ...)</code>, hide graphics, and invoke <code>swModel.SaveBMP(imagePath, widthInPixels, heightInPixels)</code>.</li></ol>",
+    "tags": [
+      "Thumbnails",
+      "Document Manager",
+      "Graphics"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Siemens",
+      "HCLTech"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 47,
+    "question": "How do you automate replacing a component in an assembly with another part file?",
+    "answer": "<p>Replacing assembly components programmatically is done via <code>IAssemblyDoc.ReplaceComponents2</code>:</p><pre><code>IAssemblyDoc swAssem = (IAssemblyDoc)swModel;\n\n// Select the component instance to replace\nswModel.Extension.SelectByID2(\"MotorBracket-1@MainAssembly\", \"COMPONENT\", 0, 0, 0, false, 0, null, 0);\n\n// Replace with new component path\nbool status = swAssem.ReplaceComponents2(\n    @\"C:\\Parts\\MotorBracket_HeavyDuty.SLDPRT\", \n    \"Default\",                                   // Configuration name\n    true,                                        // Match old mates where possible\n    (int)swReplaceComponentsInstances_e.swReplaceComponents_Single,\n    true\n);</code></pre>",
+    "tags": [
+      "Assembly",
+      "Replace",
+      "IAssemblyDoc"
+    ],
+    "companies": [
+      "Caterpillar",
+      "Cummins",
+      "John Deere"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 48,
+    "question": "How do you debug an in-process SolidWorks Add-in using Visual Studio?",
+    "answer": "<p>Because an add-in runs as an in-process DLL, you cannot launch it directly via F5 without binding to the host executable:</p><ol><li>Open Project Properties &rarr; <strong>Debug</strong> tab.</li><li>Set <strong>Start External Program</strong> to <code>C:\\Program Files\\SolidWorks Corp\\SolidWorks\\SLDWORKS.exe</code>.</li><li>Set Command line arguments (e.g. <code>/r</code> to bypass welcome screens).</li><li>Set breakpoints in your C# code (e.g. inside <code>ConnectToSW</code> or button click handlers).</li><li>Press <strong>F5</strong>: Visual Studio boots SolidWorks, attaches the CLR debugger, loads your add-in from its registered COM location, and hits breakpoints as you interact with the UI.</li></ol>",
+    "tags": [
+      "Debugging",
+      "Visual Studio",
+      "Add-in",
+      "C#"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Quest Global",
+      "HCLTech"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 49,
+    "question": "What are Third-Party Storage Stores in SolidWorks files, and how can custom data be saved inside models?",
+    "answer": "<p>Enterprise add-ins often need to persist custom application state (e.g., ERP IDs, cost breakdown schemas, revision manifests) directly inside <code>.SLDPRT</code> / <code>.SLDASM</code> files.</p><p>SolidWorks offers <strong>Third-Party Storage</strong> via COM <code>IStorage</code>:</p><ul><li>Access via <code>IModelDoc2.Get3rdPartyStorageStore(\"MyAddinDataStore\", true)</code>.</li><li>Allows writing raw binary streams, XML trees, or serialized JSON directly into OLE structured storage compartments inside the SolidWorks native file.</li><li>Data persists through Save/SaveAs operations and travels with the file, completely isolated from SolidWorks feature tree corruptions.</li></ul>",
+    "tags": [
+      "Storage",
+      "Persistence",
+      "Enterprise",
+      "Architecture"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Boeing",
+      "Collins Aerospace"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 50,
+    "question": "What design patterns and software architectural practices should be applied to large-scale SolidWorks Automation projects?",
+    "answer": "<p>Enterprise SolidWorks customization requires resilient software architecture:</p><ol><li><strong>Facade Pattern:</strong> Wrap raw COM interop calls inside high-level safe .NET wrappers (e.g., <code>CADDocument</code>, <code>CADAssembly</code>) to isolate COM marshaling and null checks away from business logic.</li><li><strong>Model-View-ViewModel (MVVM):</strong> Strictly decouple PropertyManager Page / WPF UI views from direct CAD operations. ViewModels hold state; Commands execute CAD tasks.</li><li><strong>Unit of Work & IDisposable:</strong> Implement <code>IDisposable</code> on wrapper classes to deterministically call <code>Marshal.ReleaseComObject</code>.</li><li><strong>Robust Logging & Telemetry:</strong> Log COM error codes (HRESULTs) to Serilog or NLog, since unhandled COM exceptions terminate SolidWorks abruptly.</li></ol>",
+    "tags": [
+      "Design Patterns",
+      "Architecture",
+      "Best Practices",
+      "Enterprise"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Boeing",
+      "Tesla",
+      "Capgemini"
+    ],
+    "role_level": "Sr"
+  }
+]

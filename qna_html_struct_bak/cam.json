@@ -1,0 +1,849 @@
+[
+  {
+    "number": 1,
+    "question": "What is the fundamental difference between a CAD kernel and a CAM engine, and how do they interact?",
+    "answer": "<p>A CAD kernel (like Parasolid, ACIS, or OpenCASCADE) is responsible for creating, storing, and manipulating exact geometric representations (B-Rep, NURBS, CSG). A CAM engine takes this geometry—often converting or tessellating it into meshes, voxels, or dexels—to compute collision-free toolpaths, material removal simulations, and machine-specific G-code. They interact via APIs where the CAM engine queries the CAD kernel for surface normals, UV parameters, derivatives, and topological adjacency.</p>",
+    "tags": [
+      "CAD/CAM Architecture",
+      "Geometric Kernels",
+      "B-Rep"
+    ],
+    "companies": [
+      "Autodesk",
+      "Siemens",
+      "Dassault Systèmes"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 2,
+    "question": "How do you compute the surface normal at a given (u, v) parameter on a parametric surface, and why is it critical in CAM?",
+    "answer": "<p>To find the normal on a parametric surface S(u,v), you compute the partial derivatives with respect to u and v (dS/du and dS/dv), which give two tangent vectors. The cross product of these two vectors (dS/du × dS/dv) yields the surface normal vector, which is then normalized by dividing by its magnitude. In CAM, surface normals are critical for calculating tool contact points (CC points), determining cutter location (CL points) for ball/bull-nose mills, and orienting the tool axis in 5-axis machining.</p>",
+    "tags": [
+      "Computational Geometry",
+      "Parametric Surfaces",
+      "Vector Math"
+    ],
+    "companies": [
+      "Hexagon",
+      "PTC",
+      "CNC Software (Mastercam)"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 3,
+    "question": "Explain the difference between Cutter Contact (CC) points and Cutter Location (CL) points.",
+    "answer": "<p>The Cutter Contact (CC) point is the exact geometric point where the cutting tool touches the part surface being machined. The Cutter Location (CL) point is a reference point on the tool (usually the tool tip center or the center of the radius for a ball-end mill) that the CNC machine actually tracks. The CL point is derived from the CC point using the surface normal at the CC point, the tool geometry (radius, corner radius), and the tool axis vector.</p>",
+    "tags": [
+      "Toolpath Generation",
+      "CAM Fundamentals",
+      "Kinematics"
+    ],
+    "companies": [
+      "Autodesk",
+      "CNC Software (Mastercam)",
+      "CGTech"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 4,
+    "question": "How do you calculate the CL point from a CC point for a standard Ball-End Mill, Flat-End Mill, and Bull-Nose (Fillet) End Mill in 3-axis machining?",
+    "answer": "<p>Let CC be the contact point, N be the unit surface normal at CC, R be the tool radius, r be the corner radius, and T = (0,0,1) be the tool axis.</p><ol><li><strong>Ball-End Mill:</strong> Center of ball is C = CC + R*N; Tool tip CL = C - R*T.</li><li><strong>Flat-End Mill (on a non-flat surface):</strong> Let N_xy be the normalized projection of N onto the XY plane; CL = CC + R*N_xy (assuming N_z >= 0).</li><li><strong>Bull-Nose Mill:</strong> Let N_xy be the normalized XY projection of N; the center of the torus tube is P = CC + r*N, and the tool tip CL = P + (R - r)*N_xy - r*T.</li></ol>",
+    "tags": [
+      "Toolpath Math",
+      "Cutter Location",
+      "3-Axis Machining"
+    ],
+    "companies": [
+      "Siemens",
+      "ModuleWorks",
+      "MachineWorks"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 5,
+    "question": "What is the 'Chordal Deviation' (or tolerance) in toolpath generation, and how is it calculated?",
+    "answer": "<p>Chordal deviation is the maximum perpendicular distance between a smooth mathematical curve (or surface) and the linear line segments (G01 moves) used to approximate it. For a curve with local radius of curvature R and a maximum allowed tolerance 'e', the maximum step length 'L' can be approximated using the circular sagitta formula: L = 2 * sqrt(2*R*e - e^2) ≈ 2 * sqrt(2*R*e). CAM developers use this to dynamically adjust point density along a toolpath.</p>",
+    "tags": [
+      "Toolpath Approximation",
+      "Numerical Methods",
+      "Tolerance"
+    ],
+    "companies": [
+      "Autodesk",
+      "Open Mind (hyperMILL)",
+      "Hexagon"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 6,
+    "question": "Explain how Scallop Height (Cusp Height) is related to Stepover (Ae) in 3D surface finishing with a ball-end mill.",
+    "answer": "<p>Scallop height (h) is the height of the unmachined material crest left between two adjacent parallel toolpaths. For a flat surface machined with a ball-end mill of radius R and stepover s, the relationship is s = 2 * sqrt(2*R*h - h^2) ≈ sqrt(8*R*h). If the surface itself has curvature R_s (convex or concave), the effective radius changes to R_eff = (R * R_s) / (R ± R_s), modifying the formula to s ≈ sqrt(8 * R_eff * h).</p>",
+    "tags": [
+      "Surface Finishing",
+      "Stepover",
+      "CAM Math"
+    ],
+    "companies": [
+      "CNC Software (Mastercam)",
+      "Delcam (Autodesk)",
+      "Cimatron"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 7,
+    "question": "How do you algorithmically generate 2D offset polygons for pocket milling, and how do you handle self-intersections?",
+    "answer": "<p>2D polygon offsetting involves moving each edge inward/outward along its normal by distance 'd' and joining adjacent edges with circular arcs (for round corners) or miters. As 'd' increases, local self-intersections (loops) and global self-intersections (pinching into multiple islands) occur. This is handled either via:</p><ol><li>Pairwise offset + winding number / boolean clipping (like Clipperlib/Vatti's algorithm) to trim invalid loops, or</li><li>Constructing the Voronoi Diagram / Straight Skeleton of the polygon, which analytically predicts topological split events and eliminates self-intersections naturally.</li></ol>",
+    "tags": [
+      "2D Pocket Milling",
+      "Computational Geometry",
+      "Polygon Offsetting"
+    ],
+    "companies": [
+      "Autodesk",
+      "CloudNC",
+      "ModuleWorks"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 8,
+    "question": "What is a Voronoi Diagram (or Medial Axis Transform) and how is it used in CAM toolpath generation?",
+    "answer": "<p>The Medial Axis of a 2D boundary is the locus of points that have more than one closest point on the boundary (essentially the 'skeleton' of the shape). In CAM, it is computed via Voronoi diagrams of polygon segments and vertices. It is heavily used for:</p><ol><li>Generating clean, self-intersection-free constant-offset pocket paths,</li><li>Medial-axis machining (starting from the center of a pocket and spiraling out), and</li><li>Calculating the maximum inscribed circle to prevent uncut residual material in sharp corners during roughing.</li></ol>",
+    "tags": [
+      "Voronoi Diagram",
+      "Medial Axis",
+      "Pocket Milling"
+    ],
+    "companies": [
+      "Siemens",
+      "Hexagon",
+      "SprutCAM"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 9,
+    "question": "What are the algorithmic principles behind 'Adaptive Clearing' / 'Trochoidal Milling' (High-Efficiency Milling)?",
+    "answer": "<p>Traditional offset pocketing causes spikes in radial tool engagement (up to 180 degrees) when entering sharp corners, causing tool breakage and heat buildup. Adaptive Clearing maintains a constant radial depth of cut (engagement angle) by tracking the In-Process Stock (IPW) boundary dynamically at every step. When the tool approaches a corner where engagement would exceed the target angle, the algorithm peels away material using smooth spiral/trochoidal arcs, ensuring constant chip load and high feed rates.</p>",
+    "tags": [
+      "Adaptive Clearing",
+      "Trochoidal Milling",
+      "Tool Engagement"
+    ],
+    "companies": [
+      "Autodesk",
+      "VoluMill",
+      "ModuleWorks"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 10,
+    "question": "How do you compute the instantaneous cutter engagement angle during 2D/2.5D milling?",
+    "answer": "<p>At a given tool position P along a trajectory with feed direction vector V, the tool is represented as a circle of radius R. You intersect this circle with the current In-Process Stock (IPW) geometry (represented as a 2D polygon, dexel grid, or signed distance field). The arc segment(s) of the circle that lie inside the stock material define the engagement region. The angle subtended by the entry and exit intersection points with respect to the center P gives the instantaneous radial engagement angle.</p>",
+    "tags": [
+      "Physics-Based CAM",
+      "Engagement Angle",
+      "Simulation"
+    ],
+    "companies": [
+      "CGTech",
+      "Third Wave Systems",
+      "Autodesk"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 11,
+    "question": "Compare the three main geometric representations used for Material Removal Simulation (In-Process Workpiece / IPW): B-Rep, Triangle Mesh, and Dexel/Z-Buffer.",
+    "answer": "<ol><li><strong>B-Rep:</strong> Exact analytical representation. Very slow and prone to boolean robustness failures after thousands of tool moves.</li><li><strong>Triangle Mesh:</strong> Fast rendering, arbitrary 5-axis undercut support, but direct mesh booleans suffer from degenerate triangles and numerical instability.</li><li><strong>Dexel (Depth Elements) / Multi-Dexel (3-axis orthogonal ray grids):</strong> Converts the volume into a 2D grid of 1D line segments. Booleans reduce to simple 1D interval subtractions—extremely fast, robust, parallelizable on GPUs, and industry standard for CAM IPW, reconstructing into a mesh via Dual Contouring/Marching Cubes.</li></ol>",
+    "tags": [
+      "Material Removal Simulation",
+      "Dexel",
+      "IPW",
+      "Data Structures"
+    ],
+    "companies": [
+      "ModuleWorks",
+      "MachineWorks",
+      "CGTech",
+      "Siemens"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 12,
+    "question": "Explain the difference between a single-axis Z-buffer (Heightfield) and a Tri-Dexel (3-Dexel) model for CAM simulation.",
+    "answer": "<p>A single-axis Z-buffer fires rays only along the Z-axis, storing height values per (X,Y) pixel. It cannot represent undercuts (e.g., T-slots, 5-axis cavities) and suffers from aliasing on vertical walls (steep slopes). A Tri-Dexel model uses three orthogonal grids of rays along the X, Y, and Z axes simultaneously, where each ray can store multiple entry/exit intervals. This captures arbitrary 3D undercuts, overhangs, and vertical walls accurately while maintaining the speed of 1D boolean interval arithmetic.</p>",
+    "tags": [
+      "Tri-Dexel",
+      "Simulation",
+      "5-Axis",
+      "Geometric Modeling"
+    ],
+    "companies": [
+      "ModuleWorks",
+      "MachineWorks",
+      "Hexagon"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 13,
+    "question": "How do you compute the 'Swept Volume' of a cutting tool moving along a 3-axis or 5-axis trajectory?",
+    "answer": "<p>As a tool moves from posture A to posture B, the space it occupies is its Swept Volume. Mathematically, by grazing condition theory, the boundary of the swept volume consists of parts of the tool surface at A, parts at B, and the 'envelope surface' where the relative velocity vector V(p) at point p on the tool surface is orthogonal to the tool's outward surface normal N(p) (i.e., V(p) · N(p) = 0). In 3-axis, this silhouette curve is easily found analytically; in 5-axis, it requires solving non-linear equations or approximating via dense sub-stepping of intermediate tool postures.</p>",
+    "tags": [
+      "Swept Volume",
+      "Differential Geometry",
+      "5-Axis Simulation"
+    ],
+    "companies": [
+      "CGTech",
+      "Dassault Systèmes",
+      "Siemens"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 14,
+    "question": "What spatial acceleration structures would you use to speed up collision detection between a cutting tool/holder and a 5 million triangle mesh?",
+    "answer": "<p>You use Bounding Volume Hierarchies (BVH) such as Axis-Aligned Bounding Box (AABB) trees, Oriented Bounding Box (OBB) trees, or k-d trees, alongside Octrees. For a static part mesh, an AABB/OBB tree is built once in O(N log N) time. During collision checking, the moving tool/holder (often modeled as a hierarchy of cylinders/cones or its own OBB tree) queries the part BVH, pruning 99%+ of triangles in O(log N) time before performing exact triangle-cylinder or triangle-triangle intersection tests.</p>",
+    "tags": [
+      "Collision Detection",
+      "BVH",
+      "Spatial Data Structures",
+      "Algorithms"
+    ],
+    "companies": [
+      "Autodesk",
+      "ModuleWorks",
+      "CloudNC"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 15,
+    "question": "What is 'Gouging' in CAM, and what is the difference between Local Gouging, Rear Gouging, and Global Collision?",
+    "answer": "<p>Gouging is when the cutting tool removes material from the desired finished part surface unintentionally.</p><ol><li>Local Gouging occurs right at the Cutter Contact (CC) point when the effective curvature of the tool is smaller than the concave curvature of the surface (the tool cannot fit into the local valley).</li><li>Rear Gouging happens with flat or bull-nose tools in 5-axis machining when the trailing edge of the tool bottom dips into the surface behind the CC point.</li><li>Global Collision is when the tool shaft, flute, or holder hits a distant feature of the part or fixture.</li></ol>",
+    "tags": [
+      "Gouge Avoidance",
+      "5-Axis Machining",
+      "Collision Checking"
+    ],
+    "companies": [
+      "Open Mind (hyperMILL)",
+      "Siemens",
+      "CNC Software (Mastercam)"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 16,
+    "question": "How does the 'Drop-Cutter' (Z-projection) algorithm work for 3-axis toolpath generation on triangle meshes?",
+    "answer": "<p>In Drop-Cutter, for a given (X, Y) tool position, the tool is lowered along the Z-axis until it just touches the triangle mesh without penetrating it. You query a 2D spatial grid or BVH to find all mesh triangles overlapping the tool's 2D XY bounding circle. For each candidate triangle, you perform an analytical contact test against the tool's geometry:</p><ol><li>Facet test (tool touches inside the triangle face),</li><li>Edge test (tool touches a triangle edge), and</li><li>Vertex test (tool touches a triangle vertex). The maximum Z value among all valid contact heights is the safe CL Z-height.</li></ol>",
+    "tags": [
+      "Drop-Cutter",
+      "3-Axis Toolpath",
+      "Mesh Algorithms"
+    ],
+    "companies": [
+      "Autodesk",
+      "Cimatron",
+      "SprutCAM"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 17,
+    "question": "How does the 'Push-Cutter' (Waterline / Z-Level Contouring) algorithm work?",
+    "answer": "<p>While Drop-Cutter fixes (X,Y) and finds Z, Push-Cutter fixes Z (a horizontal slicing plane) and moves the cutter horizontally to find valid (X,Y) contact points for steep walls. Alternatively, for each triangle intersecting the Z-band [Z, Z + ToolHeight], you compute the 2D offset of the triangle's cross-section by the tool's radius profile at that relative height. Taking the 2D boolean union of all these offset primitives at level Z yields the exact collision-free waterline contour toolpath.</p>",
+    "tags": [
+      "Waterline Machining",
+      "Z-Level Finishing",
+      "Push-Cutter"
+    ],
+    "companies": [
+      "Delcam (Autodesk)",
+      "Hexagon",
+      "Open Mind (hyperMILL)"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 18,
+    "question": "Why does standard 3-axis 'Parallel Lace' (Raster) finishing fail on steep walls, and how do you solve it algorithmically?",
+    "answer": "<p>In Parallel Lace finishing, stepover passes are spaced equally in the XY plane. When the surface slope becomes steep (approaching vertical), a constant ΔXY step projects onto a huge ΔZ drop on the wall, leaving massive scallops. Algorithmically, this is solved by 'Shallow and Steep' (Combined) machining: calculate the surface normal N at all points, segment the surface by slope angle (e.g., threshold 45° based on N_z = cos(θ)), machine shallow regions (<45°) with Parallel/3D Offset, and machine steep regions (>45°) with Z-Level Waterline contours.</p>",
+    "tags": [
+      "Surface Finishing",
+      "Steep and Shallow",
+      "Toolpath Strategy"
+    ],
+    "companies": [
+      "Autodesk",
+      "CNC Software (Mastercam)",
+      "Siemens"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 19,
+    "question": "Explain the concept of '3D Constant Scallop' (3D Geodesic Offset) toolpaths on meshes or B-Reps.",
+    "answer": "<p>Unlike 2D projection paths where constant XY stepover causes varying stepover on sloped surfaces, 3D Constant Scallop steps over by a constant geodesic distance directly along the 3D surface. Starting from a seed boundary curve on the surface, the algorithm computes a geodesic distance field (using Fast Marching Method, Heat Method, or exact Mitchell-Mount-Papadimitriou algorithm on meshes) and extracts iso-distance contours, dynamically adjusting the spacing based on local surface curvature to maintain a uniform cusp height everywhere.</p>",
+    "tags": [
+      "Constant Scallop",
+      "Geodesic Distance",
+      "Differential Geometry"
+    ],
+    "companies": [
+      "ModuleWorks",
+      "Autodesk",
+      "Dassault Systèmes"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 20,
+    "question": "Define 'Lead Angle' and 'Tilt (Lag/Side) Angle' in 5-axis machining and explain how their local coordinate frame is constructed.",
+    "answer": "<p>At a Cutter Contact point CC, we define a local Darboux/Frenet-like frame (F, N, B): F is the normalized projection of the feed direction vector onto the tangent plane, N is the outward unit surface normal, and B = N × F is the bi-normal (transverse/stepover direction). 'Lead Angle' is the rotation of the tool axis around B (tilting forward/backward in the feed direction, commonly 3°–5° to avoid zero-speed cutting at the center of a ball mill or rear gouging with a flat mill). 'Tilt Angle' is the rotation around F (tilting sideways away from walls).</p>",
+    "tags": [
+      "5-Axis Machining",
+      "Lead and Tilt",
+      "Coordinate Systems"
+    ],
+    "companies": [
+      "Open Mind (hyperMILL)",
+      "Siemens",
+      "Hexagon"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 21,
+    "question": "What is 'Swarf Machining' (Flank Milling), and why is it mathematically challenging on non-developable ruled surfaces?",
+    "answer": "<p>Swarf machining cuts a wall using the side (flank) of a cylindrical or conical tool rather than the tip, requiring only a single pass instead of many Z-level steps. The surface being cut is typically a ruled surface defined by a top rail and bottom rail. If the ruled surface is 'developable' (surface normals along any ruling line are parallel, i.e., zero Gaussian curvature), a cylindrical tool can touch the entire ruling line cleanly. If it is 'non-developable' (twisted), the normals twist along the ruling line, causing inevitable overcutting/undercutting (gouging). Algorithms must optimize the tool axis posture per position using least-squares minimization to balance and minimize this twist error within tolerance.</p>",
+    "tags": [
+      "Swarf Machining",
+      "Flank Milling",
+      "Ruled Surfaces",
+      "Optimization"
+    ],
+    "companies": [
+      "Open Mind (hyperMILL)",
+      "Dassault Systèmes",
+      "ModuleWorks"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 22,
+    "question": "How do you smooth a 5-axis toolpath's tool axis vectors (I, J, K) to prevent jerky rotary axis movements while guaranteeing no collisions?",
+    "answer": "<p>Raw collision-avoidance alters tool vectors abruptly, causing machine rotary axes (A/B/C) to decelerate violently. To smooth them:</p><ol><li>Represent tool orientations on the unit sphere S^2 (or as unit quaternions).</li><li>For each CL point, compute the 'Configuration Space (C-Space) Obstacle'—a valid angular cone/polygon of collision-free (Lead, Tilt) orientations.</li><li>Formulate a constrained optimization problem (e.g., minimizing second derivatives / angular acceleration ∑ ||T_{i+1} - 2T_i + T_{i-1}||^2) subject to each T_i remaining inside its collision-free angular region, or apply iterative spherical linear interpolation (SLERP) clamping.</li></ol>",
+    "tags": [
+      "5-Axis Smoothing",
+      "Quaternions",
+      "Optimization",
+      "C-Space"
+    ],
+    "companies": [
+      "ModuleWorks",
+      "Siemens",
+      "Autodesk"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 23,
+    "question": "What is a Post-Processor in CAM, and what is the difference between CL-Data (APT) and G-Code?",
+    "answer": "<p>CL-Data (Cutter Location Data, historically APT format) is machine-independent output from the CAM kernel containing generic positions (X, Y, Z), tool axis vectors (I, J, K), feed rates, and spindle commands. A Post-Processor is a translator module that converts this generic CL-Data into machine-specific NC code (G-code/M-code for Fanuc, Siemens Sinumerik, Heidenhain, etc.), accounting for the exact machine kinematics, rotary axis limits, work offsets (G54), canned cycles (G81/G83), and controller syntax.</p>",
+    "tags": [
+      "Post-Processor",
+      "G-Code",
+      "CL-Data",
+      "CNC"
+    ],
+    "companies": [
+      "Autodesk",
+      "ICAM",
+      "CGTech",
+      "CNC Software (Mastercam)"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 24,
+    "question": "Explain the Inverse Kinematics problem for a 5-axis Table-Table (e.g., AC trunnion) CNC machine.",
+    "answer": "<p>Given a desired tool tip position P = (x, y, z) and unit tool axis vector T = (i, j, k) in the workpiece coordinate system, Inverse Kinematics calculates the machine joint coordinates (X_m, Y_m, Z_m, A, C). For a standard orthogonal AC trunnion where A tilts around X and C rotates around Z: Tilt angle A = ±arccos(k). If A != 0, C = atan2(i, -j) (for positive A solution). Once A and C are found, the part position P is rotated by the forward transformation matrices R_x(A) * R_z(C) (along with pivot offsets if TCP is off) to compute the linear machine coordinates (X_m, Y_m, Z_m).</p>",
+    "tags": [
+      "Inverse Kinematics",
+      "5-Axis",
+      "Post-Processor",
+      "Matrix Math"
+    ],
+    "companies": [
+      "Siemens",
+      "Hexagon",
+      "CGTech"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 25,
+    "question": "What is a 'Kinematic Singularity' in 5-axis machining (e.g., on an AC trunnion machine), and how do CAM systems or Post-Processors handle it?",
+    "answer": "<p>In an AC trunnion machine, a singularity (Gimbal Lock) occurs when the tool axis vector T approaches (0, 0, 1), meaning tilt angle A approaches 0°. At A = 0°, the C-axis aligns with the tool axis; C can be any angle, and a tiny change in tool vector near (0,0,1) requires an instantaneous 180° swing of the C-axis, causing dwell marks, gouging, or velocity limit alarms. CAM systems handle this by:</p><ol><li>Tilting the part setup or adding a minimum Lead/Tilt angle to stay away from the pole,</li><li>Blending/retracting when crossing the pole, or</li><li>Splitting the move accurately while letting RTCP manage linear compensation.</li></ol>",
+    "tags": [
+      "Singularities",
+      "Gimbal Lock",
+      "5-Axis Kinematics"
+    ],
+    "companies": [
+      "Open Mind (hyperMILL)",
+      "Siemens",
+      "ICAM"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 26,
+    "question": "What is RTCP / TCPM (Rotational Tool Center Point / G43.4 / TRAORI), and how does it change post-processor output and multi-axis linearization?",
+    "answer": "<p>Without RTCP, the post-processor must know the exact pivot distances of the machine rotary axes and gauge length of the tool, outputting machine coordinates adjusted for rotation; furthermore, as rotary axes rotate linearly between two blocks, the tool tip swings in an arc, requiring the CAM system to linearize (insert dense sub-points) to prevent gouging. With RTCP enabled on the CNC controller (e.g., Fanuc G43.4, Siemens TRAORI), the post outputs workpiece-space (X,Y,Z) and angles (A,C) or vectors (I,J,K), and the CNC controller dynamically compensates for rotary pivot offsets and tool length in real time at the servo interpolation rate.</p>",
+    "tags": [
+      "RTCP",
+      "TCPM",
+      "5-Axis CNC",
+      "Post-Processing"
+    ],
+    "companies": [
+      "Siemens",
+      "Fanuc",
+      "Autodesk",
+      "CGTech"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 27,
+    "question": "How do you fit circular arcs (G02/G03) to a sequence of discrete linear toolpath points (G01)?",
+    "answer": "<p>Dense G01 point clouds can choke older CNC controllers and cause jerky motion. Arc fitting slides a window along consecutive points lying within a primary plane (G17 XY, G18 XZ, G19 YZ). Three non-collinear points define a candidate circle (center and radius). Subsequent points are added to the window as long as:</p><ol><li>Their perpendicular distance to the circle is within the arc fitting tolerance,</li><li>The chordal deviation of the original segments matches the arc within tolerance, and</li><li>The turning direction (CW/CCW) remains consistent. Often, Least-Squares Circle Fitting (e.g., Kåsa or Pratt method) is used to optimize the center before clamping endpoints.</li></ol>",
+    "tags": [
+      "Arc Fitting",
+      "G02/G03",
+      "Curve Fitting",
+      "Toolpath Optimization"
+    ],
+    "companies": [
+      "CNC Software (Mastercam)",
+      "Autodesk",
+      "SprutCAM"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 28,
+    "question": "What are NURBS (Non-Uniform Rational B-Splines), why are they used in CAD/CAM, and what is G06.2 / BSPLINE interpolation?",
+    "answer": "<p>NURBS are mathematical representations capable of accurately modeling both standard analytical shapes (lines, circles, cones) and complex freeform organic surfaces using control points, weights, knot vectors, and degree. In CAM, instead of tessellating a smooth curve into thousands of short G01 lines, modern CAM systems can fit a 3D or 5D B-Spline directly to the CL points and output native NURBS G-code (e.g., Fanuc G06.2, Siemens BSPLINE). This drastically reduces NC file size, ensures C2 continuity (continuous acceleration), reduces machine jerk, and yields superior surface finish.</p>",
+    "tags": [
+      "NURBS",
+      "Spline Interpolation",
+      "CAD/CAM Math"
+    ],
+    "companies": [
+      "Siemens",
+      "Dassault Systèmes",
+      "Open Mind (hyperMILL)"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 29,
+    "question": "Why does floating-point arithmetic (IEEE 754) cause severe robustness issues in geometric algorithms, and how do you mitigate it?",
+    "answer": "<p>IEEE 754 floating-point numbers have finite precision (53 bits of significand for `double`), leading to round-off errors and catastrophic cancellation. In geometric predicates—like checking if a point is left, right, or on a line (2D orientation test via determinant)—floating-point inaccuracy can return the wrong sign, causing topological inconsistencies (e.g., infinite loops in Delaunay triangulation or corrupted polygon booleans). Mitigation strategies include:</p><ol><li>Using epsilon tolerances carefully with topological snapping,</li><li>Scaling coordinates to 64-bit/128-bit integers (like Clipperlib), and</li><li>Using Exact Geometric Predicates with adaptive precision floating-point arithmetic (Shewchuk's predicates).</li></ol>",
+    "tags": [
+      "Floating-Point Precision",
+      "Numerical Robustness",
+      "Computational Geometry",
+      "C++"
+    ],
+    "companies": [
+      "Autodesk",
+      "Siemens",
+      "Dassault Systèmes",
+      "ModuleWorks"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 30,
+    "question": "What is 'Rest Machining' (Pencil Milling / Corner Cleanup), and how do you compute the uncut areas left by a previous larger tool?",
+    "answer": "<p>Rest machining identifies and removes material left in tight corners or fillets that a previous larger cutter (radius R1) could not reach, using a smaller cutter (radius R2 < R1). There are two main algorithmic approaches:</p><ol><li><strong>Geometry-based (Bitangency/Offset):</strong> Compute the theoretical offset surface for R1 and find areas of self-intersection (the bitangent trace where R1 contacts two surfaces simultaneously, forming a 'pencil' trace), then expand that boundary by R1 to define the rest region for R2.</li><li><strong>Stock-based (IPW):</strong> Compare the current Tri-Dexel/Mesh In-Process Workpiece against the target CAD model; any voxel/dexel where thickness exceeds the rest threshold is projected to bound the R2 toolpaths.</li></ol>",
+    "tags": [
+      "Rest Machining",
+      "Pencil Milling",
+      "IPW",
+      "Toolpath Algorithms"
+    ],
+    "companies": [
+      "Delcam (Autodesk)",
+      "Cimatron",
+      "CNC Software (Mastercam)"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 31,
+    "question": "How is 'Feature Recognition' (AFR - Automatic Feature Recognition) implemented to detect holes, pockets, slots, and bosses from a dumb B-Rep solid (STEP file)?",
+    "answer": "<p>When importing a STEP file without feature history, AFR builds an Attributed Adjacency Graph (AAG). In the AAG, every B-Rep face is a node (storing surface type: plane, cylinder, cone, torus) and every shared edge is an arc labeled by convexity/concavity (concave = inner corner/fillet, convex = outer edge/boss). Subgraph isomorphism, rule-based heuristics, or Graph Neural Networks (GNNs) scan the AAG: for example, a cylindrical face with inward-pointing normals bounded by a concave circular edge to a planar bottom face is classified as a 'Blind Hole'; a planar bottom face surrounded by a loop of concave edges to vertical planar walls is a 'Pocket'.</p>",
+    "tags": [
+      "Feature Recognition",
+      "B-Rep",
+      "Graph Algorithms",
+      "CAM Automation"
+    ],
+    "companies": [
+      "CloudNC",
+      "HCL (CAMWorks)",
+      "Siemens",
+      "Hexagon"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 32,
+    "question": "In Lathe / Turning CAM, how do you extract the 2D 'Spun Profile' (Turning Envelope) from an arbitrary 3D CAD solid or mesh?",
+    "answer": "<p>In turning, the part rotates around the spindle axis (Z-axis), so the turning tool only sees the maximum radial envelope of the 3D geometry. To extract the 2D (Z, R) spun profile:</p><ol><li>For a triangle mesh, project every triangle into cylindrical coordinates (Z, R = sqrt(X^2 + Y^2)); note that a 3D straight line segment becomes a hyperbola in (Z, R) space! Sample or analytically compute the upper envelope of these hyperbolic patches and compute their 2D boolean union.</li><li>For exact B-Reps, revolve faces or compute silhouette curves where the surface normal is coplanar with the Z-axis, project to the ZR plane, and extract the outer boundary.</li></ol>",
+    "tags": [
+      "Turning",
+      "Mill-Turn",
+      "Spun Profile",
+      "Computational Geometry"
+    ],
+    "companies": [
+      "CNC Software (Mastercam)",
+      "Hexagon (ESPRIT)",
+      "Autodesk"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 33,
+    "question": "How do you optimize 'Linking Moves' (retracts, leads, transitions) and solve the 'Hole Drilling Ordering' problem?",
+    "answer": "<p>Ordering hundreds of holes or pocket islands to minimize non-cutting air-travel time is a classic Traveling Salesperson Problem (TSP), which is NP-hard. CAM developers use fast heuristics: Nearest Neighbor initialization followed by 2-Opt or 3-Opt local search, or Lin-Kernighan heuristics, which yield near-optimal paths in milliseconds. For linking moves between 3D toolpath segments, the algorithm checks if a 'Direct/Stay-Down' connection along the surface or at a low clearance height is collision-free against the IPW/Part; if a collision is detected, it smoothly arcs out (Lead-Out), retracts to a safe plane/bounding cylinder, traverses, and arcs back in (Lead-In/Ramp).</p>",
+    "tags": [
+      "Toolpath Linking",
+      "TSP Optimization",
+      "Graph Theory"
+    ],
+    "companies": [
+      "Autodesk",
+      "CloudNC",
+      "Siemens"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 34,
+    "question": "Explain how C++ multithreading and SIMD/GPU parallelization are applied in modern CAM toolpath generation.",
+    "answer": "<p>CAM calculations are computationally heavy.</p><ol><li><strong>Z-Level / Parallel Lace paths are 'embarrassingly parallel':</strong> each Z-slice or raster plane can be computed independently on separate CPU threads using thread pools, OpenMP, or Intel TBB (`tbb::parallel_for`).</li><li><strong>Drop-Cutter point projection:</strong> projecting thousands of (X,Y) points onto a read-only BVH tree can be vectorized using AVX2/AVX-512 SIMD (testing 4 or 8 rays/triangles simultaneously) or offloaded to GPUs (CUDA/Compute Shaders).</li><li>Tri-Dexel material removal simulation maps directly to GPU architectures where each pixel/dexel column is updated independently by a GPU thread.</li></ol>",
+    "tags": [
+      "C++",
+      "Multithreading",
+      "SIMD",
+      "GPU Computing",
+      "Performance"
+    ],
+    "companies": [
+      "ModuleWorks",
+      "Autodesk",
+      "MachineWorks",
+      "CloudNC"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 35,
+    "question": "Why is cache locality critical when designing Mesh or BVH data structures in C++ for CAM, and how do you achieve it?",
+    "answer": "<p>Pointer-heavy data structures (like allocating every triangle or BVH node on the heap with `new` and linking via pointers) cause constant CPU cache misses and heap fragmentation, stalling the CPU pipeline for hundreds of cycles. To achieve cache locality:</p><ol><li><strong>Store vertices, triangles, and BVH nodes in contiguous flat arrays (`std:</strong> :vector`) using integer indices instead of 64-bit pointers.</li><li>Size a BVH node to fit exactly into a 32-byte or 64-byte CPU cache line.</li><li>Reorder triangles and vertices spatially using a Space-Filling Curve (Morton Code / Z-order curve) so geometrically adjacent elements reside next to each other in RAM.</li></ol>",
+    "tags": [
+      "C++ Optimization",
+      "Cache Locality",
+      "Memory Management",
+      "Data Structures"
+    ],
+    "companies": [
+      "Autodesk",
+      "Siemens",
+      "ModuleWorks",
+      "PTC"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 36,
+    "question": "What is the 'Half-Edge' (or Winged-Edge) data structure, and why is it preferred over a simple Triangle Soup (STL) in CAM?",
+    "answer": "<p>A 'Triangle Soup' (like raw STL data) is just an unstructured list of triangles with duplicated vertex coordinates and zero topological connectivity. Finding adjacent triangles or open boundary edges takes O(N) time unless rebuilt. A Half-Edge data structure splits every undirected edge into two oppositely oriented 'half-edges', each storing references to its target vertex, adjacent face, next half-edge around the face, and opposite (twin) half-edge. This allows O(1) constant-time traversal of vertex rings, adjacent faces, and boundary loops, which is essential for mesh offsetting, geodesic tracing, and region segmentation.</p>",
+    "tags": [
+      "Half-Edge",
+      "Mesh Topology",
+      "Data Structures",
+      "C++"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Autodesk",
+      "Hexagon"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 37,
+    "question": "How do you detect and repair common defects in imported STL meshes (gaps, T-junctions, flipped normals, self-intersections) before generating toolpaths?",
+    "answer": "<ol><li>Duplicate vertices are merged using a spatial hash grid or k-d tree within a sewing tolerance.</li><li>T-junctions (where a vertex lies on the interior of another edge) are fixed by splitting the long edge.</li><li>Flipped normals are unified by building the adjacency graph and performing a Breadth-First Search (BFS) to align half-edge orientations consistently, then using ray-casting or signed volume calculation to ensure normals point outward.</li><li>Small gaps/holes are filled by detecting naked boundary loops and triangulating them via minimum-weight dynamic programming. Note: Many modern CAM drop-cutter kernels are designed to be 'tolerant' of dirty meshes by treating triangles independently with an epsilon margin.</li></ol>",
+    "tags": [
+      "Mesh Repair",
+      "STL",
+      "Computational Geometry",
+      "Robustness"
+    ],
+    "companies": [
+      "Materialise",
+      "Autodesk",
+      "Cimatron"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 38,
+    "question": "What are the geometric differences and algorithmic challenges of 'Additive/Hybrid CAM' (3D Printing / DED) compared to Subtractive Milling?",
+    "answer": "<p>In subtractive milling, you remove material from a stock block from the outside in, and passing over already-cut air is harmless. In Directed Energy Deposition (DED) or Wire-Arc Additive Manufacturing (WAAM):</p><ol><li>Material is added layer-by-layer (often along non-planar curved 5-axis surfaces rather than flat 2.5D slices).</li><li>Over-deposition or voids in sharp pocket corners cause catastrophic build defects because bead width is fixed; therefore, adaptive medial-axis pathing with variable feedrate/laser power is required.</li><li>The gravity vector relative to the molten pool matters, constraining 5-axis table tilting.</li><li>In Hybrid CNC machines, the IPW must dynamically support both boolean addition (cladding) and boolean subtraction (milling).</li></ol>",
+    "tags": [
+      "Additive Manufacturing",
+      "Hybrid CAM",
+      "Non-Planar Slicing",
+      "DED"
+    ],
+    "companies": [
+      "Siemens",
+      "Autodesk",
+      "Open Mind (hyperMILL)",
+      "ModuleWorks"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 39,
+    "question": "How do specialized Impeller / Blisk (Multi-Blade) 5-axis toolpath algorithms work?",
+    "answer": "<p>Impellers feature narrow, twisted, overlapping channels bounded by a 'Hub' (floor), 'Shroud' (ceiling curve), 'Main Blade', and 'Splitter Blade'. Standard surface projection fails due to severe undercuts and tight clearances. Impeller algorithms parameterize the flow channel as a 3D hexahedral volume (u: leading-to-trailing edge, v: hub-to-shroud, w: blade-to-blade). Iso-parametric layers are interpolated between the Hub and Shroud (v-parameter) for roughing and between blade surfaces for finishing. Tool axis vectors are computed by interpolating between the ruling lines of adjacent blades while projecting the tool assembly against the channel walls to guarantee collision-free entry.</p>",
+    "tags": [
+      "Impeller Machining",
+      "5-Axis",
+      "Turbomachinery",
+      "Parametric Interpolation"
+    ],
+    "companies": [
+      "Open Mind (hyperMILL)",
+      "Siemens",
+      "Hexagon",
+      "ModuleWorks"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 40,
+    "question": "How is 5-Axis Port / Tube Machining (e.g., engine cylinder head intake/exhaust ports) computed?",
+    "answer": "<p>A port is a curved tubular cavity accessible from both ends (top and bottom openings), usually machined with a lollipop (undercutting spherical) cutter on a tapered arbor. The algorithm first extracts the 3D 'Spine' (medial centerline curve) of the tube. The port surface is parameterized along this spine (axial parameter u) and circumferentially around it (angle θ). The tool enters from one opening, keeping the lollipop center on the offset surface while pointing the tool shaft toward the entry opening's safe zone (often constrained to pass near the spine entrance) up to the midpoint, and repeats from the opposite end with a seamless overlap blend zone in the middle.</p>",
+    "tags": [
+      "Port Machining",
+      "5-Axis",
+      "Medial Spine",
+      "Collision Avoidance"
+    ],
+    "companies": [
+      "CNC Software (Mastercam)",
+      "Open Mind (hyperMILL)",
+      "Autodesk"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 41,
+    "question": "What is 'Cutter Compensation' (G41/G42) in CNC machining, and how does 'Wear' vs 'Control' compensation affect CAM output?",
+    "answer": "<p>Cutter radius compensation allows the CNC operator to adjust for minor differences between the programmed tool diameter and the actual measured/worn tool diameter on the shop floor without regenerating the CAM toolpath.</p><ol><li>In 'Control' compensation, the CAM system outputs the exact CAD part contour (CC points), and the CNC controller shifts the path by the full tool radius stored in its offset table.</li><li>In 'Wear' compensation (most common), the CAM system outputs the already-offset CL path for the nominal tool radius, and the CNC controller only shifts it by the small wear delta (e.g., -0.02 mm). The CAM developer must ensure lead-in/lead-out moves are longer than the compensation radius and contain no tight internal radii smaller than the tool, or the CNC will trigger a 'Cutter Comp Interference' alarm.</li></ol>",
+    "tags": [
+      "Cutter Compensation",
+      "G41/G42",
+      "G-Code",
+      "CNC Fundamentals"
+    ],
+    "companies": [
+      "CNC Software (Mastercam)",
+      "Autodesk",
+      "Hexagon"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 42,
+    "question": "What is 'Inverse Time Feedrate' (G93) in multi-axis machining, and why is it necessary?",
+    "answer": "<p>In standard G94 mode, feedrate is specified in linear units per minute (mm/min or inch/min). However, when rotary axes (A, B, C) move simultaneously with linear axes (X, Y, Z) on a controller without RTCP, the controller struggles to combine degrees/min and mm/min into a consistent surface speed at the tool tip. Inverse Time Feedrate (G93) solves this by specifying the time required to complete each individual G01 move as F = 1 / T_minutes (i.e., moves per minute). If a 2 mm 5-axis segment should be cut at 1000 mm/min, it takes 0.002 minutes, so the post-processor outputs F500.0 for that specific block.</p>",
+    "tags": [
+      "Inverse Time Feedrate",
+      "G93",
+      "Post-Processor",
+      "Multi-Axis"
+    ],
+    "companies": [
+      "ICAM",
+      "CGTech",
+      "Autodesk",
+      "CNC Software (Mastercam)"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 43,
+    "question": "How does 'Feedrate Optimization' (Physics-Based Feedrate Scheduling) work in CAM?",
+    "answer": "<p>Standard CAM toolpaths use a constant programmed feedrate, meaning the tool cuts too slowly during light cuts (air or thin stock corners) and experiences excessive force spikes during heavy cuts (full slotting or thick rest material). Physics-based feedrate optimization simulates the toolpath through the Tri-Dexel In-Process Workpiece (IPW) to compute the exact Material Removal Rate (MRR, in cm³/min), radial engagement, axial depth, and instantaneous chip thickness at every micro-segment. Using mechanistic cutting force models (e.g., Altintas model), it dynamically scales the feedrate F on every G01 block to maintain a constant target cutting force, spindle torque, or maximum chip thickness.</p>",
+    "tags": [
+      "Feedrate Optimization",
+      "MRR",
+      "Cutting Physics",
+      "Simulation"
+    ],
+    "companies": [
+      "CGTech (Vericut Force)",
+      "Third Wave Systems",
+      "ModuleWorks",
+      "Hexagon"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 44,
+    "question": "Explain how On-Machine Probing (Inspection) toolpaths are generated and how 'Alignment / Best-Fit' works.",
+    "answer": "<p>Touch probes (e.g., Renishaw) use a ruby stylus sphere of radius R. The CAM developer generates collision-free approach vectors normal to the target CAD surface, stopping at a standoff clearance distance, executing a protected probe move (G31 skip function), and retracting. Because the machine records the center of the ruby sphere upon trigger, the post or inspection software offsets the measured point by R along the CAD surface normal (or fits a plane/circle to multiple points). For complex castings, 'Best-Fit Alignment' uses the Iterative Closest Point (ICP) algorithm (via Singular Value Decomposition - SVD) to compute the rigid 6-DOF transformation matrix (X, Y, Z, A, B, C) that minimizes the squared distance between probed points and the nominal CAD surfaces, updating the CNC work offset dynamically.</p>",
+    "tags": [
+      "Probing",
+      "Metrology",
+      "ICP Algorithm",
+      "SVD"
+    ],
+    "companies": [
+      "Hexagon",
+      "Renishaw",
+      "Autodesk",
+      "Siemens"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 45,
+    "question": "What is a 'Signed Distance Field' (SDF) or 'Voxel Grid', and what are its pros and cons for 3D toolpath offsetting?",
+    "answer": "<p>A Signed Distance Field (SDF) represents a 3D object implicitly on a spatial grid (or octree) where every grid node stores the shortest orthogonal distance to the object's surface (negative inside, positive outside). Pros: Computing a 3D offset surface of radius R (such as the CL surface for a ball-end mill) is trivial—you simply extract the iso-surface at distance d = R using Marching Cubes or Dual Contouring, completely immune to the self-intersection nightmares of parametric B-Rep offsetting! Cons: Memory consumption scales cubically O(N^3) unless sparse octrees (like OpenVDB) are used, and sharp edges can get smoothed unless adaptive grid resolution or hermite data (surface normals) are preserved.</p>",
+    "tags": [
+      "Signed Distance Field",
+      "Voxels",
+      "OpenVDB",
+      "3D Offsetting"
+    ],
+    "companies": [
+      "Autodesk",
+      "nTopology",
+      "CloudNC"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 46,
+    "question": "How do you prevent 'Plunging' into solid material with a non-center-cutting tool, and how do you program Helical / Ramp entry moves?",
+    "answer": "<p>Flat-end and bull-nose mills often have poor axial cutting capability at their center and will chip or break if plunged straight down (Z-axis) into solid stock. The CAM engine tracks the current IPW stock boundary. If a plunge point lies inside the stock, it substitutes an entry strategy:</p><ol><li>Pre-drill hole check,</li><li>Entering from outside the stock boundary horizontally,</li><li>Helical Ramping (moving in a circle of diameter D_helix while descending at a ramp angle α, e.g., 2°–3°, so ΔZ per revolution = π * D_helix * tan(α)), or</li><li>Profile Ramping (following the actual toolpath contour itself while gradually descending at angle α until target Z-depth is reached).</li></ol>",
+    "tags": [
+      "Ramping",
+      "Helical Entry",
+      "Toolpath Safety",
+      "CAM Fundamentals"
+    ],
+    "companies": [
+      "CNC Software (Mastercam)",
+      "Autodesk",
+      "Siemens"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 47,
+    "question": "What are Barrel Cutters (Circle-Segment / Lens / Tangent Cutters), and how do they change 5-axis finishing calculations?",
+    "answer": "<p>A Barrel Cutter has a side cutting profile formed by a circular arc with a massive radius of curvature (e.g., R = 250 mm to 1000 mm) packed into a compact Ø10 mm tool diameter, combined with a small corner tip radius (e.g., r = 2 mm). Because stepover for a given scallop height h is proportional to sqrt(R_eff), a 500 mm barrel radius allows a 5x–10x larger stepover than a standard Ø10 mm ball mill (R = 5 mm), cutting cycle times by 80%. Algorithmically, the CAM developer can no longer treat the tool as a simple sphere; the contact point CC lies on the large barrel arc, requiring exact 5-axis tangent alignment between the barrel arc center, the contact normal, and a precise tilt angle to avoid gouging adjacent regions with the upper or lower transition blends of the barrel.</p>",
+    "tags": [
+      "Barrel Cutters",
+      "Circle-Segment Tools",
+      "5-Axis Finishing",
+      "Tool Geometry"
+    ],
+    "companies": [
+      "Open Mind (hyperMILL)",
+      "Siemens",
+      "Mastercam",
+      "ModuleWorks"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 48,
+    "question": "How do you calculate the intersection between a Parametric Ray/Line and a NURBS Surface?",
+    "answer": "<p>Ray-NURBS intersection is fundamental for tool projection and probing. Because a NURBS surface S(u,v) can have high polynomial degree, there is no closed-form algebraic solution. A two-phase approach is used:</p><ol><li><strong>Subdivision / Broad Phase:</strong> Use the Convex Hull property of NURBS—subdivide the surface via knot insertion (Bézier extraction) into a BVH of control point bounding boxes, pruning patches that the ray misses.</li><li><strong>Narrow Phase (Newton-Raphson):</strong> Represent the ray as the intersection of two orthogonal planes P1·X = d1 and P2·X = d2. Formulate the 2D non-linear system F(u,v) = [P1·S(u,v) - d1, P2·S(u,v) - d2] = [0, 0] and solve iteratively using the 2x2 Jacobian matrix built from surface partial derivatives ∂S/∂u and ∂S/∂v.</li></ol>",
+    "tags": [
+      "NURBS",
+      "Ray Tracing",
+      "Newton-Raphson",
+      "Numerical Methods"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Siemens",
+      "PTC",
+      "OpenCASCADE"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 49,
+    "question": "What are the challenges of Synchronized Multi-Channel Mill-Turn / Swiss-Type CAM programming?",
+    "answer": "<p>Swiss-type lathes and multi-turret mill-turn centers feature multiple independent kinematic channels (e.g., Main Spindle, Sub-Spindle, Upper B-axis Milling Head, Lower Turret) operating simultaneously in a tight work envelope. From a CAM software engineering perspective:</p><ol><li>The Kinematic Tree is dynamic—during part pick-off, both spindles clamp the workpiece simultaneously, and after cutoff, the part transfers ownership to the sub-spindle's coordinate frame.</li><li>Post-processing requires generating multiple synchronized NC files containing Wait/Sync codes (e.g., Fanuc M-codes or Siemens WAITM) on a Gantt-chart timeline.</li><li>Collision detection and IPW simulation must run across all channels concurrently in time-stepped lockstep.</li></ol>",
+    "tags": [
+      "Mill-Turn",
+      "Swiss Machining",
+      "Multi-Channel",
+      "Kinematics"
+    ],
+    "companies": [
+      "Hexagon (ESPRIT)",
+      "Siemens",
+      "CGTech",
+      "TopSolid"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 50,
+    "question": "How would you design an Automated Regression Testing framework for a CAM Toolpath Kernel?",
+    "answer": "<p>Testing geometric CAM algorithms is tricky because minor floating-point variations across compilers, OS, or multithreading schedules can slightly alter point coordinates without making the toolpath wrong. A robust regression framework shouldn't rely solely on strict string-diffing of G-code. Instead, it should verify Geometric Invariants:</p><ol><li><strong>Gouge Test:</strong> Simulate the generated toolpath using a high-precision Tri-Dexel/Signed-Distance verifier and assert that the minimum distance to the target CAD surface is >= -Tolerance (zero gouges).</li><li><strong>Rest Material Test:</strong> Assert that finished surfaces have remaining stock <= Scallop_Tolerance.</li><li><strong>Kinematic Sanity Test:</strong> Assert no sudden spikes in tool axis angular velocity, no rapid moves (G00) intersecting the IPW, and total path length / cycle time stays within ±1% of the baseline.</li></ol>",
+    "tags": [
+      "Software Architecture",
+      "QA Automation",
+      "Geometric Verification",
+      "CAM Kernel"
+    ],
+    "companies": [
+      "Autodesk",
+      "ModuleWorks",
+      "CloudNC",
+      "Siemens"
+    ],
+    "role_level": "Sr"
+  }
+]

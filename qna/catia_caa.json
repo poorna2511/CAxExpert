@@ -1,0 +1,831 @@
+[
+  {
+    "number": 1,
+    "question": "What is CAA (Component Application Architecture) and how does it fundamentally differ from standard CATIA Automation / VBA?",
+    "answer": "<p><strong>CAA (Component Application Architecture)</strong> is Dassault Systèmes' native C++ component-oriented development framework providing deep kernel-level access to CATIA data models, geometry engines, and lifecycle mechanisms.</p><h4>Key Differences:</h4><table border='1' cellpadding='6' style='border-collapse: collapse; width: 100%;'><thead><tr style='background-color: #f2f2f2;'><th>Dimension</th><th>CAA (C++)</th><th>Automation (VBA / CATScript / Python)</th></tr></thead><tbody><tr><td><strong>Execution Model</strong></td><td>Native compiled C++ DLLs executed inside CATIA memory space.</td><td>Interpreted COM / IDL wrappers.</td></tr><tr><td><strong>Access Scope</strong></td><td>Kernel/Modeler level (CGM, Topological bodies, Internal Specs, Custom Feature creation).</td><td>High-level exposed UI object model (Document, Part, HybridBody).</td></tr><tr><td><strong>Custom Features</strong></td><td>Full support to define new StartUps, features, build operations, and catalogs.</td><td>Cannot create custom features (restricted to existing PowerCopies/UDFs).</td></tr><tr><td><strong>Performance</strong></td><td>High execution speed via direct pointer access and minimal marshaling.</td><td>Slower due to COM marshaling overhead.</td></tr><tr><td><strong>Build System</strong></td><td>Requires mkmk toolchain, C++ compiler, licensing, and rigorous memory handling.</td><td>Rapid prototyping; no compilation required.</td></tr></tbody></table>",
+    "tags": [
+      "CAA Architecture",
+      "Automation vs CAA",
+      "Fundamentals"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Boeing",
+      "Airbus",
+      "Tata Technologies"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 2,
+    "question": "Explain the directory workspace hierarchy of a CAA project and the roles of IdentityCard.xml and Imakefile.mk.",
+    "answer": "<p>A CAA workspace is organized into a standardized structure managed by the <code>mkmk</code> build tool:</p><ul><li><strong>Workspace Root:</strong> Contains one or more Frameworks and runtime views.</li><li><strong>Framework:</strong> Logical module grouping containing:<ul><li><code>IdentityCard/IdentityCard.xml</code>: Declares public prerequisite frameworks required to compile public interfaces exposed in <code>PublicInterfaces/</code>.</li><li><code>PublicInterfaces/</code>: Header files (<code>.h</code>) accessible to other frameworks.</li><li><code>ProtectedInterfaces/</code>: Headers shared only among designated frameworks.</li><li><code>CNext/code/dictionary/</code>: Declares runtime dynamic linkage (<code>.dico</code>) between interfaces and implementation classes.</li><li><strong>Modules:</strong> Subdirectories containing source code (<code>src/</code>) and <code>LocalInterfaces/</code>.</li></ul></li></ul><h4>IdentityCard.xml vs Imakefile.mk:</h4><ul><li><code>IdentityCard.xml</code>: <em>Framework-level</em> contract declaring public dependencies needed to compile public headers across frameworks.</li><li><code>Imakefile.mk</code>: <em>Module-level</em> makefile. Specifies target binary type (shared library/DLL or executable), linked libraries (<code>LINK_WITH</code>), and required prerequisite frameworks (<code>WIZARD_LINK_MODULES</code>).</li></ul><pre><code># Sample Imakefile.mk\nBUILT_OBJECT_TYPE = SHARED LIBRARY\nLINK_WITH = JS0GROUP CATGeometricObjects CATTopologicalObjects\nINCLUDES = -I$(INSTALL_ROOT)/OS_directory/code/include</code></pre>",
+    "tags": [
+      "mkmk",
+      "Build Tool",
+      "Workspace Structure"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Altran",
+      "Capgemini",
+      "HCLTech"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 3,
+    "question": "What is the purpose of CATIA Dictionary files (.dico) and how are they structured?",
+    "answer": "<p>A <strong>dictionary file (<code>.dico</code>)</strong> informs the CATIA Object Modeler runtime how to bind abstract interface requests (<code>QueryInterface</code>) to concrete C++ implementation shared libraries (DLLs) without static compile-time binding.</p><h4>Syntax and Components:</h4><pre><code>Component_Name  Interface_Name  Library_Name [Extension_Type]</code></pre><ul><li><strong>Component_Name:</strong> The internal name of the CAA component or feature (e.g., <code>CATPart</code>, <code>MyCustomFeature</code>).</li><li><strong>Interface_Name:</strong> The interface exposed to callers (e.g., <code>CATIBuild</code>, <code>CATIVisu</code>).</li><li><strong>Library_Name:</strong> The shared library name (without <code>lib</code> prefix or <code>.dll</code> suffix) implementing the code.</li><li><strong>Extension_Type (Optional):</strong> Empty for base extension; <code>late_binding</code> or <code>code_extension</code> for specific behavioral overlays.</li></ul><p><strong>Key Takeaway:</strong> Without entries in the <code>.dico</code> file, runtime queries for interfaces will fail with <code>E_NOINTERFACE</code> even if the C++ class is properly compiled.</p>",
+    "tags": [
+      "Dictionary",
+      "Dico",
+      "Object Modeler",
+      "Runtime"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Tata Consultancy Services",
+      "L&T Technology Services"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 4,
+    "question": "What is the Object Modeler in CAA, and how does it relate to the Component Object Model (COM)?",
+    "answer": "<p>The <strong>CAA Object Modeler (OM)</strong> is Dassault Systèmes' proprietary component-based architecture inspired by Microsoft COM. It enables loose coupling, runtime interface query, and dynamic behavioral extension.</p><h4>Core Concepts:</h4><ul><li><strong>Separation of Interface and Implementation:</strong> Clients interact strictly through abstract C++ pure virtual interfaces (prefixed with <code>CATI...</code>), never direct implementation pointers.</li><li><strong>Dynamic Querying:</strong> Clients use <code>QueryInterface()</code> to discover whether a component supports a given interface at runtime.</li><li><strong>Lifecycle Management:</strong> Reference counting via <code>AddRef()</code> and <code>Release()</code> controls component lifetime.</li><li><strong>OM Extensions:</strong> Components can be extended without modifying or recompiling original source code by adding data or code extensions.</li></ul>",
+    "tags": [
+      "Object Modeler",
+      "COM",
+      "Architecture"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Mercedes-Benz R&D",
+      "Stellantis"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 5,
+    "question": "Explain the difference between Data Extension, Code Extension, and Cache Extension in CAA.",
+    "answer": "<p>CAA components utilize multiple extension types to attach behaviors and state to existing components:</p><ul><li><strong>Data Extension:</strong> Adds both member variables (state/data) and interface implementations to an OM component. An instance of the extension object is instantiated per component instance.</li><li><strong>Code Extension:</strong> Adds purely algorithmic methods without holding per-instance member state. Typically used when the extension class needs no internal storage, reducing memory footprints.</li><li><strong>Cache Extension:</strong> A transient extension used to store computed data (such as temporary tessellation or evaluation caches) that can be cleared on demand when memory optimization is required.</li></ul><h4>Comparison Table:</h4><table border='1' cellpadding='6' style='border-collapse: collapse; width: 100%;'><thead><tr style='background-color: #f2f2f2;'><th>Extension Type</th><th>State (Member Variables)</th><th>Lifecycle Scope</th><th>Common Use Case</th></tr></thead><tbody><tr><td><strong>Data Extension</strong></td><td>Yes (per instance)</td><td>Bound to component life</td><td>Custom feature attributes, persistence</td></tr><tr><td><strong>Code Extension</strong></td><td>No (stateless)</td><td>Shared/Single instantiation</td><td>Standard calculation logic, converter utilities</td></tr><tr><td><strong>Cache Extension</strong></td><td>Yes (volatile)</td><td>Can be flushed dynamically</td><td>Display lists, tessellation buffers</td></tr></tbody></table>",
+    "tags": [
+      "Object Modeler",
+      "Extensions",
+      "Architecture"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Renault Group",
+      "Infosys"
+    ],
+    "role_level": "Mid/Sr"
+  },
+  {
+    "number": 6,
+    "question": "What is CATBaseUnknown, and what are the roles of AddRef() and Release()?",
+    "answer": "<p><code>CATBaseUnknown</code> is the fundamental base class of all CAA Object Modeler interfaces and implementations (analogous to <code>IUnknown</code> in COM).</p><h4>Core Lifecycle Methods:</h4><ul><li><code>AddRef()</code>: Increments internal reference count when a new pointer or smart pointer references the object.</li><li><code>Release()</code>: Decrements internal reference count. When the count reaches zero, the underlying object destroys itself in memory.</li><li><code>QueryInterface(const IID &iIID, void **oPPV)</code>: Inquires whether the target component implements the interface identified by <code>iIID</code>.</li></ul><p><strong>Rule of Thumb:</strong> Every manual assignment or raw <code>QueryInterface</code> call increments the reference count; failure to invoke <code>Release()</code> causes memory leaks.</p>",
+    "tags": [
+      "CATBaseUnknown",
+      "Memory Management",
+      "Reference Counting"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Wipro",
+      "Capgemini"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 7,
+    "question": "What is CATBaseUnknown_var and how does it prevent memory leaks in CAA applications?",
+    "answer": "<p><code>CATBaseUnknown_var</code> (and derived smart handlers like <code>CATISpecObject_var</code>) is CAA's internal smart pointer implementing RAII (Resource Acquisition Is Initialization).</p><h4>Key Characteristics:</h4><ul><li><strong>Automatic Reference Counting:</strong> Automatically calls <code>AddRef()</code> upon construction/copying and <code>Release()</code> when going out of scope.</li><li><strong>Safe Casting:</strong> Supports implicit casting and assignment between compatible interface types via embedded <code>QueryInterface</code> calls.</li><li><strong>NULL Checking:</strong> Can be verified using <code>NULL_var</code>:</li></ul><pre><code>CATISpecObject_var spSpec = piUnknown;\nif (spSpec != NULL_var) {\n    spSpec->Update();\n}\n// No manual Release() required when spSpec goes out of scope</code></pre>",
+    "tags": [
+      "Smart Pointers",
+      "CATBaseUnknown_var",
+      "Memory Management"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Ford",
+      "Airbus"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 8,
+    "question": "What is the difference between a raw interface pointer (CATI...*) and an interface handler (CATI..._var)?",
+    "answer": "<p>Understanding the distinction between raw pointers and smart handlers is critical for memory safety in CAA:</p><table border='1' cellpadding='6' style='border-collapse: collapse; width: 100%;'><thead><tr style='background-color: #f2f2f2;'><th>Aspect</th><th>Raw Pointer (<code>CATISpecObject*</code>)</th><th>Interface Handler (<code>CATISpecObject_var</code>)</th></tr></thead><tbody><tr><td><strong>Memory Management</strong></td><td>Manual. Developer must explicitly call <code>Release()</code>.</td><td>Automatic RAII. Destructor calls <code>Release()</code>.</td></tr><tr><td><strong>Performance</strong></td><td>Zero overhead; direct vtable call.</td><td>Slight overhead due to smart pointer wrapper management.</td></tr><tr><td><strong>Null Comparison</strong></td><td>Compares against standard <code>NULL</code> or <code>nullptr</code>.</td><td>Compares against <code>NULL_var</code>.</td></tr><tr><td><strong>Assignment</strong></td><td>Shallow pointer copy without incrementing reference counter.</td><td>Invokes copy constructor/assignment, calling <code>AddRef()</code>.</td></tr><tr><td><strong>Usage Recommendation</strong></td><td>Output arguments of APIs (<code>void**</code>) or performance-critical loops.</td><td>Default recommended practice for application logic.</td></tr></tbody></table>",
+    "tags": [
+      "Memory Management",
+      "Smart Pointers",
+      "Pointers"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Tata Technologies",
+      "Boeing"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 9,
+    "question": "What are the common causes of crashes and memory leaks in CAA C++ development, and how do you diagnose them?",
+    "answer": "<p>CAA applications execute inside the CATIA main process, making them susceptible to runtime memory corruption if unhandled.</p><h4>Primary Causes:</h4><ul><li><strong>Dangling Geometric Pointers:</strong> Holding pointers to CGM objects (<code>CATBody*</code>, <code>CATGeometry*</code>) after their parent container or feature is deleted or updated.</li><li><strong>Mismatched AddRef/Release:</strong> Forgetting to call <code>Release()</code> on raw pointers returned by factory methods or <code>QueryInterface()</code>.</li><li><strong>Invalid Topological Journaling:</strong> Corrupted or incomplete journal records leading to topological crash during subsequent feature updates.</li><li><strong>Improper Cross-Thread Calls:</strong> Accessing CATIA session or visualization trees outside the main GUI thread.</li></ul><h4>Diagnostic Tools:</h4><ul><li><strong>CATIA Debug Console:</strong> Run CATIA via <code>CNEXT -env ... -debug</code> to inspect stdout/stderr.</li><li><strong>Visual Studio Native Debugger:</strong> Attach to <code>CNEXT.exe</code> with symbol paths set to generated <code>.pdb</code> files.</li><li><strong>Memory Check Flags:</strong> Use environment variables such as <code>CATMemoryCheck=1</code> to track allocations.</li></ul>",
+    "tags": [
+      "Debugging",
+      "Memory Leaks",
+      "Best Practices"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Cyient",
+      "HCLTech"
+    ],
+    "role_level": "Mid/Sr"
+  },
+  {
+    "number": 10,
+    "question": "Explain the concept of TIE and BOA macros in CAA implementation classes.",
+    "answer": "<p>When implementing a CAA interface on a component, Dassault Systèmes provides two macro-based delegation techniques: <strong>TIE</strong> and <strong>BOA</strong>.</p><h4>1. TIE (Template Interface Extension):</h4><ul><li>Uses composition/delegation pattern.</li><li>The implementation class inherits from <code>CATBaseUnknown</code>, and the macro <code>CATImplementClass</code> alongside <code>TIE_CATIMyInterface(MyImplClass)</code> generates an intermediate adapter class.</li><li>Allows multiple interfaces with identical method signatures to coexist without name collisions.</li></ul><h4>2. BOA (Basic Object Adapter):</h4><ul><li>Uses C++ direct inheritance: the implementation class directly derives from the interface C++ class.</li><li>Declared using <code>CATImplementClass(MyImplClass, Implementation, CATBaseUnknown, CATnull)</code> and <code>CATImplementBOA(CATIMyInterface, MyImplClass)</code>.</li><li><strong>Advantage:</strong> Much lower memory footprint and faster execution (no intermediate TIE proxy allocated per instance).</li></ul>",
+    "tags": [
+      "TIE",
+      "BOA",
+      "Object Modeler",
+      "Design Patterns"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Airbus",
+      "Tata Consultancy Services"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 11,
+    "question": "What is CGM (CATIA Geometric Modeler) and what is the difference between Geometry and Topology?",
+    "answer": "<p><strong>CGM (CATIA Geometric Modeler)</strong> is the core mathematical and topological modeling kernel powering CATIA.</p><h4>Geometry vs. Topology:</h4><ul><li><strong>Geometry (CATGeometry):</strong> Defines the infinite mathematical shape and coordinates in 3D space without bounded boundaries.<br><em>Examples:</em> <code>CATPoint</code>, <code>CATLine</code>, <code>CATPlane</code>, <code>CATCylinder</code>, <code>CATNurbsSurface</code>.</li><li><strong>Topology (CATTopology):</strong> Defines finite boundaries, connectivity, and adjacency relationships between geometric elements.<br><em>Examples:</em> <code>CATVertex</code>, <code>CATEdge</code>, <code>CATFace</code>, <code>CATVolume</code>, <code>CATBody</code>.</li></ul><p><strong>Analogy:</strong> A mathematical plane is infinite (Geometry). A rectangular bounded boundary on that plane defining a face of a cube is a <code>CATFace</code> (Topology).</p>",
+    "tags": [
+      "CGM",
+      "Geometry",
+      "Topology",
+      "Kernel"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Boeing",
+      "Lockheed Martin",
+      "General Motors"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 12,
+    "question": "Describe the Topological Hierarchy in CGM from CATBody down to CATVertex.",
+    "answer": "<p>CGM organizes topological entities into an unambiguous hierarchical boundary representation (B-Rep):</p><ul><li><strong>CATBody:</strong> The top-level topological container representing a 3D solid, 2D skin/shell, or 1D wireframe.</li><li><strong>CATDomain:</strong> A connected set of cells of identical dimension:<ul><li><code>CATLump</code>: 3D connected volume domain.</li><li><code>CATShell</code>: 2D connected surface skin domain.</li><li><code>CATWire</code>: 1D connected curve domain.</li><li><code>CATVertexInVolume</code>: 0D isolated point domain.</li></ul></li><li><strong>CATCell:</strong> Boundary building blocks:<ul><li><code>CATVolume</code> (3D bounded region)</li><li><code>CATFace</code> (2D surface boundary, bounded by CATLoop)</li><li><code>CATEdge</code> (1D curve boundary, bounded by CATSideVertex)</li><li><code>CATVertex</code> (0D corner point)</li></ul></li></ul>",
+    "tags": [
+      "Topology",
+      "B-Rep",
+      "CGM",
+      "Data Model"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Airbus",
+      "Safran"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 13,
+    "question": "What is CATGeoFactory and how is it used to create geometric and topological elements?",
+    "answer": "<p><code>CATGeoFactory</code> is the factory interface responsible for allocating, creating, and managing the lifecycle of CGM geometric entities (curves, surfaces, points) and top-level topological bodies (<code>CATBody</code>).</p><h4>Core Responsibilities:</h4><ul><li>Creates pure geometric primitives: <code>CreatePlane()</code>, <code>CreateLine()</code>, <code>CreateNurbsSurface()</code>.</li><li>Creates empty topological bodies: <code>CreateBody()</code>.</li><li>Manages geometric containers within the CATIA geometric stream.</li><li>Handles memory deallocation for CGM items via <code>Remove()</code>.</li></ul><pre><code>// Example: Obtaining factory and creating a body\nCATGeoFactory* piGeomFactory = ...; // obtained from CATContainer\nCATTopData topData;\nCATBody* pNewBody = piGeomFactory->CreateBody();\n// Use topological operator to populate pNewBody\n// ...\n// Remove if temporary:\n// piGeomFactory->Remove(pNewBody);</code></pre>",
+    "tags": [
+      "CATGeoFactory",
+      "CGM",
+      "Topology"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "L&T Technology Services",
+      "Cyient"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 14,
+    "question": "What is CATTopData and what role does CATCGMJournalList play during topological operations?",
+    "answer": "<p><code>CATTopData</code> is an input configuration object passed to all CGM topological operators. It carries configuration settings, software versioning rules, and a pointer to the <strong>Topological Journal (<code>CATCGMJournalList</code>)</strong>.</p><h4>Role of CATCGMJournalList (Topological Journal):</h4><ul><li>Tracks the mathematical lineage (history) of cells: which source cells were <em>Created</em>, <em>Modified</em>, <em>Deleted</em>, or <em>Kept</em>.</li><li>Essential for <strong>Feature Update</strong> and <strong>Generic Naming</strong>: when a user fillets an edge, CATIA relies on the journal to recognize which edge in version N corresponds to the edge in version N-1.</li></ul><pre><code>CATCGMJournalList* pJournal = new CATCGMJournalList();\nCATTopData topData(pConfig, pJournal);\nCATICGMTopPrism* pExtrudeOp = ::CATCGMCreateTopPrism(pFactory, &topData, pProfileBody, ...);\npExtrudeOp->Run();\nCATBody* pResultBody = pExtrudeOp->GetResult();</code></pre>",
+    "tags": [
+      "CATTopData",
+      "Journaling",
+      "CGM",
+      "Topological Operators"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Boeing",
+      "Ford"
+    ],
+    "role_level": "Mid/Sr"
+  },
+  {
+    "number": 15,
+    "question": "How do you navigate from a CATFace to its supporting geometric surface and boundary edges in CGM?",
+    "answer": "<p>Navigation between topological cells and underlying geometric math uses dedicated CGM methods:</p><h4>1. From CATFace to Surface Geometry:</h4><pre><code>CATFace* piFace = ...;\nCATSurface* piSurface = piFace->GetSurface(); // Returns underlying infinite surface\nCATSurParam param;\nCATMathPoint point3D;\npiSurface->EvalPoint(param, point3D);</code></pre><h4>2. From CATFace to its Boundary Edges:</h4><p>Faces are bounded by loops (<code>CATLoop</code>), which contain edge domains:</p><pre><code>CATListPtrCATCell edgeList;\npiFace->GetAllCells(edgeList, 1); // 1 = 1-dimensional cells (CATEdge)\nfor (int i = 1; i <= edgeList.Size(); ++i) {\n    CATEdge* pEdge = (CATEdge*)edgeList[i];\n    CATCurve* pCurve = pEdge->GetCurve();\n}</code></pre>",
+    "tags": [
+      "CGM",
+      "Navigation",
+      "CATFace",
+      "CATEdge"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Renault Group",
+      "Mercedes-Benz R&D"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 16,
+    "question": "What is the difference between CATTopOperator and pure Geometric Operators?",
+    "answer": "<p>In CGM, operations are split between purely geometric evaluations and boundary-representation topological modifications:</p><h4>Comparison Table:</h4><table border='1' cellpadding='6' style='border-collapse: collapse; width: 100%;'><thead><tr style='background-color: #f2f2f2;'><th>Feature</th><th>Geometric Operators</th><th>Topological Operators (<code>CATTopOperator</code>)</th></tr></thead><tbody><tr><td><strong>Input / Output</strong></td><td><code>CATGeometry*</code> (Surfaces, Curves, Math Points).</td><td><code>CATBody*</code> (Solid, Shell, Wire).</td></tr><tr><td><strong>Header/Class</strong></td><td>E.g., <code>CATDistanceMinPtSur</code>, <code>CATIntersectionCrvSur</code>.</td><td>Derived from <code>CATTopOperator</code> (e.g., <code>CATICGMTopSplit</code>, <code>CATICGMTopFillet</code>).</td></tr><tr><td><strong>Journaling</strong></td><td>No tracking or journal generation.</td><td>Generates <code>CATCGMJournalList</code> for cell history.</td></tr><tr><td><strong>Boundary Checks</strong></td><td>Computes mathematical intersection on unbounded mathematical models.</td><td>Resolves cell trimming, orientation, manifoldness, and boundary topology.</td></tr></tbody></table>",
+    "tags": [
+      "CGM",
+      "Topological Operators",
+      "Geometry"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Airbus",
+      "Capgemini"
+    ],
+    "role_level": "Mid/Sr"
+  },
+  {
+    "number": 17,
+    "question": "Explain Boolean Operators in CGM (CATICGMTopBoolean / CATTopBoolean).",
+    "answer": "<p><strong>Boolean Operators</strong> perform volumetric or skin combinations between two valid <code>CATBody</code> instances.</p><h4>Supported Operations:</h4><ul><li><code>CATBoolUnion</code>: Merges volumes of two bodies into a single coherent body.</li><li><code>CATBoolIntersection</code>: Retains only the shared overlapping volume.</li><li><code>CATBoolRemoval</code>: Subtracts the tool body from the target operating body.</li></ul><h4>Standard Usage Pattern:</h4><pre><code>CATTopData topData;\nCATICGMTopBoolean* pBoolOp = ::CATCGMCreateTopBoolean(\n    pFactory, &topData, CATBoolUnion, pBaseBody, pToolBody);\npBoolOp->Run();\nCATBody* pResult = pBoolOp->GetResult();\n// Always release or remove operator pointer after completion\n// Note: Result must be associated with the feature during Build()</code></pre>",
+    "tags": [
+      "Boolean Operations",
+      "CGM",
+      "Solid Modeling"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Tata Technologies",
+      "Boeing"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 18,
+    "question": "What is Generic Naming (CATIGenericNaming / B-Rep Naming) and why is it crucial in parametric modeling?",
+    "answer": "<p><strong>Generic Naming</strong> is the mechanism CATIA uses to uniquely and stably identify topological sub-elements (faces, edges, vertices) across design modifications and rebuild cycles.</p><h4>The Reroute Problem:</h4><p>If a user fillets an edge, then later modifies a sketch dimension upstream, the underlying internal pointer and index of that edge changes. Without generic naming, downstream features would break (persistent topological identification failure).</p><h4>How it Works:</h4><ul><li>Every cell's identity is expressed as a graph of historical operations recorded in the <code>CATCGMJournalList</code> (e.g., <em>The intersection between Face 2 of Extrude 1 and Face 3 of Pocket 2</em>).</li><li>The interface <code>CATIGenericNaming</code> resolves these label expressions back to live cells during feature update.</li></ul>",
+    "tags": [
+      "Generic Naming",
+      "B-Rep",
+      "Parametric Modeling",
+      "Update"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Airbus",
+      "Lockheed Martin"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 19,
+    "question": "What is a Feature in CATIA, and what is the difference between a StartUp and a Feature Instance?",
+    "answer": "<p>A <strong>Feature</strong> is a persistent parametric object containing attributes, specifications, and behavioral rules stored in a CATIA Part container.</p><h4>StartUp vs Instance:</h4><ul><li><strong>StartUp:</strong> The template or prototype definition stored in a feature catalog (<code>.CATfct</code> file). It defines the schema: attribute names, types, and default values. StartUps are created using catalog generation tools.</li><li><strong>Feature Instance:</strong> A concrete parametric entity instantiated in a document from a StartUp (e.g., a specific \"Pad.1\" or custom \"Flange.1\"). Multiple instances inherit their schema from the single StartUp.</li></ul><table border='1' cellpadding='6' style='border-collapse: collapse; width: 100%;'><thead><tr style='background-color: #f2f2f2;'><th>Concept</th><th>Analogous C++ Concept</th><th>Storage Location</th></tr></thead><tbody><tr><td><strong>StartUp</strong></td><td>Class declaration / Metadata</td><td>Catalog file (<code>.CATfct</code>)</td></tr><tr><td><strong>Feature Instance</strong></td><td>Object instance in memory/heap</td><td>Part document container (<code>CATPart</code>)</td></tr></tbody></table>",
+    "tags": [
+      "Feature Modeler",
+      "StartUp",
+      "Catalog",
+      "Mechanical Modeler"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Ford",
+      "Capgemini"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 20,
+    "question": "How do you create a feature catalog (.CATfct) and instantiate a custom feature in CAA?",
+    "answer": "<p>Custom features require catalog definition and procedural instantiation:</p><h4>1. Catalog Creation (.CATfct):</h4><p>Defined using OSM (Object Specs Modeler) language and compiled with <code>CATCafCatalogSU</code> tool:</p><pre><code>document `MyCatalog.CATfct` {\n    container `MyCont` {\n        feature `MyCustomHole` #startup {\n            double `Diameter` = 10.0\n            double `Depth` = 25.0\n            specobject `SupportFace`\n        }\n    }\n}</code></pre><h4>2. Instantiation in C++:</h4><pre><code>CATICatalog_var spCat;\n::CATAccessCatalog(catalogName, clientId, spCont, spCat);\nCATISpecObject_var spStartUp;\nspCat->FindFeature(\"MyCustomHole\", spStartUp);\nCATISpecObject_var spInstance = spStartUp->Instantiate(spTargetContainer);</code></pre>",
+    "tags": [
+      "Catalog",
+      "CATfct",
+      "Feature Modeler",
+      "OSM"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Stellantis",
+      "Tata Technologies"
+    ],
+    "role_level": "Mid/Sr"
+  },
+  {
+    "number": 21,
+    "question": "Explain the role and implementation of the CATIBuild interface in custom feature development.",
+    "answer": "<p><code>CATIBuild</code> is the primary calculation interface for parametric features. CATIA invokes its <code>Build()</code> method whenever the feature is marked out-of-date and updated.</p><h4>Build Workflow:</h4><ol><li>Retrieve input specifications and parameter values (e.g., length, support faces).</li><li>Access geometric input bodies from referenced features via <code>CATIMmiGeometricalElement</code>.</li><li>Instantiate topological operators (e.g., extrude, thicken, split) with a valid <code>CATTopData</code> and journal.</li><li>Execute the operator and retrieve the computed <code>CATBody</code>.</li><li>Associate the resulting body with the feature via <code>CATIMmiMechanicalFeature::SetResult()</code>.</li></ol><pre><code>HRESULT MyFeatureBuild::Build() {\n    // 1. Read parameters\n    // 2. Call CGM operator\n    // 3. Set procedural result\n    return S_OK;\n}</code></pre>",
+    "tags": [
+      "CATIBuild",
+      "Update Mechanism",
+      "Custom Feature",
+      "Mechanical Modeler"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Airbus",
+      "Renault Group"
+    ],
+    "role_level": "Mid/Sr"
+  },
+  {
+    "number": 22,
+    "question": "What is the difference between Geometrical Elements (GSM / Surfacic) and Mechanical Features (Solid / Part Design)?",
+    "answer": "<p>CATIA divides 3D geometry into distinct modeling paradigms with specific container homes:</p><table border='1' cellpadding='6' style='border-collapse: collapse; width: 100%;'><thead><tr style='background-color: #f2f2f2;'><th>Feature Type</th><th>Geometrical Element (GSM / Wireframe / Surface)</th><th>Mechanical Feature (Solid / Part Design)</th></tr></thead><tbody><tr><td><strong>Container</strong></td><td><code>Open_body</code> / <code>HybridBody</code> (Geometrical Set)</td><td><code>MechanicalTool</code> (PartBody / Body)</td></tr><tr><td><strong>Order Dependency</strong></td><td>Non-ordered by default (unless in Ordered Geometrical Set). Evaluates graph dependencies.</td><td>Strict procedural order (linear chronological tree sequence).</td></tr><tr><td><strong>Core Interfaces</strong></td><td><code>CATIGSMTool</code>, <code>CATIGSMProceduralView</code>.</td><td><code>CATIPartRequest</code>, <code>CATIMmiMechanicalFeature</code>.</td></tr><tr><td><strong>Result Propagation</strong></td><td>Each feature exposes its own standalone result body.</td><td>Features modify the cumulative accumulated solid body of the PartBody.</td></tr></tbody></table>",
+    "tags": [
+      "Mechanical Modeler",
+      "GSM",
+      "Part Design",
+      "Solid Modeling"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Boeing",
+      "Mercedes-Benz R&D"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 23,
+    "question": "What is CATISpecObject and what are its most critical methods?",
+    "answer": "<p><code>CATISpecObject</code> is the cornerstone interface of the Feature Modeler. Every persistent feature in the CATIA tree implements it.</p><h4>Most Important Methods:</h4><ul><li><code>Update()</code>: Re-evaluates and rebuilds the feature if inputs have changed.</li><li><code>IsUpToDate()</code>: Returns <code>S_OK</code> if the feature is clean, or <code>S_FALSE</code> if inputs require recalculation.</li><li><code>GetContainer()</code>: Returns the parent container (e.g., <code>CATPart</code> specification container).</li><li><code>GetName()</code> / <code>SetName()</code>: Reads or updates user-visible instance names (e.g., \"Pad.1\").</li><li><code>GetFather()</code>: Navigates up the hierarchical tree to the parent feature or group.</li></ul>",
+    "tags": [
+      "CATISpecObject",
+      "Feature Modeler",
+      "Specifications"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "L&T Technology Services",
+      "Cyient"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 24,
+    "question": "Explain the Update mechanism in CATIA: How does CATIA know when a feature needs rebuilding?",
+    "answer": "<p>The CATIA Update mechanism uses a <strong>Directed Acyclic Graph (DAG)</strong> of dependencies:</p><ol><li><strong>Timestamp Tracking:</strong> Every feature instance maintains internal timestamps tracking modifications to attributes and referenced inputs.</li><li><strong>Invalidation Propagation:</strong> When an upstream attribute (e.g., sketch dimension) changes, all downstream dependent features in the graph are flagged as out-of-date (dirty).</li><li><strong>Update Call:</strong> Calling <code>CATISpecObject::Update()</code> triggers topological re-execution:<ul><li>Verifies upstream prerequisites are up-to-date.</li><li>Invokes <code>CATIBuild::Build()</code> on each dirty node in topological order.</li><li>Updates generic naming identifiers and refreshes visualization representations.</li></ul></li></ol>",
+    "tags": [
+      "Update Mechanism",
+      "DAG",
+      "Parametric Engine"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Airbus",
+      "Tata Consultancy Services"
+    ],
+    "role_level": "Mid/Sr"
+  },
+  {
+    "number": 25,
+    "question": "What is CCP (Cut, Copy, Paste) in CAA and which interfaces control it?",
+    "answer": "<p><strong>CCP (Cut, Copy, Paste)</strong> governs feature duplication across or within CATIA containers.</p><h4>Controlling Interfaces:</h4><ul><li><code>CATICutAndPastable</code>: The legacy interface defining how an object behaves when copied, cut, pasted, or extracted.</li><li><code>CATIMmiCutAndPastable</code>: The modern Mechanical Modeler interface governing copy-paste for geometrical sets and 3D shapes.</li><li><code>CATICopyPastePath</code>: Represents selected paths transferred onto clipboard buffers.</li></ul><p><strong>Customization Note:</strong> Implementing these interfaces enables custom features to restrict duplication, remap external references, or automatically convert copied items into \"Result with link\" (datum bodies).</p>",
+    "tags": [
+      "CCP",
+      "Cut Copy Paste",
+      "Feature Modeler"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Renault Group",
+      "HCLTech"
+    ],
+    "role_level": "Mid/Sr"
+  },
+  {
+    "number": 26,
+    "question": "What is a CATStateCommand and how does it implement the finite state machine (FSM) pattern?",
+    "answer": "<p><code>CATStateCommand</code> is the foundational class for interactive multi-step CATIA workbench commands implementing a Finite State Machine.</p><h4>Core Building Blocks:</h4><ul><li><strong>States (<code>CATDialogState</code>):</strong> Discrete points in the command waiting for user input (e.g., \"Select Face\", \"Specify Length\").</li><li><strong>Dialog Agents (<code>CATDialogAgent</code>):</strong> Sensors monitoring mouse clicks, keyboard entries, or 3D selections.</li><li><strong>Transitions (<code>CATDialogTransition</code>):</strong> Logic links connecting an initial state to a target state, guarded by a condition method.</li><li><strong>Action Methods:</strong> C++ callbacks executed during state transitions.</li></ul><pre><code>void MyCommand::BuildGraph() {\n    CATDialogState* pState1 = GetInitialState(\"SelectFirstEntity\");\n    CATPathElementAgent* pAgent = new CATPathElementAgent(\"Agent1\");\n    pState1->AddDialogAgent(pAgent);\n    CATDialogState* pState2 = AddDialogState(\"SelectSecondEntity\");\n    AddTransition(pState1, pState2, IsOutputSetCondition(pAgent), ActionMethod(&MyCommand::OnSelect));\n}</code></pre>",
+    "tags": [
+      "CATStateCommand",
+      "FSM",
+      "Commands",
+      "UI Architecture"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Ford",
+      "Capgemini"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 27,
+    "question": "What is the difference between CATCommand, CATStateCommand, and CATDlgDialog?",
+    "answer": "<p>Each class fulfills a distinct responsibility in the CATIA GUI/Application lifecycle:</p><table border='1' cellpadding='6' style='border-collapse: collapse; width: 100%;'><thead><tr style='background-color: #f2f2f2;'><th>Class</th><th>Type / Role</th><th>Typical Responsibility</th></tr></thead><tbody><tr><td><strong>CATCommand</strong></td><td>Base Interactive Command</td><td>Handles simple atomic commands (one-click actions) or base messaging.</td></tr><tr><td><strong>CATStateCommand</strong></td><td>FSM Interactive Command</td><td>Multi-step 3D interactions requiring mouse inputs, previews, and cancel/undo lifecycles.</td></tr><tr><td><strong>CATDlgDialog</strong></td><td>GUI Window / Panel</td><td>Dialog box holding push buttons, text inputs, combo boxes, and check boxes.</td></tr></tbody></table>",
+    "tags": [
+      "CATCommand",
+      "CATStateCommand",
+      "CATDlgDialog",
+      "UI"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Tata Technologies",
+      "Infosys"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 28,
+    "question": "What is CATPathElementAgent and how is it configured to filter 3D user selection?",
+    "answer": "<p><code>CATPathElementAgent</code> is a specialized dialog agent that captures user selections in the 3D viewer or specification tree, returning a <code>CATPathElement</code> representing the full contextual path to the clicked object.</p><h4>Adding Selection Filters:</h4><p>Use <code>AddElementType()</code> to restrict selection strictly to target interfaces or feature types:</p><pre><code>CATPathElementAgent* pFaceAgent = new CATPathElementAgent(\"FaceAgent\");\n// Restrict selection to faces only:\npFaceAgent->AddElementType(CATFace::ClassId());\n// Or restrict to features implementing a custom interface:\npFaceAgent->AddElementType(IID_CATIMyCustomInterface);\npFaceAgent->SetBehavior(CATDlgEngWithPreselection | CATDlgEngMultiAcquisition);</code></pre>",
+    "tags": [
+      "CATPathElementAgent",
+      "Selection",
+      "Dialog Agent"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Boeing",
+      "Airbus"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 29,
+    "question": "Explain Undo and Redo transaction management in CAA commands.",
+    "answer": "<p>Undo/Redo enables transactional rollback of modifications made during interactive commands.</p><h4>Key Mechanisms:</h4><ul><li><strong>Transaction Scope:</strong> CATIA begins a transaction when a command activates and commits when it successfully terminates.</li><li><strong>Automatic Specification Undo:</strong> Modifications made to <code>CATISpecObject</code> attributes inside a command are automatically recorded by the Undo manager.</li><li><strong>Custom Global Undo:</strong> For non-spec operations (e.g., external temporary files), commands derive from <code>CATCommand</code> and implement:<ul><li><code>CATCommand::CreateUndoMarker()</code></li><li><code>CATCommand::Undo()</code> and <code>CATCommand::Redo()</code></li></ul></li></ul>",
+    "tags": [
+      "Undo Redo",
+      "Transactions",
+      "CATCommand"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "L&T Technology Services",
+      "Altran"
+    ],
+    "role_level": "Mid/Sr"
+  },
+  {
+    "number": 30,
+    "question": "What is the difference between Shared, Exclusive, and Undefined command modes in CATIA?",
+    "answer": "<p>Command modes determine how a command coexists with other running commands in the session:</p><ul><li><strong>Exclusive Mode (Default):</strong> Activating this command cancels and terminates any other active command in the workbench. Standard for heavy editing commands (e.g., Pad, Shaft).</li><li><strong>Shared Mode:</strong> Puts the previous active command into a standby/suspended state. When the shared command exits, the previous command resumes automatically (e.g., View panning/zooming, measuring tools).</li><li><strong>Undefined Mode:</strong> Executes concurrently without impacting the active command stack (e.g., simple toggle switches or background status queries).</li></ul>",
+    "tags": [
+      "Command Lifecycle",
+      "Shared vs Exclusive",
+      "UI Architecture"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Mercedes-Benz R&D",
+      "Stellantis"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 31,
+    "question": "Explain the Model-View-Controller (MVC) visualization mechanism in CAA (CATIVisu and CATIModelEvents).",
+    "answer": "<p>CATIA decouples persistent business data from graphical display using an MVC architecture:</p><ul><li><strong>Model:</strong> Persistent feature data (<code>CATISpecObject</code>).</li><li><strong>View:</strong> Graphic representations (<code>CATRep</code>, <code>CAT3DRep</code>) held in the visualization tree.</li><li><strong>Controller:</strong> Interface <code>CATIVisu</code> converts model state into graphic representations; <code>CATIModelEvents</code> notifies listeners of updates.</li></ul><h4>Update Flow:</h4><ol><li>A feature attribute changes.</li><li>The feature fires a notification via <code>CATIModelEvents::Dispatch(CATModifyVisu)</code>.</li><li>The visualization manager invokes <code>CATIVisu::BuildRep()</code> on the feature.</li><li>The returned <code>CAT3DBagRep</code> updates on screen without reloading the document.</li></ol>",
+    "tags": [
+      "Visualization",
+      "CATIVisu",
+      "CATIModelEvents",
+      "MVC"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Boeing",
+      "Airbus"
+    ],
+    "role_level": "Mid/Sr"
+  },
+  {
+    "number": 32,
+    "question": "What are the common CATRep classes and how are they used?",
+    "answer": "<p>A <strong><code>CATRep</code> (Representation)</strong> is an optimized display object rendered directly by the 3D graphics pipeline.</p><h4>Primary Rep Classes:</h4><ul><li><code>CAT3DBagRep</code>: A container/node representation capable of aggregating child representations (branch in the scene graph).</li><li><code>CATSurfacicRep</code>: High-performance triangular mesh representation used to render surfaces and solid bodies.</li><li><code>CAT3DCustomRep</code>: User-defined graphical representation containing custom draw primitives (wireframes, glyphs).</li><li><code>CAT3DPointRep</code> / <code>CAT3DLineRep</code>: Lightweight representations for point markers and line segments.</li><li><code>CAT2DRep</code>: Represents planar annotations, drafting views, and HUD elements.</li></ul>",
+    "tags": [
+      "CATRep",
+      "CAT3DBagRep",
+      "Visualization",
+      "Scene Graph"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Capgemini",
+      "Tata Technologies"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 33,
+    "question": "What is CATPathElement and why is it necessary for contextual 3D operations?",
+    "answer": "<p>A <strong><code>CATPathElement</code></strong> represents a complete hierarchical path from the root of a document or product down to a specific selected leaf cell or feature.</p><h4>Why It Is Crucial:</h4><ul><li>In product assemblies, the same Part definition may appear multiple times as different instances.</li><li>A simple pointer to a <code>CATFace</code> cannot determine <em>which assembly instance</em> or transformation matrix the user actually clicked.</li><li><code>CATPathElement</code> contains the chain of parent occurrences and cumulative transformation matrices ($4 \\times 4$) required to position the geometry accurately in 3D world space.</li></ul>",
+    "tags": [
+      "CATPathElement",
+      "Assembly Context",
+      "Visualization"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Ford",
+      "Airbus"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 34,
+    "question": "How do you customize the 3D display of a custom feature using CATIVisu::BuildRep()?",
+    "answer": "<p>To provide custom rendering for a feature, implement <code>CATIVisu</code> in a data or code extension:</p><pre><code>CATRep* MyFeatureVisu::BuildRep() {\n    CAT3DBagRep* pBagRep = new CAT3DBagRep();\n    \n    // Create a 3D line representation for preview\n    CATMathPoint p1(0, 0, 0), p2(100, 50, 0);\n    float pt1[3] = {(float)p1.GetX(), (float)p1.GetY(), (float)p1.GetZ()};\n    float pt2[3] = {(float)p2.GetX(), (float)p2.GetY(), (float)p2.GetZ()};\n    \n    CAT3DLineRep* pLineRep = new CAT3DLineRep(pt1, pt2);\n    pBagRep->AddChild(*pLineRep);\n    return pBagRep;\n}</code></pre><p><strong>Important:</strong> Always declare the implementation in the <code>.dico</code> file associating <code>MyCustomFeature</code> with <code>CATIVisu</code>.</p>",
+    "tags": [
+      "CATIVisu",
+      "BuildRep",
+      "Custom Graphics"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Renault Group",
+      "Cyient"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 35,
+    "question": "Explain the CATIA Reference-Instance (Occurrence) data model in Product Structure.",
+    "answer": "<p>CATIA Product Structure enforces strict separation between part geometry and its assembly re-use:</p><ul><li><strong>Reference (Part / Product):</strong> The master design definition holding actual features and geometric containers (stored in files or PLM database).</li><li><strong>Instance:</strong> An instantiation of a Reference within an assembly parent, holding relative spatial position (transformation matrix) and instance name.</li><li><strong>Occurrence:</strong> The transient runtime representation of an instance within a fully expanded multi-level assembly context, holding accumulated absolute world coordinates.</li></ul><h4>Key Interfaces:</h4><ul><li>V5: <code>CATIProduct</code></li><li>3DEXPERIENCE: <code>CATIPLMNavReference</code>, <code>CATIPLMNavInstance</code>, <code>CATIPLMNavOccurrence</code>.</li></ul>",
+    "tags": [
+      "Product Structure",
+      "Reference-Instance",
+      "Assembly Modeler"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Boeing",
+      "Stellantis"
+    ],
+    "role_level": "Mid/Sr"
+  },
+  {
+    "number": 36,
+    "question": "How do you traverse a Product Structure tree from root to leaf parts in CAA V5 and 3DEXPERIENCE?",
+    "answer": "<p>Traversing an assembly hierarchy requires iterating through child instances or occurrences:</p><h4>1. V5 Approach (CATIProduct):</h4><pre><code>CATIProduct_var spRootProd = ...;\nCATListValCATBaseUnknown_var* pChildren = spRootProd->GetChildren();\nfor (int i = 1; i <= pChildren->Size(); ++i) {\n    CATIProduct_var spChildProd = (*pChildren)[i];\n    // Recurse into sub-assembly if child is also a product\n}</code></pre><h4>2. 3DEXPERIENCE Approach (CATIPLMNavOccurrence):</h4><pre><code>CATIPLMNavOccurrence_var spRootOcc = ...;\nListPOfCATIPLMNavOccurrence childOccs;\nspRootOcc->ListChildren(childOccs);\nfor (int j = 1; j <= childOccs.Size(); ++j) {\n    CATIPLMNavOccurrence* pChild = childOccs[j];\n    // Traverse children or retrieve related CATIPLMNavReference\n}</code></pre>",
+    "tags": [
+      "Product Structure",
+      "Assembly Traversal",
+      "3DEXPERIENCE"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Airbus",
+      "Tata Technologies"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 37,
+    "question": "What is the difference between CATDocument, CATInit, and CATIDocRoots in document management?",
+    "answer": "<p>In file-based CATIA V5, documents are handled via standard lifecycle interfaces:</p><ul><li><strong>CATDocument:</strong> The physical file container representing loaded <code>.CATPart</code>, <code>.CATProduct</code>, or <code>.CATDrawing</code> files.</li><li><strong>CATInit:</strong> The interface used to initialize a document and retrieve its primary root containers:</li></ul><pre><code>CATInit_var spDocInit = pDocument;\nCATIPrtContainer* pPrtCont = (CATIPrtContainer*)spDocInit->GetInit(\"CATPrtCont\");</code></pre><ul><li><strong>CATIDocRoots:</strong> Retrieves the list of root objects contained in the document (such as root <code>CATIProduct</code> in a <code>.CATProduct</code> file).</li></ul>",
+    "tags": [
+      "CATDocument",
+      "CATInit",
+      "Document Management"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "HCLTech",
+      "L&T Technology Services"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 38,
+    "question": "How do you access the Part Container (CATPrtCont) from a CATDocument?",
+    "answer": "<p>To manipulate geometry or features inside a <code>.CATPart</code> document, you must navigate from the document object to its internal specification container (<code>CATPrtCont</code>):</p><pre><code>CATDocument* pDoc = ...; // Obtained via CATDocumentServices::Open() or active editor\nCATInit_var spInit(pDoc);\nif (spInit != NULL_var) {\n    CATIPrtContainer* pPrtCont = NULL;\n    HRESULT hr = spInit->GetInit(\"CATPrtCont\", (void**)&pPrtCont);\n    if (SUCCEEDED(hr) && pPrtCont) {\n        CATIPrtPart_var spPrtPart = pPrtCont->GetPart();\n        // Perform operations on Part...\n        pPrtCont->Release();\n    }\n}</code></pre>",
+    "tags": [
+      "CATPrtCont",
+      "CATDocument",
+      "Container Navigation"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Capgemini",
+      "Wipro"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 39,
+    "question": "What are the primary architectural differences between CATIA V5 CAA and 3DEXPERIENCE CAA?",
+    "answer": "<p>Transitioning from V5 to 3DEXPERIENCE involves substantial architectural modernizations:</p><table border='1' cellpadding='6' style='border-collapse: collapse; width: 100%;'><thead><tr style='background-color: #f2f2f2;'><th>Feature</th><th>CATIA V5</th><th>3DEXPERIENCE</th></tr></thead><tbody><tr><td><strong>Storage Model</strong></td><td>File-based on local or network disks (<code>.CATPart</code>, <code>.CATProduct</code>).</td><td>Database-driven (PLM Database / Cloud repository). No raw local files.</td></tr><tr><td><strong>Document Concept</strong></td><td><code>CATDocument</code> opened and saved via file path.</td><td>PLM Components, Representations, and Identification via <code>PLM_ExternalID</code> / UUID.</td></tr><tr><td><strong>Assembly Model</strong></td><td><code>CATIProduct</code> used for both tree navigation and geometry.</td><td>Separation: <code>CATIPLMNavReference</code>, <code>CATIPLMNavInstance</code>, and <code>CATIPLMNavOccurrence</code>.</td></tr><tr><td><strong>Session Initialization</strong></td><td><code>CATSession</code> / <code>GetActiveDocument()</code>.</td><td>PLM Session connection via <code>CATPLMSessionServices</code> and explicit database queries.</td></tr></tbody></table>",
+    "tags": [
+      "3DEXPERIENCE",
+      "V5 vs 3DEXPERIENCE",
+      "PLM Architecture"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Boeing",
+      "Airbus",
+      "Tata Technologies"
+    ],
+    "role_level": "Mid/Sr"
+  },
+  {
+    "number": 40,
+    "question": "How do you query and open a PLM Component from the 3DEXPERIENCE database using CAA?",
+    "answer": "<p>In 3DEXPERIENCE, components are loaded via PLM queries rather than direct file system paths:</p><ol><li><strong>Initialize PLM Session:</strong> Connect using <code>CATPLMSessionServices</code>.</li><li><strong>Build Query Criteria:</strong> Query database using <code>CATAdpAttributeSet</code> with attributes (e.g., <code>PLM_ExternalID</code>, <code>V_version</code>).</li><li><strong>Execute Query:</strong> Call <code>CATAdpQueryServices</code> to retrieve a <code>CATIAdpPLMIdentificator</code>.</li><li><strong>Open into Session:</strong> Call <code>CATAdpOpener</code> to stream the object into the active session.</li></ol><pre><code>CATIAdpPLMIdentificator* pID = ...; // Obtained via query\nCATAdpOpener opener;\nCATIPLMNavReference* pNavRef = NULL;\nHRESULT hr = opener.CompleteAndOpen(pID, IID_CATIPLMNavReference, (void**)&pNavRef);</code></pre>",
+    "tags": [
+      "3DEXPERIENCE",
+      "PLM Query",
+      "Database Services"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Stellantis",
+      "Capgemini"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 41,
+    "question": "What is the role of CATIPLMNavOccurrence vs CATIPLMNavReference in 3DEXPERIENCE?",
+    "answer": "<p>In 3DEXPERIENCE, assembly structures strictly separate reusable design definitions from contextual positional occurrences:</p><ul><li><strong>CATIPLMNavReference:</strong> Represents the shared design entity (analogous to a part class or sub-assembly definition). It contains geometric representations and lists its direct child instances.</li><li><strong>CATIPLMNavOccurrence:</strong> Represents the concrete physical occurrence in the current open assembly tree. It accounts for all parent transformations up to the assembly root.</li></ul><p><strong>Interview Tip:</strong> To query 3D absolute spatial coordinates or visual highlights, always query the <code>CATIPLMNavOccurrence</code>.</p>",
+    "tags": [
+      "3DEXPERIENCE",
+      "Occurrence",
+      "Reference",
+      "Assembly"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Airbus",
+      "Renault Group"
+    ],
+    "role_level": "Mid/Sr"
+  },
+  {
+    "number": 42,
+    "question": "How do you programmatically extract all Hole features and their diameter parameters from a Part using CAA?",
+    "answer": "<p>Extracting specific features involves searching the Part container and querying the relevant mechanical feature interfaces:</p><ol><li>Access <code>CATIPrtContainer</code> and retrieve <code>CATIPrtPart</code>.</li><li>Query <code>CATIPartRequest</code> or traverse the specifications tree.</li><li>Check if the feature implements <code>CATIMmiMechanicalFeature</code> and verify if its startup type is <code>\"Hole\"</code>.</li><li>Query the hole interface <code>CATIHole</code> or inspect its parameter attributes:</li></ol><pre><code>CATIHole_var spHole = spSpecFeature;\nif (spHole != NULL_var) {\n    CATICkeParm_var spDiameterParm = spHole->GetDiameter();\n    double diameterValue = spDiameterParm->ShowReal();\n}</code></pre>",
+    "tags": [
+      "Feature Extraction",
+      "Part Design",
+      "CATIHole",
+      "Knowledge"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Ford",
+      "Tata Technologies"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 43,
+    "question": "What are Knowledge Interfaces (CATICkeParm, CATICkeParmFactory) and how do you create custom parameters?",
+    "answer": "<p><strong>Knowledge Interfaces</strong> manage parametric dimensions, formulas, rules, and user-defined variables:</p><ul><li><code>CATICkeParm</code>: Represents a typed parametric variable (Length, Angle, Real, Integer, Boolean, String).</li><li><code>CATICkeParmFactory</code>: Factory interface implemented by containers to instantiate new parameters and relations.</li></ul><h4>Creating a Length Parameter:</h4><pre><code>CATICkeParmFactory_var spParmFact = spContainer;\nCATICkeParm_var spParm = spParmFact->CreateLength(\"MyLength\", 25.4 / 1000.0); // Value in MKS (meters)</code></pre><p><strong>Important Note:</strong> The internal units in CATIA Knowledge/CGM are strictly SI/MKS (Meters, Kilograms, Seconds, Radians), regardless of display units configured in user preferences.</p>",
+    "tags": [
+      "Knowledge Interfaces",
+      "CATICkeParm",
+      "Parameters"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Airbus",
+      "Boeing"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 44,
+    "question": "How do you create an interactive Preview in a CATStateCommand before the user commits a feature?",
+    "answer": "<p>Interactive previews let users visualize geometry changes dynamically without modifying persistent part specifications:</p><ol><li>During state transitions or dialog agent value changes, construct a temporary <code>CATBody</code> using CGM operators.</li><li>Convert the temporary body into a display representation (<code>CATSurfacicRep</code> or <code>CAT3DCustomRep</code>).</li><li>Add the representation to the ISO (Interactive Set of Objects) via <code>CATISO</code>.</li><li>Clear and remove temporary representations from the ISO when the user confirms (OK) or cancels the command:</li></ol><pre><code>CATISO* pISO = GetISO();\npISO->AddElement(pTempRep);\n// When command exits:\npISO->RemoveElement(pTempRep);</code></pre>",
+    "tags": [
+      "Preview",
+      "CATISO",
+      "CATStateCommand",
+      "Interactive Graphics"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Renault Group",
+      "Mercedes-Benz R&D"
+    ],
+    "role_level": "Mid/Sr"
+  },
+  {
+    "number": 45,
+    "question": "What is the Interactive Set of Objects (ISO) and Highlight Set of Objects (HSO)?",
+    "answer": "<p>CATIA maintains dedicated visualization sets for transient interactive elements:</p><ul><li><strong>HSO (Highlight Set of Objects):</strong> Contains elements currently highlighted (orange bounding borders) due to mouse hover or explicit selection. Synchronized with the active specification tree and 3D viewers.</li><li><strong>ISO (Interactive Set of Objects):</strong> A non-persistent display bucket where CAA commands can insert temporary graphical reps (manipulators, coordinate arrows, preview surfaces) without registering them in the Part tree.</li><li><strong>PSO (Prehighlight Set of Objects):</strong> Manages subtle highlighting when the cursor moves over selectable entities before a click.</li></ul>",
+    "tags": [
+      "ISO",
+      "HSO",
+      "Highlighting",
+      "Visualization"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Capgemini",
+      "Tata Technologies"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 46,
+    "question": "How do you define a Custom Toolbar and Workbench in CATIA using CAA?",
+    "answer": "<p>Creating a customized workbench or toolbar involves implementing UI interfaces and runtime resource files:</p><ol><li>Implement <code>CATIWorkbench</code> or <code>CATIWorkbenchAddin</code> on a late-typed component.</li><li>In the implementation class, define toolbars and command headers using <code>CreateCommands()</code> and <code>CreateToolbars()</code>.</li><li>Create command headers using <code>CATAfrCommandHeader::CATCreateCommandHeader()</code> linking command names to loadable classes.</li><li>Provide resource files in <code>CNext/resources/msgcatalog/</code>:<ul><li><code>MyWorkbench.CATNls</code>: Display names and help tooltips.</li><li><code>MyWorkbench.CATRsc</code>: Icon definitions and toolbar layouts.</li></ul></li><li>Register in <code>.dico</code> dictionary.</li></ol>",
+    "tags": [
+      "Workbench",
+      "Toolbar",
+      "AfrCommandHeader",
+      "UI Customization"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Cyient",
+      "HCLTech"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 47,
+    "question": "How do you expose a C++ CAA custom method to CATIA Automation (VBA / CATScript)?",
+    "answer": "<p>CAA components can be exposed to scripting environments by implementing IDL (Interface Definition Language) interfaces:</p><ol><li>Define an interface file with <code>.idl</code> extension declaring dual COM-compatible methods.</li><li>Compile the <code>.idl</code> with the <code>mkmk</code> IDL compiler to generate C++ abstract base classes and TypeLib headers.</li><li>Implement the interface in a C++ extension class deriving from <code>CATBaseDispatch</code>.</li><li>Register the dispatch interface in the dictionary with the <code>CATIAlias</code> and automation runtime mapping.</li><li>VBA developers can now call the method directly on the Automation object: <code>part.GetItem(\"MyCustomExtension\").MyMethod()</code>.</li></ol>",
+    "tags": [
+      "Automation",
+      "IDL",
+      "VBA Integration",
+      "Dual Interface"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Boeing",
+      "Airbus"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 48,
+    "question": "Explain Threading and Concurrency rules in CATIA CAA development.",
+    "answer": "<p><strong>Core Rule:</strong> The entire CATIA modeling session, visualization tree, and specification container are <strong>strictly single-threaded</strong> (Main GUI Thread).</p><h4>Critical Rules:</h4><ul><li>You cannot invoke CGM topological operators, create features, or modify <code>CATISpecObject</code> attributes from background worker threads.</li><li><strong>Safe Background Work:</strong> Heavy mathematical calculations, network HTTP API calls, or reading external files can occur on worker threads.</li><li><strong>Marshal Results Back:</strong> Results must be handed back to the main thread via Qt/System event loops or CAA notifications before touching CATIA data models.</li></ul>",
+    "tags": [
+      "Threading",
+      "Concurrency",
+      "Performance",
+      "Best Practices"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Lockheed Martin",
+      "General Motors"
+    ],
+    "role_level": "Sr"
+  },
+  {
+    "number": 49,
+    "question": "What is the difference between CATMathTransformation, CATMathAxis, and CATMathVector in 3D transformations?",
+    "answer": "<p>CAA represents 3D spatial transformations using mathematical primitives from the <code>Mathematics</code> framework:</p><table border='1' cellpadding='6' style='border-collapse: collapse; width: 100%;'><thead><tr style='background-color: #f2f2f2;'><th>Class</th><th>Description</th><th>Mathematical Formulation</th></tr></thead><tbody><tr><td><strong>CATMathVector</strong></td><td>Direction and magnitude without fixed origin.</td><td>$3 \\times 1$ directional vector $(dx, dy, dz)$.</td></tr><tr><td><strong>CATMathAxis</strong></td><td>Local Cartesian coordinate system.</td><td>Origin point + 3 orthogonal direction vectors $(U, V, W)$.</td></tr><tr><td><strong>CATMathTransformation</strong></td><td>Full rigid affine transformation.</td><td>$4 \\times 4$ matrix combining 3D rotation, scaling, and translation vector.</td></tr></tbody></table><p><strong>Common Usage:</strong> Transforming a point: <code>point2 = transform * point1;</code></p>",
+    "tags": [
+      "Mathematics",
+      "Transformations",
+      "CATMathTransformation",
+      "Vectors"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Airbus",
+      "Tata Technologies"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 50,
+    "question": "What checklist of best practices and coding standards should every CAA C++ developer follow?",
+    "answer": "<p>Professional CAA development requires adherence to strict architectural conventions:</p><ol><li><strong>Smart Pointer Discipline:</strong> Use <code>CATBaseUnknown_var</code> handlers instead of raw pointers wherever possible; always balance manual <code>AddRef()</code> with <code>Release()</code>.</li><li><strong>Check HRESULT:</strong> Always evaluate returned <code>HRESULT</code> using <code>SUCCEEDED(hr)</code> or <code>FAILED(hr)</code>. Never assume pointers are non-NULL.</li><li><strong>Clean CGM Operators:</strong> Always delete or call <code>Release()</code> on topological operator pointers after reading results to prevent massive heap leaks.</li><li><strong>Never Bypass Generic Naming:</strong> When building procedural features, consistently link topological journals via <code>CATTopData</code>.</li><li><strong>Verify Dictionary Bindings:</strong> Verify <code>.dico</code> declarations whenever introducing new components or interfaces.</li><li><strong>Units Awareness:</strong> Always write and read parameter values in MKS units internally.</li></ol>",
+    "tags": [
+      "Best Practices",
+      "Coding Standards",
+      "Interview Essentials"
+    ],
+    "companies": [
+      "Dassault Systèmes",
+      "Boeing",
+      "Airbus",
+      "Ford",
+      "Mercedes-Benz R&D"
+    ],
+    "role_level": "Jr/Mid/Sr"
+  }
+]

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAx🧠Expert — CAD, CAM & CAE Development Hub</title>
+  <meta name="description" content="Prepare for CAD, CAM, and CAE software engineering roles with in-depth technical guides and interview questions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script>
+    (function () {
+      var stored = localStorage.getItem("CAx_theme");
+      var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (stored === "dark" || (!stored && prefersDark)) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">CAx<span>🧠Expert</span></a>
+
+      <nav class="nav-primary" aria-label="Primary">
+        <a href="index.html" class="nav-link is-active">Home</a>
+        <a href="interview.html" class="nav-link">Interview questions</a>
+      </nav>
+
+      <div class="header-actions">
+        <nav class="nav-secondary" aria-label="More">
+          <a href="about.html" class="nav-link">About</a>
+          <a href="contact.html" class="nav-link">Contact</a>
+        </nav>
+        <button type="button" id="themeToggle" class="icon-btn" aria-label="Toggle theme">
+          <span class="theme-label theme-label--light">Light</span>
+          <span class="theme-label theme-label--dark">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container layout">
+    <aside class="sidebar" aria-label="Interview topics">
+      <p class="sidebar-label">Top questions</p>
+      <nav id="topicNav" class="topic-nav">
+        <a class="topic-link" href="interview.html" data-topic="all">All questions</a>
+        <a class="topic-link" href="computational-geometry.html" data-topic="computational-geometry">Computational Geometry</a>
+        <a class="topic-link" href="catia-caa.html" data-topic="catia-caa">CAA CATIA</a>
+        <a class="topic-link" href="solidworks-api.html" data-topic="solidworks">SolidWorks API</a>
+        <a class="topic-link" href="creo-proe-automation.html" data-topic="creo-proe">Creo Pro/E Automation</a>
+        <a class="topic-link" href="autocad-automation.html" data-topic="autocad">AutoCAD Automation</a>
+        <a class="topic-link" href="cam.html" data-topic="cam">CAM</a>
+        <a class="topic-link" href="cae.html" data-topic="cae">CAE</a>
+        <a class="topic-link" href="DSA.html" data-topic="DSA">Data Structures & Algorithms</a>
+      </nav>
+    </aside>
+
+    <main class="site-main">
+      <section id="tab-home" class="tab-panel is-visible">
+        <div class="hero">
+          <h1>Hello, world!!</h1>
+          <p class="lede">
+            CAx🧠Expert makes it easy to discover everything you need to learn about CAD, CAM, and CAE software development.
+          </p>
+          <div class="hero-actions">
+            <a href="interview.html" class="btn btn-primary">Interview questions</a>
+            <a href="contact.html" class="btn btn-ghost" id="exploreCAx">Share Feedback/Collaborate? Please contact us.</a>
+          </div>
+        </div>
+
+        <div id="CAx-breakdown" class="section-block">
+          <h2>Understanding CAx</h2>
+          <p class="section-copy">Tools across the product development lifecycle.</p>
+
+          <div class="card-grid">
+            <article class="card">
+              <span class="tag tag-blue">CAD</span>
+              <h3>Computer-Aided Design</h3>
+              <p>Geometry, B-Rep kernels, NURBS, and parametric solvers.</p>
+            </article>
+            <article class="card">
+              <span class="tag tag-amber">CAM</span>
+              <h3>Computer-Aided Manufacturing</h3>
+              <p>Toolpaths, G-code, cutter compensation, and multi-axis simulation.</p>
+            </article>
+            <article class="card">
+              <span class="tag tag-green">CAE</span>
+              <h3>Computer-Aided Engineering</h3>
+              <p>Physical behavior with FEA, CFD, and structural solvers.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>© 2026 CAx🧠Expert</p>
+      <nav aria-label="Footer">
+        <a href="index.html">Home</a>
+        <a href="interview.html">Interview</a>
+        <a href="terms.html">Terms</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="js/common.js"></script>
+</body>
+</html>

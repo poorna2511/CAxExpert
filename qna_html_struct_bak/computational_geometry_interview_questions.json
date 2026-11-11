@@ -1,0 +1,340 @@
+[
+  {
+    "number": 1,
+    "question": "What is the difference between a point and a vector?",
+    "answer": "<div class='qa-answer'><p>While both can be represented using coordinates like <code>(x, y, z)</code> in $\\mathbb{R}^3$, they represent fundamentally distinct geometric entities:</p><ul><li><strong>Point:</strong> Represents an absolute <em>location</em> in space. It has no magnitude or direction, only position relative to an origin. Moving the coordinate frame origin changes a point's coordinates. In affine geometry, points can be subtracted ($P_2 - P_1 = \\vec{v}$) yielding a displacement vector, but adding two points ($P_1 + P_2$) is mathematically undefined without barycentric weights.</li><li><strong>Vector:</strong> Represents a <em>displacement, direction, and magnitude</em>. A free vector has no fixed anchor or origin; translating it does not change its mathematical identity. Vectors can be added together, scaled, and transformed by linear operators.</li></ul><p><strong>Homogeneous coordinates representation:</strong> In 4D homogeneous coordinates, a point is represented with $w = 1$ ($[x, y, z, 1]^T$) making it susceptible to translations, while a direction vector is represented with $w = 0$ ($[x, y, z, 0]^T$), preventing translations from altering direction.</p></div>",
+    "code_snippets": {
+      "python": "class Point3D:\n    def __init__(self, x, y, z):\n        self.x, self.y, self.z = x, y, z\n    def __sub__(self, other):\n        return Vector3D(self.x - other.x, self.y - other.y, self.z - other.z)\n    def __add__(self, vec):\n        return Point3D(self.x + vec.x, self.y + vec.y, self.z + vec.z)\n\nclass Vector3D:\n    def __init__(self, x, y, z):\n        self.x, self.y, self.z = x, y, z\n    def __add__(self, other):\n        return Vector3D(self.x + other.x, self.y + other.y, self.z + other.z)",
+      "cpp": "struct Vector3D { double x, y, z; };\nstruct Point3D {\n    double x, y, z;\n    Vector3D operator-(const Point3D& p) const {\n        return {x - p.x, y - p.y, z - p.z};\n    }\n    Point3D operator+(const Vector3D& v) const {\n        return {x + v.x, y + v.y, z + v.z};\n    }\n};",
+      "csharp": "public readonly record struct Vector3D(double X, double Y, double Z) {\n    public static Vector3D operator +(Vector3D a, Vector3D b) => new(a.X + b.X, a.Y + b.Y, a.Z + b.Z);\n}\npublic readonly record struct Point3D(double X, double Y, double Z) {\n    public static Vector3D operator -(Point3D a, Point3D b) => new(a.X - b.X, a.Y - b.Y, a.Z - b.Z);\n    public static Point3D operator +(Point3D p, Vector3D v) => new(p.X + v.X, p.Y + v.Y, p.Z + v.Z);\n}"
+    },
+    "tags": ["Computational Geometry", "Affine Space", "Linear Algebra"],
+    "companies": ["AMC Bridge", "Autodesk", "Dassault Systèmes"],
+    "role_level": "Jr"
+  },
+  {
+    "number": 2,
+    "question": "What is the dot product of two vectors? List its properties.",
+    "answer": "<div class='qa-answer'><p>The <strong>dot product</strong> (scalar product) of two vectors $\\vec{u}, \\vec{v} \\in \\mathbb{R}^n$ is an algebraic operation returning a single scalar value defined as:</p><p>$$\\vec{u} \\cdot \\vec{v} = \\sum_{i=1}^n u_i v_i = \\|\\vec{u}\\| \\|\\vec{v}\\| \\cos\\theta$$</p><p>where $\\theta$ is the angle between the vectors ($0 \\le \\theta \\le \\pi$).</p><h4>Key Properties:</h4><ul><li><strong>Commutativity:</strong> $\\vec{u} \\cdot \\vec{v} = \\vec{v} \\cdot \\vec{u}$</li><li><strong>Distributivity:</strong> $\\vec{u} \\cdot (\\vec{v} + \\vec{w}) = \\vec{u} \\cdot \\vec{v} + \\vec{u} \\cdot \\vec{w}$</li><li><strong>Bilinearity / Scalar multiplication:</strong> $(c\\vec{u}) \\cdot \\vec{v} = c(\\vec{u} \\cdot \\vec{v})$</li><li><strong>Length connection (Positive Definiteness):</strong> $\\vec{u} \\cdot \\vec{u} = \\|\\vec{u}\\|^2 \\ge 0$, and $\\vec{u} \\cdot \\vec{u} = 0 \\iff \\vec{u} = \\vec{0}$</li><li><strong>Orthogonality:</strong> $\\vec{u} \\cdot \\vec{v} = 0$ if and only if $\\vec{u} \\perp \\vec{v}$ (for non-zero vectors).</li><li><strong>Sign interpretation:</strong> Positive when $\\theta < 90^\\circ$ (acute), zero when $\\theta = 90^\\circ$ (orthogonal), negative when $\\theta > 90^\\circ$ (obtuse).</li></ul></div>",
+    "code_snippets": {
+      "python": "def dot_product(u: list[float], v: list[float]) -> float:\n    return sum(a * b for a, b in zip(u, v))",
+      "cpp": "template <size_t N>\ndouble dotProduct(const std::array<double, N>& u, const std::array<double, N>& v) {\n    double sum = 0.0;\n    for (size_t i = 0; i < N; ++i) sum += u[i] * v[i];\n    return sum;\n}",
+      "csharp": "public static double DotProduct(ReadOnlySpan<double> u, ReadOnlySpan<double> v) {\n    double sum = 0;\n    for (int i = 0; i < u.Length; i++) sum += u[i] * v[i];\n    return sum;\n}"
+    },
+    "tags": ["Computational Geometry", "Linear Algebra"],
+    "companies": ["AMC Bridge", "Epic Games", "Unity"],
+    "role_level": "Jr"
+  },
+  {
+    "number": 3,
+    "question": "How do you check if two vectors are parallel/orthogonal?",
+    "answer": "<div class='qa-answer'><h4>1. Orthogonality Test</h4><p>Two vectors $\\vec{u}$ and $\\vec{v}$ are orthogonal if their dot product equals zero:</p><p>$$|\\vec{u} \\cdot \\vec{v}| \\le \\epsilon$$</p><p>To make the check scale-invariant against vector magnitudes, normalize the vectors or divide by norms: $\\frac{|\\vec{u} \\cdot \\vec{v}|}{\\|\\vec{u}\\| \\|\\vec{v}\\|} \\le \\epsilon$.</p><h4>2. Parallelism Test</h4><p>Two vectors are collinear/parallel if they are scalar multiples of each other. Practical methods:</p><ul><li><strong>Cross product test (3D):</strong> $\\|\\vec{u} \\times \\vec{v}\\| \\le \\epsilon$. For scale invariance: $\\frac{\\|\\vec{u} \\times \\vec{v}\\|}{\\|\\vec{u}\\| \\|\\vec{v}\\|} \\le \\epsilon$.</li><li><strong>Normalized dot product test (Any dimension):</strong> $|\\hat{u} \\cdot \\hat{v}| \\ge 1.0 - \\epsilon$. A value of $+1$ indicates parallel (same direction), $-1$ indicates anti-parallel (opposite direction).</li><li><strong>Component ratio (2D/3D):</strong> Check cross components equality (e.g. In 2D: $|u_x v_y - u_y v_x| \\le \\epsilon$).</li></ul></div>",
+    "code_snippets": {
+      "python": "import math\n\ndef are_orthogonal(u, v, eps=1e-7):\n    mag = math.sqrt(sum(a*a for a in u)) * math.sqrt(sum(b*b for b in v))\n    if mag < eps: return False\n    return abs(sum(a*b for a, b in zip(u, v))) / mag <= eps\n\ndef are_parallel(u, v, eps=1e-7):\n    mag = math.sqrt(sum(a*a for a in u)) * math.sqrt(sum(b*b for b in v))\n    if mag < eps: return False\n    cos_theta = abs(sum(a*b for a, b in zip(u, v))) / mag\n    return abs(cos_theta - 1.0) <= eps",
+      "cpp": "#include <cmath>\n#include <array>\n\nbool areOrthogonal(const std::array<double, 3>& u, const std::array<double, 3>& v, double eps = 1e-7) {\n    double dot = u[0]*v[0] + u[1]*v[1] + u[2]*v[2];\n    double mag = std::sqrt((u[0]*u[0]+u[1]*u[1]+u[2]*u[2]) * (v[0]*v[0]+v[1]*v[1]+v[2]*v[2]));\n    return mag > eps && (std::abs(dot) / mag) <= eps;\n}\n\nbool areParallel(const std::array<double, 3>& u, const std::array<double, 3>& v, double eps = 1e-7) {\n    std::array<double, 3> cross = { u[1]*v[2] - u[2]*v[1], u[2]*v[0] - u[0]*v[2], u[0]*v[1] - u[1]*v[0] };\n    double crossSq = cross[0]*cross[0] + cross[1]*cross[1] + cross[2]*cross[2];\n    double magSq = (u[0]*u[0]+u[1]*u[1]+u[2]*u[2]) * (v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);\n    return magSq > eps && (crossSq / magSq) <= eps * eps;\n}",
+      "csharp": "public static bool AreOrthogonal(double[] u, double[] v, double eps = 1e-7) {\n    double dot = 0, lenU = 0, lenV = 0;\n    for (int i = 0; i < u.Length; i++) { dot += u[i] * v[i]; lenU += u[i] * u[i]; lenV += v[i] * v[i]; }\n    double mag = Math.Sqrt(lenU * lenV);\n    return mag > eps && (Math.Abs(dot) / mag) <= eps;\n}"
+    },
+    "tags": ["Computational Geometry", "Vector Operations"],
+    "companies": ["AMC Bridge", "PTC", "Siemens"],
+    "role_level": "Jr"
+  },
+  {
+    "number": 4,
+    "question": "How do you find a projection of one vector onto the direction of another vector?",
+    "answer": "<div class='qa-answer'><p>Let $\\vec{u}$ be the vector to project and $\\vec{v}$ be the target direction vector ($\\vec{v} \\neq \\vec{0}$).</p><h4>1. Scalar Projection ($s$)</h4><p>The signed length of the projection along $\\vec{v}$ is obtained by taking the dot product with the normalized unit vector $\\hat{v}$:</p><p>$$s = \\text{comp}_{\\vec{v}}(\\vec{u}) = \\vec{u} \\cdot \\hat{v} = \\frac{\\vec{u} \\cdot \\vec{v}}{\\|\\vec{v}\\|}$$</p><h4>2. Vector Projection ($\\text{proj}_{\\vec{v}}(\\vec{u})$)</h4><p>The vector component along $\\vec{v}$ is scalar projection multiplied by the unit vector $\\hat{v}$:</p><p>$$\\text{proj}_{\\vec{v}}(\\vec{u}) = s \\, \\hat{v} = \\left( \\frac{\\vec{u} \\cdot \\vec{v}}{\\|\\vec{v}\\|} \\right) \\frac{\\vec{v}}{\\|\\vec{v}\\|} = \\frac{\\vec{u} \\cdot \\vec{v}}{\\|\\vec{v}\\|^2} \\vec{v} = \\frac{\\vec{u} \\cdot \\vec{v}}{\\vec{v} \\cdot \\vec{v}} \\vec{v}$$</p><p>Notice that computing $\\text{proj}_{\\vec{v}}(\\vec{u})$ directly requires <strong>no square root</strong> operations, avoiding expensive operations in hot loops.</p></div>",
+    "code_snippets": {
+      "python": "def project(u: tuple[float, float, float], v: tuple[float, float, float]):\n    v_sq = sum(b * b for b in v)\n    if v_sq < 1e-12: raise ValueError('Target vector has zero length')\n    scale = sum(a * b for a, b in zip(u, v)) / v_sq\n    return tuple(scale * b for b in v)",
+      "cpp": "#include <array>\n\nstd::array<double, 3> project(const std::array<double, 3>& u, const std::array<double, 3>& v) {\n    double vSq = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];\n    double scale = (u[0]*v[0] + u[1]*v[1] + u[2]*v[2]) / vSq;\n    return {scale * v[0], scale * v[1], scale * v[2]};\n}",
+      "csharp": "public static (double X, double Y, double Z) Project((double X, double Y, double Z) u, (double X, double Y, double Z) v) {\n    double vSq = v.X * v.X + v.Y * v.Y + v.Z * v.Z;\n    double scale = (u.X * v.X + u.Y * v.Y + u.Z * v.Z) / vSq;\n    return (scale * v.X, scale * v.Y, scale * v.Z);\n}"
+    },
+    "tags": ["Computational Geometry", "Vector Operations"],
+    "companies": ["AMC Bridge", "Autodesk", "Nvidia"],
+    "role_level": "Jr"
+  },
+  {
+    "number": 5,
+    "question": "What is the cross product? List its properties.",
+    "answer": "<div class='qa-answer'><p>The <strong>cross product</strong> (vector product) of two vectors $\\vec{u}, \\vec{v} \\in \\mathbb{R}^3$ yields a vector perpendicular to both $\\vec{u}$ and $\\vec{v}$, whose orientation follows the right-hand rule. It is defined as:</p><p>$$\\vec{u} \\times \\vec{v} = \\begin{vmatrix} \\mathbf{i} & \\mathbf{j} & \\mathbf{k} \\\\ u_x & u_y & u_z \\\\ v_x & v_y & v_z \\end{vmatrix} = \\begin{pmatrix} u_y v_z - u_z v_y \\\\ u_z v_x - u_x v_z \\\\ u_x v_y - u_y v_x \\end{pmatrix}$$</p><p>Magnitude: $\\|\\vec{u} \\times \\vec{v}\\| = \\|\\vec{u}\\| \\|\\vec{v}\\| \\sin\\theta$, which equals the <em>area of the parallelogram</em> spanned by $\\vec{u}$ and $\\vec{v}$.</p><h4>Key Properties:</h4><ul><li><strong>Anti-commutativity:</strong> $\\vec{u} \\times \\vec{v} = -(\\vec{v} \\times \\vec{u})$</li><li><strong>Distributivity:</strong> $\\vec{u} \\times (\\vec{v} + \\vec{w}) = (\\vec{u} \\times \\vec{v}) + (\\vec{u} \\times \\vec{w})$</li><li><strong>Self cross-product:</strong> $\\vec{u} \\times \\vec{u} = \\vec{0}$</li><li><strong>Collinearity:</strong> $\\vec{u} \\times \\vec{v} = \\vec{0} \\iff \\vec{u} \\parallel \\vec{v}$ (or one is $\\vec{0}$)</li><li><strong>Non-associative:</strong> $\\vec{u} \\times (\\vec{v} \\times \\vec{w}) \\neq (\\vec{u} \\times \\vec{v}) \\times \\vec{w}$ (Lagrange's identity applies: $\\vec{u} \\times (\\vec{v} \\times \\vec{w}) = (\\vec{u} \\cdot \\vec{w})\\vec{v} - (\\vec{u} \\cdot \\vec{v})\\vec{w}$)</li></ul></div>",
+    "code_snippets": {
+      "python": "def cross_product(u: tuple[float, float, float], v: tuple[float, float, float]):\n    return (\n        u[1] * v[2] - u[2] * v[1],\n        u[2] * v[0] - u[0] * v[2],\n        u[0] * v[1] - u[1] * v[0]\n    )",
+      "cpp": "#include <array>\n\nstd::array<double, 3> crossProduct(const std::array<double, 3>& u, const std::array<double, 3>& v) {\n    return {\n        u[1]*v[2] - u[2]*v[1],\n        u[2]*v[0] - u[0]*v[2],\n        u[0]*v[1] - u[1]*v[0]\n    };\n}",
+      "csharp": "public static (double X, double Y, double Z) CrossProduct((double X, double Y, double Z) u, (double X, double Y, double Z) v) =>\n    (u.Y * v.Z - u.Z * v.Y, u.Z * v.X - u.X * v.Z, u.X * v.Y - u.Y * v.X);"
+    },
+    "tags": ["Computational Geometry", "Vector Operations"],
+    "companies": ["AMC Bridge", "Autodesk", "Dassault Systèmes"],
+    "role_level": "Jr"
+  },
+  {
+    "number": 6,
+    "question": "How do you compute an angle between two vectors?",
+    "answer": "<div class='qa-answer'><p>The standard geometric angle $\\theta \\in [0, \\pi]$ between two non-zero vectors $\\vec{u}$ and $\\vec{v}$ can be computed via their dot product:</p><p>$$\\cos\\theta = \\frac{\\vec{u} \\cdot \\vec{v}}{\\|\\vec{u}\\| \\|\\vec{v}\\|} \\implies \\theta = \\arccos\\left(\\text{clamp}\\left(\\frac{\\vec{u} \\cdot \\vec{v}}{\\|\\vec{u}\\| \\|\\vec{v}\\|}, -1.0, 1.0\\right)\\right)$$</p><p><strong>Important Numerical Precision Note:</strong> Due to floating point inaccuracy, the quotient may result in $1.0000000002$ or $-1.0000000002$, causing <code>acos()</code> to return <code>NaN</code>. Clamping to $[-1, 1]$ is mandatory.</p><p><strong>More robust alternative (atan2 approach):</strong> For 3D vectors, using <code>atan2</code> is numerically stabler, especially for small angles near $0$ and $\\pi$:</p><p>$$\\theta = \\text{atan2}(\\|\\vec{u} \\times \\vec{v}\\|, \\vec{u} \\cdot \\vec{v})$$</p></div>",
+    "code_snippets": {
+      "python": "import math\n\ndef angle_between(u, v):\n    dot = sum(a * b for a, b in zip(u, v))\n    # Cross product magnitude for 3D\n    cross = (\n        u[1]*v[2] - u[2]*v[1],\n        u[2]*v[0] - u[0]*v[2],\n        u[0]*v[1] - u[1]*v[0]\n    )\n    cross_norm = math.sqrt(sum(c * c for c in cross))\n    return math.atan2(cross_norm, dot)  # in radians",
+      "cpp": "#include <cmath>\n#include <algorithm>\n\ndouble angleBetween(const double u[3], const double v[3]) {\n    double dot = u[0]*v[0] + u[1]*v[1] + u[2]*v[2];\n    double cross[3] = {\n        u[1]*v[2] - u[2]*v[1],\n        u[2]*v[0] - u[0]*v[2],\n        u[0]*v[1] - u[1]*v[0]\n    };\n    double crossNorm = std::sqrt(cross[0]*cross[0] + cross[1]*cross[1] + cross[2]*cross[2]);\n    return std::atan2(crossNorm, dot);\n}",
+      "csharp": "public static double AngleBetween(double[] u, double[] v) {\n    double dot = u[0]*v[0] + u[1]*v[1] + u[2]*v[2];\n    double cx = u[1]*v[2] - u[2]*v[1];\n    double cy = u[2]*v[0] - u[0]*v[2];\n    double cz = u[0]*v[1] - u[1]*v[0];\n    double crossNorm = Math.Sqrt(cx*cx + cy*cy + cz*cz);\n    return Math.Atan2(crossNorm, dot);\n}"
+    },
+    "tags": ["Computational Geometry", "Numerical Stability"],
+    "companies": ["AMC Bridge", "Unity", "Epic Games"],
+    "role_level": "Jr"
+  },
+  {
+    "number": 7,
+    "question": "How do you compute a signed angle measured from vector A to vector B on a 3D plane containing both vectors?",
+    "answer": "<div class='qa-answer'><p>In 3D, a signed angle between vectors $\\vec{a}$ and $\\vec{b}$ is ambiguous without defining a <strong>plane normal $\\vec{n}$</strong> (representing the viewpoint or axis of rotation). With a designated normal vector $\\hat{n}$ ($\\|\\hat{n}\\| = 1$):</p><ol><li>The cosine of the angle relates to the dot product: $\\cos\\theta = \\frac{\\vec{a} \\cdot \\vec{b}}{\\|\\vec{a}\\| \\|\\vec{b}\\|}$.</li><li>The sine of the angle along the normal direction is extracted via the scalar triple product with $\\hat{n}$:$$\\sin\\theta = \\frac{(\\vec{a} \\times \\vec{b}) \\cdot \\hat{n}}{\\|\\vec{a}\\| \\|\\vec{b}\\|}$$</li><li>Compute the signed angle $\\theta \\in (-\\pi, \\pi]$ using <code>atan2</code>:$$\\theta = \\text{atan2}((\\vec{a} \\times \\vec{b}) \\cdot \\hat{n}, \\vec{a} \\cdot \\vec{b})$$</li></ol><p>If the plane normal is not pre-assigned, it can be defined as $\\hat{n} = \\frac{\\vec{a} \\times \\vec{b}}{\\|\\vec{a} \\times \\vec{b}\\|}$, but that trivially makes the angle always non-negative. A reference surface or camera normal must be supplied to distinguish clockwise from counter-clockwise.</p></div>",
+    "code_snippets": {
+      "python": "import math\n\ndef signed_angle(a, b, normal):\n    cross = (\n        a[1]*b[2] - a[2]*b[1],\n        a[2]*b[0] - a[0]*b[2],\n        a[0]*b[1] - a[1]*b[0]\n    )\n    dot = sum(x * y for x, y in zip(a, b))\n    sin_val = sum(c * n for c, n in zip(cross, normal))\n    return math.atan2(sin_val, dot)",
+      "cpp": "#include <cmath>\n\ndouble signedAngle(const double a[3], const double b[3], const double n[3]) {\n    double cross[3] = {\n        a[1]*b[2] - a[2]*b[1],\n        a[2]*b[0] - a[0]*b[2],\n        a[0]*b[1] - a[1]*b[0]\n    };\n    double dot = a[0]*b[0] + a[1]*b[1] + a[2]*b[2];\n    double sinVal = cross[0]*n[0] + cross[1]*n[1] + cross[2]*n[2];\n    return std::atan2(sinVal, dot);\n}",
+      "csharp": "public static double SignedAngle(double[] a, double[] b, double[] normal) {\n    double[] cross = { a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2], a[0]*b[1] - a[1]*b[0] };\n    double dot = a[0]*b[0] + a[1]*b[1] + a[2]*b[2];\n    double sinVal = cross[0]*normal[0] + cross[1]*normal[1] + cross[2]*normal[2];\n    return Math.Atan2(sinVal, dot);\n}"
+    },
+    "tags": ["Computational Geometry", "Vector Operations"],
+    "companies": ["AMC Bridge", "Blender", "Autodesk"],
+    "role_level": "Mid"
+  },
+  {
+    "number": 8,
+    "question": "How to check if three vectors are coplanar?",
+    "answer": "<div class='qa-answer'><p>Three vectors $\\vec{u}, \\vec{v}, \\vec{w} \\in \\mathbb{R}^3$ are coplanar if and only if they lie in the same plane, which means they are linearly dependent and span a parallelepiped with zero volume.</p><h4>Mathematical Check:</h4><p>Evaluate their <strong>scalar triple product (mixed product)</strong> or determinant:</p><p>$$\\det([\\vec{u}, \\vec{v}, \\vec{w}]) = \\vec{u} \\cdot (\\vec{v} \\times \\vec{w}) = 0$$</p><h4>Numerical Tolerance Consideration:</h4><p>In floating-point math, compute the scalar triple product and check against a relative epsilon proportional to vector magnitudes:</p><p>$$\\frac{|\\vec{u} \\cdot (\\vec{v} \\times \\vec{w})|}{\\|\\vec{u}\\| \\|\\vec{v}\\| \\|\\vec{w}\\|} \\le \\epsilon$$</p></div>",
+    "code_snippets": {
+      "python": "import math\n\ndef are_coplanar(u, v, w, eps=1e-6):\n    # v x w\n    vxw = (v[1]*w[2] - v[2]*w[1], v[2]*w[0] - v[0]*w[2], v[0]*w[1] - v[1]*w[0])\n    triple_prod = abs(sum(a * b for a, b in zip(u, v_cross := vxw)))\n    mag = math.sqrt(sum(x*x for x in u)) * math.sqrt(sum(x*x for x in v)) * math.sqrt(sum(x*x for x in w))\n    return (triple_prod / mag) <= eps if mag > 1e-12 else True",
+      "cpp": "#include <cmath>\n\nbool areCoplanar(const double u[3], const double v[3], const double w[3], double eps = 1e-6) {\n    double cross[3] = { v[1]*w[2] - v[2]*w[1], v[2]*w[0] - v[0]*w[2], v[0]*w[1] - v[1]*w[0] };\n    double trip = std::abs(u[0]*cross[0] + u[1]*cross[1] + u[2]*cross[2]);\n    double magU = std::sqrt(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);\n    double magV = std::sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);\n    double magW = std::sqrt(w[0]*w[0] + w[1]*w[1] + w[2]*w[2]);\n    double denom = magU * magV * magW;\n    return denom < 1e-12 || (trip / denom) <= eps;\n}",
+      "csharp": "public static bool AreCoplanar(double[] u, double[] v, double[] w, double eps = 1e-6) {\n    double cx = v[1]*w[2] - v[2]*w[1], cy = v[2]*w[0] - v[0]*w[2], cz = v[0]*w[1] - v[1]*w[0];\n    double trip = Math.Abs(u[0]*cx + u[1]*cy + u[2]*cz);\n    double mag = Math.Sqrt((u[0]*u[0]+u[1]*u[1]+u[2]*u[2]) * (v[0]*v[0]+v[1]*v[1]+v[2]*v[2]) * (w[0]*w[0]+w[1]*w[1]+w[2]*w[2]));\n    return mag < 1e-12 || (trip / mag) <= eps;\n}"
+    },
+    "tags": ["Computational Geometry", "Linear Algebra"],
+    "companies": ["AMC Bridge", "Autodesk", "PTC"],
+    "role_level": "Jr"
+  },
+  {
+    "number": 9,
+    "question": "Can you uniquely define a plane having two non-collinear vectors? How?",
+    "answer": "<div class='qa-answer'><p><strong>Short answer:</strong> No, not without an anchor point. Two non-collinear vectors define a <em>family of parallel planes</em> (an orientation / linear subspace), but <strong>not a unique affine plane</strong> in 3D space.</p><h4>Explanation:</h4><ul><li>To uniquely fix an affine plane in 3D, <strong>3 degrees of freedom (DoF)</strong> are needed (orientation + position).</li><li>Two non-collinear direction vectors $\\vec{u}$ and $\\vec{v}$ determine only the normal direction:$$\\vec{n} = \\vec{u} \\times \\vec{v}$$</li><li>This fixes the plane's orientation, giving the equation $n_x x + n_y y + n_z z + d = 0$. However, parameter $d$ remains unknown. There are infinitely many parallel planes with normal $\\vec{n}$.</li><li><strong>To make it unique:</strong> You must either specify a reference point $P_0$ (giving point-plane form: $\\vec{n} \\cdot (P - P_0) = 0$), or assume the plane passes through the origin $O(0,0,0)$ (which defines a 2D linear subspace).</li></ul></div>",
+    "code_snippets": {
+      "python": "def define_plane(u, v, point_on_plane=(0, 0, 0)):\n    # Normal via cross product\n    n = (u[1]*v[2] - u[2]*v[1], u[2]*v[0] - u[0]*v[2], u[0]*v[1] - u[1]*v[0])\n    # d = - (n . P0)\n    d = -sum(ni * pi for ni, pi in zip(n, point_on_plane))\n    return (*n, d)  # Plane: ax + by + cz + d = 0",
+      "cpp": "struct Plane { double a, b, c, d; };\nPlane definePlane(const double u[3], const double v[3], const double p[3] = nullptr) {\n    double a = u[1]*v[2] - u[2]*v[1];\n    double b = u[2]*v[0] - u[0]*v[2];\n    double c = u[0]*v[1] - u[1]*v[0];\n    double d = p ? -(a*p[0] + b*p[1] + c*p[2]) : 0.0;\n    return {a, b, c, d};\n}",
+      "csharp": "public readonly record struct Plane(double A, double B, double C, double D);\npublic static Plane DefinePlane(double[] u, double[] v, double[]? p = null) {\n    double a = u[1]*v[2] - u[2]*v[1], b = u[2]*v[0] - u[0]*v[2], c = u[0]*v[1] - u[1]*v[0];\n    double d = p != null ? -(a*p[0] + b*p[1] + c*p[2]) : 0.0;\n    return new Plane(a, b, c, d);\n}"
+    },
+    "tags": ["Computational Geometry", "Analytic Geometry"],
+    "companies": ["AMC Bridge", "Siemens", "Trimble"],
+    "role_level": "Jr"
+  },
+  {
+    "number": 10,
+    "question": "What is the mixed product of three vectors? What is its geometric sense?",
+    "answer": "<div class='qa-answer'><p>The <strong>mixed product</strong> (also called the <strong>scalar triple product</strong> or box product) of three vectors $\\vec{a}, \\vec{b}, \\vec{c} \\in \\mathbb{R}^3$ is defined as:</p><p>$$[\\vec{a}, \\vec{b}, \\vec{c}] = \\vec{a} \\cdot (\\vec{b} \\times \\vec{c}) = \\det \\begin{pmatrix} a_x & a_y & a_z \\\\ b_x & b_y & b_z \\\\ c_x & c_y & c_z \\end{pmatrix}$$</p><h4>Geometric Sense:</h4><ul><li><strong>Volume:</strong> The absolute value $|\\vec{a} \\cdot (\\vec{b} \\times \\vec{c})|$ equals the <strong>volume of the parallelepiped</strong> spanned by the three vectors. Consequently, the volume of a tetrahedron formed by the vectors is $\\frac{1}{6}|[\\vec{a}, \\vec{b}, \\vec{c}]|$.</li><li><strong>Orientation / Handedness:</strong> <ul><li>If $[\\vec{a}, \\vec{b}, \\vec{c}] > 0$: The triad $(\\vec{a}, \\vec{b}, \\vec{c})$ forms a <em>right-handed system</em>.</li><li>If $[\\vec{a}, \\vec{b}, \\vec{c}] < 0$: The triad forms a <em>left-handed system</em>.</li><li>If $[\\vec{a}, \\vec{b}, \\vec{c}] = 0$: The vectors are <em>coplanar</em> (degenerate, zero volume).</li></ul></li><li><strong>Circular Permutation:</strong> $\\vec{a} \\cdot (\\vec{b} \\times \\vec{c}) = \\vec{b} \\cdot (\\vec{c} \\times \\vec{a}) = \\vec{c} \\cdot (\\vec{a} \\times \\vec{b})$.</li></ul></div>",
+    "code_snippets": {
+      "python": "def mixed_product(a, b, c) -> float:\n    # a . (b x c)\n    cross_bc = (\n        b[1]*c[2] - b[2]*c[1],\n        b[2]*c[0] - b[0]*c[2],\n        b[0]*c[1] - b[1]*c[0]\n    )\n    return sum(ai * bi for ai, bi in zip(a, cross_bc))",
+      "cpp": "double mixedProduct(const double a[3], const double b[3], const double c[3]) {\n    double cross[3] = {\n        b[1]*c[2] - b[2]*c[1],\n        b[2]*c[0] - b[0]*c[2],\n        b[0]*c[1] - b[1]*c[0]\n    };\n    return a[0]*cross[0] + a[1]*cross[1] + a[2]*cross[2];\n}",
+      "csharp": "public static double MixedProduct(double[] a, double[] b, double[] c) =>\n    a[0]*(b[1]*c[2] - b[2]*c[1]) + a[1]*(b[2]*c[0] - b[0]*c[2]) + a[2]*(b[0]*c[1] - b[1]*c[0]);"
+    },
+    "tags": ["Computational Geometry", "Linear Algebra"],
+    "companies": ["AMC Bridge", "Autodesk", "Dassault Systèmes"],
+    "role_level": "Jr"
+  },
+  {
+    "number": 11,
+    "question": "What is a convex polygon? How do you check if a polygon is convex or concave?",
+    "answer": "<div class='qa-answer'><p>A polygon is <strong>convex</strong> if the line segment connecting any two points inside the polygon lies entirely within the polygon. Equivalently, all interior angles are strictly $\\le 180^\\circ$, and traversing the vertices turns consistently in one direction (all left turns or all right turns).</p><h4>Verification Algorithm (Sign of Cross Products):</h4><ol><li>Order vertices cyclically $P_0, P_1, \\dots, P_{n-1}$.</li><li>For every sequential triplet of vertices $(P_{i-1}, P_i, P_{i+1})$, construct edge vectors:$$\\vec{e}_1 = P_i - P_{i-1}, \\quad \\vec{e}_2 = P_{i+1} - P_i$$</li><li>Compute the 2D cross product ($z$-component):$$c_i = (\\vec{e}_1)_x (\\vec{e}_2)_y - (\\vec{e}_1)_y (\\vec{e}_2)_x$$</li><li>Check the signs of all $c_i$:<ul><li>If all non-zero $c_i > 0$, the polygon is strictly convex with CCW winding.</li><li>If all non-zero $c_i < 0$, the polygon is strictly convex with CW winding.</li><li>If there are both strictly positive and strictly negative signs ($c_j > 0$ and $c_k < 0$), the polygon is <strong>concave</strong> (or self-intersecting).</li></ul></li></ol></div>",
+    "code_snippets": {
+      "python": "def is_convex(poly: list[tuple[float, float]]) -> bool:\n    n = len(poly)\n    if n < 3: return False\n    sign = 0\n    for i in range(n):\n        p0, p1, p2 = poly[i-1], poly[i], poly[(i+1)%n]\n        cp = (p1[0] - p0[0]) * (p2[1] - p1[1]) - (p1[1] - p0[1]) * (p2[0] - p1[0])\n        if abs(cp) > 1e-9:\n            if sign == 0: sign = 1 if cp > 0 else -1\n            elif (cp > 0 and sign == -1) or (cp < 0 and sign == 1):\n                return False\n    return True",
+      "cpp": "#include <vector>\n#include <cmath>\n\nstruct Point2D { double x, y; };\nbool isConvex(const std::vector<Point2D>& poly) {\n    int n = poly.size();\n    if (n < 3) return false;\n    int sign = 0;\n    for (int i = 0; i < n; ++i) {\n        const auto& p0 = poly[(i + n - 1) % n];\n        const auto& p1 = poly[i];\n        const auto& p2 = poly[(i + 1) % n];\n        double cp = (p1.x - p0.x) * (p2.y - p1.y) - (p1.y - p0.y) * (p2.x - p1.x);\n        if (std::abs(cp) > 1e-9) {\n            if (sign == 0) sign = (cp > 0) ? 1 : -1;\n            else if ((cp > 0 && sign == -1) || (cp < 0 && sign == 1)) return false;\n        }\n    }\n    return true;\n}",
+      "csharp": "public static bool IsConvex((double X, double Y)[] poly) {\n    int n = poly.Length;\n    if (n < 3) return false;\n    int sign = 0;\n    for (int i = 0; i < n; i++) {\n        var p0 = poly[(i + n - 1) % n];\n        var p1 = poly[i];\n        var p2 = poly[(i + 1) % n];\n        double cp = (p1.X - p0.X) * (p2.Y - p1.Y) - (p1.Y - p0.Y) * (p2.X - p1.X);\n        if (Math.Abs(cp) > 1e-9) {\n            if (sign == 0) sign = cp > 0 ? 1 : -1;\n            else if ((cp > 0 && sign == -1) || (cp < 0 && sign == 1)) return false;\n        }\n    }\n    return true;\n}"
+    },
+    "tags": ["Computational Geometry", "Polygon Algorithms"],
+    "companies": ["AMC Bridge", "Autodesk", "Bentley"],
+    "role_level": "Mid"
+  },
+  {
+    "number": 12,
+    "question": "Compute the distance between an infinite line and a point in 3D. What needs to be changed to compute the distance between a finite segment and a point?",
+    "answer": "<div class='qa-answer'><h4>1. Infinite Line to Point in 3D</h4><p>Let the line be defined by point $P_0$ and direction vector $\\vec{d} \\neq \\vec{0}$, and let the point be $Q$.</p><p>Vector from $P_0$ to $Q$ is $\\vec{v} = Q - P_0$. The distance is the perpendicular height of the parallelogram formed by $\\vec{v}$ and $\\vec{d}$:</p><p>$$d = \\frac{\\|\\vec{v} \\times \\vec{d}\\|}{\\|\\vec{d}\\|}$$</p><h4>2. Modification for Finite Segment $[A, B]$</h4><p>A segment is parameterized as $P(t) = A + t\\vec{d}$, where $\\vec{d} = B - A$ and $t \\in [0, 1]$.</p><ol><li>Project $(Q - A)$ onto $\\vec{d}$ to find parameter $t$ of the closest point on the unbounded line:$$t = \\frac{(Q - A) \\cdot \\vec{d}}{\\vec{d} \\cdot \\vec{d}}$$</li><li><strong>Clamp $t$ to the interval $[0, 1]$:</strong>$$t_{\\text{clamped}} = \\max(0.0, \\min(1.0, t))$$</li><li>The closest point on the segment is $P_{\\text{closest}} = A + t_{\\text{clamped}} \\vec{d}$.</li><li>The distance is $\\|Q - P_{\\text{closest}}\\|$.</li></ol></div>",
+    "code_snippets": {
+      "python": "import math\n\ndef point_to_line_dist(q, p0, d):\n    v = [q[i] - p0[i] for i in range(3)]\n    cross = [v[1]*d[2]-v[2]*d[1], v[2]*d[0]-v[0]*d[2], v[0]*d[1]-v[1]*d[0]]\n    return math.sqrt(sum(c*c for c in cross)) / math.sqrt(sum(di*di for di in d))\n\ndef point_to_segment_dist(q, a, b):\n    d = [b[i] - a[i] for i in range(3)]\n    v = [q[i] - a[i] for i in range(3)]\n    d_sq = sum(di * di for di in d)\n    if d_sq < 1e-12: return math.sqrt(sum(vi * vi for vi in v))\n    t = max(0.0, min(1.0, sum(vi * di for vi, di in zip(v, d)) / d_sq))\n    closest = [a[i] + t * d[i] for i in range(3)]\n    return math.sqrt(sum((q[i] - closest[i])**2 for i in range(3)))",
+      "cpp": "#include <cmath>\n#include <algorithm>\n\ndouble pointToSegmentDist(const double q[3], const double a[3], const double b[3]) {\n    double d[3] = { b[0] - a[0], b[1] - a[1], b[2] - a[2] };\n    double v[3] = { q[0] - a[0], q[1] - a[1], q[2] - a[2] };\n    double dSq = d[0]*d[0] + d[1]*d[1] + d[2]*d[2];\n    double t = (dSq < 1e-12) ? 0.0 : std::clamp((v[0]*d[0] + v[1]*d[1] + v[2]*d[2]) / dSq, 0.0, 1.0);\n    double distSq = 0.0;\n    for (int i = 0; i < 3; ++i) {\n        double diff = q[i] - (a[i] + t * d[i]);\n        distSq += diff * diff;\n    }\n    return std::sqrt(distSq);\n}",
+      "csharp": "public static double PointToSegmentDistance(double[] q, double[] a, double[] b) {\n    double[] d = { b[0] - a[0], b[1] - a[1], b[2] - a[2] };\n    double dSq = d[0]*d[0] + d[1]*d[1] + d[2]*d[2];\n    double t = dSq < 1e-12 ? 0.0 : Math.Clamp(((q[0]-a[0])*d[0] + (q[1]-a[1])*d[1] + (q[2]-a[2])*d[2]) / dSq, 0.0, 1.0);\n    double sum = 0;\n    for (int i = 0; i < 3; i++) { double diff = q[i] - (a[i] + t * d[i]); sum += diff * diff; }\n    return Math.Sqrt(sum);\n}"
+    },
+    "tags": ["Computational Geometry", "Distance Queries"],
+    "companies": ["AMC Bridge", "Autodesk", "Nvidia"],
+    "role_level": "Mid"
+  },
+  {
+    "number": 13,
+    "question": "Compute the distance between two arbitrary infinite lines in 3D.",
+    "answer": "<div class='qa-answer'><p>Let the two lines be $L_1(s) = P_1 + s\\vec{d_1}$ and $L_2(t) = P_2 + t\\vec{d_2}$. Let $\\vec{r} = P_1 - P_2$.</p><h4>Case 1: Non-parallel lines (Skew or Intersecting)</h4><p>The vector mutual to both lines is perpendicular to both $\\vec{d_1}$ and $\\vec{d_2}$: $\\vec{n} = \\vec{d_1} \\times \\vec{d_2} \\neq \\vec{0}$.</p><p>The shortest distance is the projection of $\\vec{r}$ onto the unit normal vector $\\hat{n}$:</p><p>$$d = \\frac{|\\vec{r} \\cdot (\\vec{d_1} \\times \\vec{d_2})|}{\\|\\vec{d_1} \\times \\vec{d_2}\\|}$$</p><p>If $d = 0$, the lines intersect.</p><h4>Case 2: Parallel lines ($\\vec{d_1} \\times \\vec{d_2} = \\vec{0}$)</h4><p>The distance between the lines is the distance from any point on $L_1$ (e.g. $P_1$) to line $L_2$:</p><p>$$d = \\frac{\\|\\vec{r} \\times \\vec{d_2}\\|}{\\|\\vec{d_2}\\|}$$</p></div>",
+    "code_snippets": {
+      "python": "import math\n\ndef distance_between_lines(p1, d1, p2, d2):\n    # n = d1 x d2\n    n = [d1[1]*d2[2] - d1[2]*d2[1], d1[2]*d2[0] - d1[0]*d2[2], d1[0]*d2[1] - d1[1]*d2[0]]\n    n_len = math.sqrt(sum(x*x for x in n))\n    r = [p1[i] - p2[i] for i in range(3)]\n    if n_len < 1e-9:  # Parallel lines\n        rx_d2 = [r[1]*d2[2] - r[2]*d2[1], r[2]*d2[0] - r[0]*d2[2], r[0]*d2[1] - r[1]*d2[0]]\n        return math.sqrt(sum(x*x for x in rx_d2)) / math.sqrt(sum(x*x for x in d2))\n    return abs(sum(r[i] * n[i] for i in range(3))) / n_len",
+      "cpp": "#include <cmath>\n\ndouble distanceLines(const double p1[3], const double d1[3], const double p2[3], const double d2[3]) {\n    double n[3] = { d1[1]*d2[2]-d1[2]*d2[1], d1[2]*d2[0]-d1[0]*d2[2], d1[0]*d2[1]-d1[1]*d2[0] };\n    double nMag = std::sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]);\n    double r[3] = { p1[0] - p2[0], p1[1] - p2[1], p1[2] - p2[2] };\n    if (nMag < 1e-9) { // Parallel\n        double cross[3] = { r[1]*d2[2]-r[2]*d2[1], r[2]*d2[0]-r[0]*d2[2], r[0]*d2[1]-r[1]*d2[0] };\n        return std::sqrt(cross[0]*cross[0] + cross[1]*cross[1] + cross[2]*cross[2]) / \n               std::sqrt(d2[0]*d2[0] + d2[1]*d2[1] + d2[2]*d2[2]);\n    }\n    return std::abs(r[0]*n[0] + r[1]*n[1] + r[2]*n[2]) / nMag;\n}",
+      "csharp": "public static double DistanceBetweenLines(double[] p1, double[] d1, double[] p2, double[] d2) {\n    double nx = d1[1]*d2[2]-d1[2]*d2[1], ny = d1[2]*d2[0]-d1[0]*d2[2], nz = d1[0]*d2[1]-d1[1]*d2[0];\n    double nMag = Math.Sqrt(nx*nx + ny*ny + nz*nz);\n    double[] r = { p1[0] - p2[0], p1[1] - p2[1], p1[2] - p2[2] };\n    if (nMag < 1e-9) {\n        double cx = r[1]*d2[2]-r[2]*d2[1], cy = r[2]*d2[0]-r[0]*d2[2], cz = r[0]*d2[1]-r[1]*d2[0];\n        return Math.Sqrt(cx*cx + cy*cy + cz*cz) / Math.Sqrt(d2[0]*d2[0] + d2[1]*d2[1] + d2[2]*d2[2]);\n    }\n    return Math.Abs(r[0]*nx + r[1]*ny + r[2]*nz) / nMag;\n}"
+    },
+    "tags": ["Computational Geometry", "Analytic Geometry"],
+    "companies": ["AMC Bridge", "Autodesk", "Bentley"],
+    "role_level": "Mid"
+  },
+  {
+    "number": 14,
+    "question": "Compute the intersection line for two planes.",
+    "answer": "<div class='qa-answer'><p>Let two planes be given in scalar standard form:</p><p>$$\\Pi_1: \\vec{n}_1 \\cdot X + d_1 = 0, \\quad \\Pi_2: \\vec{n}_2 \\cdot X + d_2 = 0$$</p><ol><li><strong>Direction vector of the line:</strong> Because the line lies in both planes, it is orthogonal to both normal vectors:$$\\vec{d} = \\vec{n}_1 \\times \\vec{n}_2$$If $\\|\\vec{d}\\| \\approx 0$, the planes are parallel or coincident (no unique intersection line).</li><li><strong>Finding a point $P_0$ on the line:</strong> We seek a point simultaneously satisfying both plane equations. A robust and symmetric formula finds the point on the line closest to the origin:$$P_0 = \\frac{(-d_1 (\\vec{n}_2 \\cdot \\vec{n}_2) + d_2 (\\vec{n}_1 \\cdot \\vec{n}_2))\\vec{n}_1 + (-d_2 (\\vec{n}_1 \\cdot \\vec{n}_1) + d_1 (\\vec{n}_1 \\cdot \\vec{n}_2))\\vec{n}_2}{\\|\\vec{n}_1 \\times \\vec{n}_2\\|^2}$$Alternatively, use cross products:$$P_0 = \\frac{(d_2 \\vec{n}_1 - d_1 \\vec{n}_2) \\times (\\vec{n}_1 \\times \\vec{n}_2)}{\\|\\vec{n}_1 \\times \\vec{n}_2\\|^2}$$</li></ol><p>The resulting line is represented parametrically as $L(t) = P_0 + t\\vec{d}$.</p></div>",
+    "code_snippets": {
+      "python": "def intersect_planes(n1, d1, n2, d2):\n    # d = n1 x n2\n    d = (n1[1]*n2[2]-n1[2]*n2[1], n1[2]*n2[0]-n1[0]*n2[2], n1[0]*n2[1]-n1[1]*n2[0])\n    d_len_sq = sum(x*x for x in d)\n    if d_len_sq < 1e-12: return None  # Parallel or coincident\n    # v = d2*n1 - d1*n2\n    v = [d2*n1[i] - d1*n2[i] for i in range(3)]\n    # p0 = (v x d) / |d|^2\n    p0 = (\n        (v[1]*d[2] - v[2]*d[1]) / d_len_sq,\n        (v[2]*d[0] - v[0]*d[2]) / d_len_sq,\n        (v[0]*d[1] - v[1]*d[0]) / d_len_sq\n    )\n    return p0, d",
+      "cpp": "#include <optional>\n#include <array>\n\nstruct Line3D { std::array<double, 3> p0, dir; };\nstd::optional<Line3D> intersectPlanes(const double n1[3], double d1, const double n2[3], double d2) {\n    std::array<double, 3> d = { n1[1]*n2[2]-n1[2]*n2[1], n1[2]*n2[0]-n1[0]*n2[2], n1[0]*n2[1]-n1[1]*n2[0] };\n    double dLenSq = d[0]*d[0] + d[1]*d[1] + d[2]*d[2];\n    if (dLenSq < 1e-12) return std::nullopt;\n    double v[3] = { d2*n1[0] - d1*n2[0], d2*n1[1] - d1*n2[1], d2*n1[2] - d1*n2[2] };\n    std::array<double, 3> p0 = {\n        (v[1]*d[2] - v[2]*d[1]) / dLenSq,\n        (v[2]*d[0] - v[0]*d[2]) / dLenSq,\n        (v[0]*d[1] - v[1]*d[0]) / dLenSq\n    };\n    return Line3D{p0, d};\n}",
+      "csharp": "public static (double[] P0, double[] Dir)? IntersectPlanes(double[] n1, double d1, double[] n2, double d2) {\n    double[] d = { n1[1]*n2[2]-n1[2]*n2[1], n1[2]*n2[0]-n1[0]*n2[2], n1[0]*n2[1]-n1[1]*n2[0] };\n    double dLenSq = d[0]*d[0] + d[1]*d[1] + d[2]*d[2];\n    if (dLenSq < 1e-12) return null;\n    double[] v = { d2*n1[0] - d1*n2[0], d2*n1[1] - d1*n2[1], d2*n1[2] - d1*n2[2] };\n    double[] p0 = { (v[1]*d[2] - v[2]*d[1])/dLenSq, (v[2]*d[0] - v[0]*d[2])/dLenSq, (v[0]*d[1] - v[1]*d[0])/dLenSq };\n    return (p0, d);\n}"
+    },
+    "tags": ["Computational Geometry", "Intersection Algorithms"],
+    "companies": ["AMC Bridge", "Autodesk", "Siemens"],
+    "role_level": "Mid"
+  },
+  {
+    "number": 15,
+    "question": "How do you compute the area of a convex polygon? How should the algorithm be changed to work with non-convex polygons?",
+    "answer": "<div class='qa-answer'><h4>Convex Polygon Area: Fan Triangulation</h4><p>Pick an arbitrary vertex (e.g. $P_0$) and triangulate the polygon into $n-2$ triangles $(P_0, P_i, P_{i+1})$. The area is the sum of the triangle areas:</p><p>$$\\text{Area} = \\frac{1}{2} \\sum_{i=1}^{n-2} \\| (P_i - P_0) \\times (P_{i+1} - P_0) \\|$$</p><h4>Generalization to Non-Convex (and Concave) Polygons: Shoelace Formula</h4><p><strong>The algorithm doesn't need complex redesign!</strong> By using <em>signed areas</em> (Green's theorem / Gauss's Area Formula / Shoelace Formula), the fan triangulation or trapezoidal integration works correctly for <strong>any simple non-self-intersecting polygon</strong> (both convex and concave):</p><p>$$A = \\frac{1}{2} \\left| \\sum_{i=0}^{n-1} (x_i y_{i+1} - x_{i+1} y_i) \\right|$$</p><p>where $P_n = P_0$. Exterior signed regions outside a concave indentation have opposite signs and automatically cancel out.</p><p><em>For self-intersecting (complex) polygons:</em> One must decompose the polygon into non-overlapping simple planar faces (e.g., via Constrained Delaunay Triangulation or Bentley-Ottmann line sweep) and sum regions based on winding number/even-odd fill rule.</p></div>",
+    "code_snippets": {
+      "python": "def polygon_area(pts: list[tuple[float, float]]) -> float:\n    n = len(pts)\n    area2 = 0.0\n    for i in range(n):\n        j = (i + 1) % n\n        area2 += pts[i][0] * pts[j][1] - pts[j][0] * pts[i][1]\n    return abs(area2) * 0.5",
+      "cpp": "#include <vector>\n#include <cmath>\n\nstruct Point2D { double x, y; };\ndouble polygonArea(const std::vector<Point2D>& pts) {\n    double area2 = 0.0;\n    size_t n = pts.size();\n    for (size_t i = 0; i < n; ++i) {\n        size_t j = (i + 1) % n;\n        area2 += pts[i].x * pts[j].y - pts[j].x * pts[i].y;\n    }\n    return std::abs(area2) * 0.5;\n}",
+      "csharp": "public static double PolygonArea((double X, double Y)[] pts) {\n    double area2 = 0.0;\n    for (int i = 0; i < pts.Length; i++) {\n        int j = (i + 1) % pts.Length;\n        area2 += pts[i].X * pts[j].Y - pts[j].X * pts[i].Y;\n    }\n    return Math.Abs(area2) * 0.5;\n}"
+    },
+    "tags": ["Computational Geometry", "Polygon Algorithms"],
+    "companies": ["AMC Bridge", "Autodesk", "Trimble"],
+    "role_level": "Jr"
+  },
+  {
+    "number": 16,
+    "question": "How do you determine whether a polygon's points go in a clockwise or counter-clockwise direction?",
+    "answer": "<div class='qa-answer'><p>The winding order of a 2D planar polygon can be robustly determined using the <strong>signed area (Shoelace formula)</strong>:</p><p>$$S = \\frac{1}{2} \\sum_{i=0}^{n-1} (x_i y_{i+1} - x_{i+1} y_i)$$</p><h4>Interpretation (in standard Cartesian coordinates where $+Y$ points up):</h4><ul><li>If $S > 0$: The vertices are ordered <strong>Counter-Clockwise (CCW)</strong>.</li><li>If $S < 0$: The vertices are ordered <strong>Clockwise (CW)</strong>.</li><li>If $S = 0$: Collinear or degenerate polygon.</li></ul><p><em>Note:</em> In computer screen coordinates where the $+Y$-axis points <em>downward</em>, the sign interpretation is inverted ($S > 0$ corresponds to CW).</p><h4>Alternative Local Method (Extreme Vertex):</h4><p>Find the vertex with the minimum X-coordinate (or bottom-most min Y). At this extreme vertex $P$, the interior must lie to one side. The cross product of the incoming and outgoing edge vectors $(P - P_{\\text{prev}}) \\times (P_{\\text{next}} - P)$ directly gives the winding sign without summing all vertices.</p></div>",
+    "code_snippets": {
+      "python": "def polygon_winding(pts: list[tuple[float, float]]) -> str:\n    signed_area = sum(pts[i][0]*pts[(i+1)%len(pts)][1] - pts[(i+1)%len(pts)][0]*pts[i][1] for i in range(len(pts)))\n    if signed_area > 1e-9: return 'CCW'\n    if signed_area < -1e-9: return 'CW'\n    return 'Collinear'",
+      "cpp": "#include <vector>\n#include <string>\n\nstruct Point2D { double x, y; };\nstd::string polygonWinding(const std::vector<Point2D>& pts) {\n    double sum = 0.0;\n    size_t n = pts.size();\n    for (size_t i = 0; i < n; ++i) {\n        size_t j = (i + 1) % n;\n        sum += (pts[i].x * pts[j].y - pts[j].x * pts[i].y);\n    }\n    if (sum > 1e-9) return \"CCW\";\n    if (sum < -1e-9) return \"CW\";\n    return \"Degenerate\";\n}",
+      "csharp": "public static string PolygonWinding((double X, double Y)[] pts) {\n    double sum = 0.0;\n    for (int i = 0; i < pts.Length; i++) {\n        int j = (i + 1) % pts.Length;\n        sum += pts[i].X * pts[j].Y - pts[j].X * pts[i].Y;\n    }\n    return sum > 1e-9 ? \"CCW\" : (sum < -1e-9 ? \"CW\" : \"Degenerate\");\n}"
+    },
+    "tags": ["Computational Geometry", "Polygon Algorithms"],
+    "companies": ["AMC Bridge", "Autodesk", "Bentley"],
+    "role_level": "Jr"
+  },
+  {
+    "number": 17,
+    "question": "How many parameters are required to uniquely define a line/plane? What are the parameters?",
+    "answer": "<div class='qa-answer'><h4>1. Line</h4><ul><li><strong>In 2D:</strong> <strong>2 parameters (Degrees of Freedom)</strong>. Representation: Slope-intercept $(m, b)$ in $y = mx + b$, or angle and distance $(\\theta, d)$ in Hessian normal form $x \\cos\\theta + y \\sin\\theta = d$.</li><li><strong>In 3D:</strong> <strong>4 parameters (Degrees of Freedom)</strong>. <em>Parameterization:</em> Although often written with a point $P(x,y,z)$ (3 DoF) and a direction $\\vec{d}(d_x, d_y, d_z)$ (2 DoF on sphere) totaling 5 numbers, $P$ can slide anywhere along $\\vec{d}$ ($-1$ DoF redundancy). Minimal representations use 4 parameters (e.g. Plücker coordinates with Grassmannian manifold condition, or coordinates of intersection with two fixed coordinate planes).</li></ul><h4>2. Plane in 3D</h4><ul><li><strong>3 parameters (Degrees of Freedom)</strong>.</li><li><em>Representations:</em><ul><li>Equation: $ax + by + cz + d = 0$. With normalization $a^2 + b^2 + c^2 = 1$, the unit normal $\\hat{n}$ takes 2 angles (spherical coordinates $\\theta, \\phi$), and the scalar offset $d$ takes 1 parameter (distance to origin) $\\implies 2 + 1 = 3$ parameters.</li><li>Or a point $P_0(x_0, y_0, z_0)$ and a unit normal $\\hat{n}$ constrained by $\\|\\hat{n}\\|=1$.</li></ul></li></ul></div>",
+    "code_snippets": {
+      "python": "# Minimal parameterizations\n# 3D Plane: unit normal (spherical coords theta, phi) + distance d (3 params)\nimport math\ndef spherical_plane_to_cartesian(theta, phi, d):\n    nx = math.sin(theta) * math.cos(phi)\n    ny = math.sin(theta) * math.sin(phi)\n    nz = math.cos(theta)\n    return (nx, ny, nz, d) # nx*x + ny*y + nz*z + d = 0",
+      "cpp": "// Plücker coordinates for 3D Line (6 homogeneous coordinates with 1 constraint => 4 DoF)\nstruct PluckerLine {\n    double L[3]; // Direction vector\n    double M[3]; // Moment vector = Point x Direction (Satisfies L . M = 0)\n};",
+      "csharp": "// Plane represented by 4 normalized coefficients (3 DoF)\npublic readonly record struct NormalizedPlane(double A, double B, double C, double D) {\n    public static NormalizedPlane FromPointNormal(double[] p, double[] n) {\n        double len = Math.Sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]);\n        double na = n[0]/len, nb = n[1]/len, nc = n[2]/len;\n        return new(na, nb, nc, -(na*p[0] + nb*p[1] + nc*p[2]));\n    }\n}"
+    },
+    "tags": ["Computational Geometry", "Analytic Geometry"],
+    "companies": ["AMC Bridge", "Autodesk", "Siemens"],
+    "role_level": "Mid"
+  },
+  {
+    "number": 18,
+    "question": "How many parameters are required to uniquely define a sphere/cone/cylinder/torus? What are the parameters?",
+    "answer": "<div class='qa-answer'><table class='qa-table' border='1' cellpadding='6' style='border-collapse: collapse; width: 100%;'><thead><tr style='background-color: #2b2b2b;'><th>Surface</th><th>DoF</th><th>Standard Parameters</th><th>Breakdown</th></tr></thead><tbody><tr><td><strong>Sphere</strong></td><td><strong>4</strong></td><td>Center $C(x, y, z)$, Radius $R$</td><td>Center location (3) + radius (1)</td></tr><tr><td><strong>Infinite Cylinder</strong></td><td><strong>5</strong></td><td>Axis line $L$ (4 DoF) + Radius $R$ (1)</td><td>Axis line in 3D (4) + radius (1)</td></tr><tr><td><strong>Finite Cylinder</strong></td><td><strong>7</strong></td><td>Base center $C_1(x, y, z)$, Axis direction $\\hat{a}$ (2 angles), Height $h$ (1), Radius $R$ (1)</td><td>Alternatively: 2 endpoint centers (6) + radius (1)</td></tr><tr><td><strong>Infinite Cone</strong></td><td><strong>6</strong></td><td>Apex point $V(x, y, z)$ (3), Axis direction $\\hat{a}$ (2), Semi-vertical apex angle $\\alpha$ (1)</td><td>Apex position (3) + direction (2) + opening angle (1)</td></tr><tr><td><strong>Torus</strong></td><td><strong>7</strong></td><td>Center point $C(x, y, z)$ (3), Axis of rotational symmetry $\\hat{n}$ (2), Major radius $R$ (1), Minor tube radius $r$ (1)</td><td>Center (3) + axis orientation (2) + major radius (1) + minor radius (1)</td></tr></tbody></table></div>",
+    "code_snippets": {
+      "python": "class Sphere:\n    def __init__(self, cx, cy, cz, r): self.center, self.r = (cx, cy, cz), r\n\nclass InfiniteCylinder:\n    def __init__(self, axis_p0, axis_dir, r): self.p0, self.dir, self.r = axis_p0, axis_dir, r\n\nclass Torus:\n    def __init__(self, center, axis_normal, major_r, minor_r):\n        self.center, self.axis, self.R, self.r = center, axis_normal, major_r, minor_r",
+      "cpp": "struct Sphere { double c[3]; double r; };\nstruct Cylinder { double axisP[3]; double axisDir[3]; double r; double h; };\nstruct Cone { double apex[3]; double axisDir[3]; double halfAngle; };\nstruct Torus { double center[3]; double axis[3]; double majorR; double minorR; };",
+      "csharp": "public record struct Sphere(double[] Center, double Radius);\npublic record struct Torus(double[] Center, double[] AxisNormal, double MajorRadius, double MinorRadius);"
+    },
+    "tags": ["Computational Geometry", "Solid Modeling", "CAD Primitives"],
+    "companies": ["AMC Bridge", "Siemens", "Dassault Systèmes"],
+    "role_level": "Mid"
+  },
+  {
+    "number": 19,
+    "question": "Is it possible to find a circle's radius and the center point from three points lying on the circle? If yes, how would you do so? Is it possible to do with less than 3 points?",
+    "answer": "<div class='qa-answer'><p><strong>1. Can it be done with less than 3 points?</strong><br><strong>No.</strong> A 2D circle requires 3 parameters (Degrees of Freedom: $x_c, y_c, R$). 1 point provides 1 constraint (infinitely many circles). 2 points define a line segment; any point on the perpendicular bisector can be a center (a 1-parameter family of circles). In 3D, a circle has 6 DoF (plane has 3 DoF, circle inside plane has 3 DoF), so 3 non-collinear points are also necessary and sufficient.</p><h4>2. How to find the center and radius from 3 points ($A, B, C$):</h4><ol><li><strong>Check for collinearity:</strong> If $(B - A) \\times (C - A) = \\vec{0}$, the points are collinear; no unique finite circle exists.</li><li><strong>Circumcenter Construction:</strong> The center $O$ is the intersection of the perpendicular bisectors of segments $AB$ and $BC$. Let $\\vec{u} = B - A$ and $\\vec{v} = C - A$.</li><li>In 2D or 3D, center $O = A + \\vec{w}$ where:$$\\vec{w} = \\frac{(\\|\\vec{u}\\|^2 \\vec{v} - \\|\\vec{v}\\|^2 \\vec{u}) \\times (\\vec{u} \\times \\vec{v})}{2 \\|\\vec{u} \\times \\vec{v}\\|^2}$$</li><li><strong>Radius:</strong> $R = \\|O - A\\| = \\frac{\\|AB\\| \\|BC\\| \\|CA\\|}{2 \\| (B - A) \\times (C - A) \\|}$.</li></ol></div>",
+    "code_snippets": {
+      "python": "import math\n\ndef circle_from_3_points(a, b, c):\n    # 2D implementation\n    d = 2 * (a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1]))\n    if abs(d) < 1e-10: return None  # Collinear points\n    a_sq = a[0]**2 + a[1]**2\n    b_sq = b[0]**2 + b[1]**2\n    c_sq = c[0]**2 + c[1]**2\n    ux = (a_sq * (b[1] - c[1]) + b_sq * (c[1] - a[1]) + c_sq * (a[1] - b[1])) / d\n    uy = (a_sq * (c[0] - b[0]) + b_sq * (a[0] - c[0]) + c_sq * (b[0] - a[0])) / d\n    r = math.sqrt((a[0] - ux)**2 + (a[1] - uy)**2)\n    return (ux, uy), r",
+      "cpp": "#include <cmath>\n#include <optional>\n#include <utility>\n\nstruct Point2D { double x, y; };\nstd::optional<std::pair<Point2D, double>> circleFrom3Points(Point2D a, Point2D b, Point2D c) {\n    double d = 2 * (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y));\n    if (std::abs(d) < 1e-10) return std::nullopt;\n    double aSq = a.x*a.x + a.y*a.y, bSq = b.x*b.x + b.y*b.y, cSq = c.x*c.x + c.y*c.y;\n    double ux = (aSq * (b.y - c.y) + bSq * (c.y - a.y) + cSq * (a.y - b.y)) / d;\n    double uy = (aSq * (c.x - b.x) + bSq * (a.x - c.x) + cSq * (b.x - a.x)) / d;\n    double r = std::hypot(a.x - ux, a.y - uy);\n    return std::make_pair(Point2D{ux, uy}, r);\n}",
+      "csharp": "public static ((double X, double Y) Center, double Radius)? CircleFrom3Points((double X, double Y) a, (double X, double Y) b, (double X, double Y) c) {\n    double d = 2 * (a.X * (b.Y - c.Y) + b.X * (c.Y - a.Y) + c.X * (a.Y - b.Y));\n    if (Math.Abs(d) < 1e-10) return null;\n    double aSq = a.X*a.X + a.Y*a.Y, bSq = b.X*b.X + b.Y*b.Y, cSq = c.X*c.X + c.Y*c.Y;\n    double ux = (aSq * (b.Y - c.Y) + bSq * (c.Y - a.Y) + cSq * (a.Y - b.Y)) / d;\n    double uy = (aSq * (c.X - b.X) + bSq * (a.X - c.X) + cSq * (b.X - a.X)) / d;\n    return ((ux, uy), Math.Sqrt((a.X - ux)*(a.X - ux) + (a.Y - uy)*(a.Y - uy)));\n}"
+    },
+    "tags": ["Computational Geometry", "Analytic Geometry"],
+    "companies": ["AMC Bridge", "Autodesk", "Hexagon"],
+    "role_level": "Mid"
+  },
+  {
+    "number": 20,
+    "question": "Suppose you have a triangle. All edge lengths and corner angles are known. How would you compute the radius of the minimum enclosing circle?",
+    "answer": "<div class='qa-answer'><p>The <strong>Minimum Enclosing Circle (MEC)</strong> of a triangle depends critically on whether the triangle is obtuse/right or acute:</p><h4>Case 1: Obtuse or Right Triangle (Any angle $\\ge 90^\\circ$)</h4><p>The circumcircle is <em>not</em> minimal because the hypotenuse/longest edge spans across the circle. The MEC is the circle whose <strong>diameter is the longest edge</strong> ($c$):</p><p>$$R_{\\text{MEC}} = \\frac{c}{2} = \\frac{\\max(a, b, c)}{2}$$</p><p>The center is the midpoint of that longest edge.</p><h4>Case 2: Acute Triangle (All angles $< 90^\\circ$)</h4><p>The MEC coincides with the <strong>circumscribed circle (circumcircle)</strong> passing through all 3 vertices. By the Law of Sines:</p><p>$$R_{\\text{MEC}} = R_{\\text{circum}} = \\frac{a}{2 \\sin A} = \\frac{b}{2 \\sin B} = \\frac{c}{2 \\sin C}$$</p><p>Or using Heron's formula where $s = \\frac{a+b+c}{2}$ and Area $\\Delta = \\sqrt{s(s-a)(s-b)(s-c)}$:</p><p>$$R_{\\text{MEC}} = \\frac{abc}{4\\Delta}$$</p></div>",
+    "code_snippets": {
+      "python": "import math\n\ndef min_enclosing_circle_radius(a: float, b: float, c: float, angles_deg: tuple[float, float, float]) -> float:\n    # Check if any angle >= 90 degrees\n    if any(angle >= 90.0 for angle in angles_deg):\n        return max(a, b, c) / 2.0\n    # Acute triangle: Circumradius via Sine Law\n    max_angle_idx = angles_deg.index(max(angles_deg))\n    sides = [a, b, c]\n    return sides[max_angle_idx] / (2.0 * math.sin(math.radians(angles_deg[max_angle_idx])))",
+      "cpp": "#include <algorithm>\n#include <cmath>\n\ndouble minEnclosingCircleRadius(double a, double b, double c, double A_rad, double B_rad, double C_rad) {\n    const double halfPi = 1.5707963267948966;\n    if (A_rad >= halfPi || B_rad >= halfPi || C_rad >= halfPi) {\n        return std::max({a, b, c}) * 0.5;\n    }\n    return a / (2.0 * std::sin(A_rad));\n}",
+      "csharp": "public static double MinEnclosingCircleRadius(double a, double b, double c, double alphaDeg, double betaDeg, double gammaDeg) {\n    if (alphaDeg >= 90.0 || betaDeg >= 90.0 || gammaDeg >= 90.0) {\n        return Math.Max(a, Math.Max(b, c)) / 2.0;\n    }\n    return a / (2.0 * Math.Sin(alphaDeg * Math.PI / 180.0));\n}"
+    },
+    "tags": ["Computational Geometry", "Bounding Volumes"],
+    "companies": ["AMC Bridge", "Autodesk", "PTC"],
+    "role_level": "Mid"
+  },
+  {
+    "number": 21,
+    "question": "Given a coordinate system with X-axis (x1, y1), Y-axis (x2, y2) and an origin O(x,y). What would be the matrix that transforms the point coordinates from a global coordinate space?",
+    "answer": "<div class='qa-answer'><p>Let the local coordinate system $CS$ have origin $\\vec{O} = [x, y]^T$ and orthonormal axes $\\vec{X} = [x_1, y_1]^T$, $\\vec{Y} = [x_2, y_2]^T$.</p><p>The transformation from <strong>Local coordinates to Global coordinates</strong> is:</p><p>$$P_{\\text{global}} = M_{\\text{L}\\to\\text{G}} P_{\\text{local}} = \\begin{pmatrix} x_1 & x_2 & x \\\\ y_1 & y_2 & y \\\\ 0 & 0 & 1 \\end{pmatrix} \\begin{pmatrix} x_{\\text{loc}} \\\\ y_{\\text{loc}} \\\\ 1 \\end{pmatrix}$$</p><p>We are asked for the reverse: transforming <strong>from Global to Local</strong> ($M_{\\text{G}\\to\\text{L}} = M_{\\text{L}\\to\\text{G}}^{-1}$). Since rotation matrix $R = [\\vec{X} \\mid \\vec{Y}]$ is orthogonal ($R^{-1} = R^T$):</p><p>$$M_{\\text{G}\\to\\text{L}} = \\begin{pmatrix} R^T & -R^T O \\\\ 0 & 1 \\end{pmatrix} = \\begin{pmatrix} x_1 & y_1 & -(x_1 x + y_1 y) \\\\ x_2 & y_2 & -(x_2 x + y_2 y) \\\\ 0 & 0 & 1 \\end{pmatrix}$$</p><p>Multiplying $M_{\\text{G}\\to\\text{L}}$ by $[P_x, P_y, 1]^T$ evaluates the local coordinates: $x_{\\text{loc}} = (P - O) \\cdot \\vec{X}$ and $y_{\\text{loc}} = (P - O) \\cdot \\vec{Y}$.</p></div>",
+    "code_snippets": {
+      "python": "import numpy as np\n\ndef global_to_local_matrix(x1, y1, x2, y2, ox, oy):\n    # R^T * -O\n    tx = -(x1 * ox + y1 * oy)\n    ty = -(x2 * ox + y2 * oy)\n    return np.array([\n        [x1, y1, tx],\n        [x2, y2, ty],\n        [0.0, 0.0, 1.0]\n    ])",
+      "cpp": "#include <array>\n\n// Returns 3x3 row-major matrix mapping Global -> Local\nstd::array<double, 9> globalToLocalMatrix(double x1, double y1, double x2, double y2, double ox, double oy) {\n    return {\n        x1, y1, -(x1*ox + y1*oy),\n        x2, y2, -(x2*ox + y2*oy),\n        0.0, 0.0, 1.0\n    };\n}",
+      "csharp": "public static double[,] GlobalToLocalMatrix(double x1, double y1, double x2, double y2, double ox, double oy) {\n    return new double[3, 3] {\n        { x1, y1, -(x1 * ox + y1 * oy) },\n        { x2, y2, -(x2 * ox + y2 * oy) },\n        { 0.0, 0.0, 1.0 }\n    };\n}"
+    },
+    "tags": ["Transformations", "Linear Algebra", "Coordinate Systems"],
+    "companies": ["AMC Bridge", "Autodesk", "Dassault Systèmes"],
+    "role_level": "Mid"
+  },
+  {
+    "number": 22,
+    "question": "How do you turn a 2D vector 90 degrees in a CCW direction?",
+    "answer": "<div class='qa-answer'><p>Applying the 2D rotation matrix for $\\theta = +90^\\circ$ ($+\\frac{\\pi}{2}$ radians):</p><p>$$R(90^\\circ) = \\begin{pmatrix} \\cos 90^\\circ & -\\sin 90^\\circ \\\\ \\sin 90^\\circ & \\cos 90^\\circ \\end{pmatrix} = \\begin{pmatrix} 0 & -1 \\\\ 1 & 0 \\end{pmatrix}$$</p><p>Multiplying with vector $\\vec{v} = \\begin{pmatrix} x \\\\ y \\end{pmatrix}$:</p><p>$$\\vec{v}_{\\text{rot}} = \\begin{pmatrix} 0 & -1 \\\\ 1 & 0 \\end{pmatrix} \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} -y \\\\ x \\end{pmatrix}$$</p><p><strong>Rule:</strong> Swap the coordinates and negate the new X coordinate: $$(x, y) \\longrightarrow (-y, x)$$</p></div>",
+    "code_snippets": {
+      "python": "def rotate_90_ccw(x: float, y: float) -> tuple[float, float]:\n    return (-y, x)",
+      "cpp": "std::pair<double, double> rotate90CCW(double x, double y) {\n    return {-y, x};\n}",
+      "csharp": "public static (double X, double Y) Rotate90CCW(double x, double y) => (-y, x);"
+    },
+    "tags": ["Transformations", "Vector Operations"],
+    "companies": ["AMC Bridge", "Epic Games", "Unity"],
+    "role_level": "Jr"
+  },
+  {
+    "number": 23,
+    "question": "How do you compute an inverted rotational matrix?",
+    "answer": "<div class='qa-answer'><p>A proper 3D rotation matrix $R$ is a member of the <strong>Special Orthogonal Group $\\text{SO}(3)$</strong>. By definition of orthogonal matrices:</p><p>$$R^{-1} = R^T$$</p><p>The inverse is simply its <strong>transpose</strong>!</p><h4>Why this holds:</h4><ul><li>The column vectors of $R$ form an orthonormal basis: $\\vec{c}_i \\cdot \\vec{c}_j = \\delta_{ij}$.</li><li>Therefore, $R^T R = I \\implies R^{-1} = R^T$.</li></ul><p>Instead of running an expensive numerical matrix inversion algorithm (like Gaussian elimination with $O(n^3)$ complexity), simply swap elements across the main diagonal ($R_{ij} \\leftrightarrow R_{ji}$).</p></div>",
+    "code_snippets": {
+      "python": "def invert_rotation_matrix(R):\n    # 3x3 matrix transpose\n    return [[R[j][i] for j in range(3)] for i in range(3)]",
+      "cpp": "#include <array>\n\nstd::array<std::array<double, 3>, 3> invertRotation(const std::array<std::array<double, 3>, 3>& R) {\n    std::array<std::array<double, 3>, 3> inv;\n    for (int i = 0; i < 3; ++i)\n        for (int j = 0; j < 3; ++j)\n            inv[i][j] = R[j][i];\n    return inv;\n}",
+      "csharp": "public static double[,] InvertRotationMatrix(double[,] r) {\n    double[,] inv = new double[3, 3];\n    for (int i = 0; i < 3; i++)\n        for (int j = 0; j < 3; j++)\n            inv[i, j] = r[j, i];\n    return inv;\n}"
+    },
+    "tags": ["Transformations", "Linear Algebra", "Rotations"],
+    "companies": ["AMC Bridge", "Autodesk", "Siemens"],
+    "role_level": "Jr"
+  },
+  {
+    "number": 24,
+    "question": "What would be the transformation matrix that rotates an object around an axis that passes through its origin and is aligned with the Z-direction? How would the matrix change if the axis passed through an arbitrary point P in 3D space?",
+    "answer": "<div class='qa-answer'><h4>1. Rotation Around Z-Axis Through Origin by Angle $\\theta$</h4><p>In standard 4x4 homogeneous transformation format:</p><p>$$R_z(\\theta) = \\begin{pmatrix} \\cos\\theta & -\\sin\\theta & 0 & 0 \\\\ \\sin\\theta & \\cos\\theta & 0 & 0 \\\\ 0 & 0 & 1 & 0 \\\\ 0 & 0 & 0 & 1 \\end{pmatrix}$$</p><h4>2. Axis Passes Through Arbitrary Point $P(p_x, p_y, p_z)$</h4><p>To rotate about an off-origin axis, apply a 3-step composite transformation:</p><ol><li>Translate space by $-P$ to shift point $P$ to the origin: $T(-P)$</li><li>Apply rotation around the axis: $R_z(\\theta)$</li><li>Translate back by $+P$: $T(P)$</li></ol><p>$$M = T(P) \\cdot R_z(\\theta) \\cdot T(-P)$$</p><p>Multiplying the matrices yields:</p><p>$$M = \\begin{pmatrix} \\cos\\theta & -\\sin\\theta & 0 & p_x(1 - \\cos\\theta) + p_y\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta & 0 & p_y(1 - \\cos\\theta) - p_x\\sin\\theta \\\\ 0 & 0 & 1 & 0 \\\\ 0 & 0 & 0 & 1 \\end{pmatrix}$$</p></div>",
+    "code_snippets": {
+      "python": "import math\nimport numpy as np\n\ndef rotation_around_z_at_point(theta_rad, px, py, pz):\n    c = math.cos(theta_rad)\n    s = math.sin(theta_rad)\n    return np.array([\n        [c, -s, 0, px*(1 - c) + py*s],\n        [s,  c, 0, py*(1 - c) - px*s],\n        [0,  0, 1, 0],\n        [0,  0, 0, 1]\n    ])",
+      "cpp": "#include <cmath>\n#include <array>\n\nstd::array<double, 16> rotateZAroundPoint(double theta, double px, double py, double pz) {\n    double c = std::cos(theta), s = std::sin(theta);\n    return {\n        c, -s, 0.0, px*(1-c) + py*s,\n        s,  c, 0.0, py*(1-c) - px*s,\n        0.0, 0.0, 1.0, 0.0,\n        0.0, 0.0, 0.0, 1.0\n    };\n}",
+      "csharp": "public static double[,] RotateZAroundPoint(double theta, double px, double py, double pz) {\n    double c = Math.Cos(theta), s = Math.Sin(theta);\n    return new double[4, 4] {\n        { c, -s, 0, px*(1 - c) + py*s },\n        { s,  c, 0, py*(1 - c) - px*s },\n        { 0,  0, 1, 0 },\n        { 0,  0, 0, 1 }\n    };\n}"
+    },
+    "tags": ["Transformations", "Affine Transformations", "Rotations"],
+    "companies": ["AMC Bridge", "Autodesk", "Bentley"],
+    "role_level": "Mid"
+  },
+  {
+    "number": 25,
+    "question": "What would be the matrix for a 0 degree rotation around an axis line that passes point P(0.55, 12.669, 0.15) and has the direction D = (-0.002196, -0.0020014, -0.9999956)?",
+    "answer": "<div class='qa-answer'><p><strong>The result is simply the $4 \\times 4$ Identity Matrix ($I_4$).</strong></p><p>$$M = \\begin{pmatrix} 1 & 0 & 0 & 0 \\\\ 0 & 1 & 0 & 0 \\\\ 0 & 0 & 1 & 0 \\\\ 0 & 0 & 0 & 1 \\end{pmatrix}$$</p><h4>Mathematical Proof:</h4><p>The transformation is given by $M = T(P) \\cdot R_D(0^\\circ) \\cdot T(-P)$.</p><ul><li>A rotation of $\\theta = 0^\\circ$ about <em>any</em> axis (regardless of its direction vector $\\vec{D}$) is the identity operator: $R_D(0^\\circ) = I$.</li><li>Substituting this:$$M = T(P) \\cdot I \\cdot T(-P) = T(P) \\cdot T(-P) = T(P - P) = T(\\vec{0}) = I_4$$</li></ul><p><em>Interview context:</em> This is a classic interview \"trick/sanity-check question\" tested by CAD companies like AMC Bridge to see whether candidates immediately dive into Rodrigues' rotation formulas or recognize that zero rotation leaves all points unchanged.</p></div>",
+    "code_snippets": {
+      "python": "import numpy as np\n\ndef zero_degree_rotation_matrix(p, d):\n    # Any 0-degree rotation around any line is Identity\n    return np.identity(4)",
+      "cpp": "#include <array>\n\nstd::array<double, 16> zeroDegreeRotationMatrix(const double p[3], const double d[3]) {\n    return {\n        1, 0, 0, 0,\n        0, 1, 0, 0,\n        0, 0, 1, 0,\n        0, 0, 0, 1\n    };\n}",
+      "csharp": "public static double[,] ZeroDegreeRotationMatrix(double[] p, double[] d) =>\n    new double[4, 4] {\n        { 1, 0, 0, 0 },\n        { 0, 1, 0, 0 },\n        { 0, 0, 1, 0 },\n        { 0, 0, 0, 1 }\n    };"
+    },
+    "tags": ["Transformations", "Interview Trick", "Rotations"],
+    "companies": ["AMC Bridge"],
+    "role_level": "Jr"
+  },
+  {
+    "number": 26,
+    "question": "Given two coordinate systems CS1 and CS2 defined by transformation matrices M1 and M2 correspondingly. Given a point P in CS1's space. How do you compute the coordinates of P in CS2's space?",
+    "answer": "<div class='qa-answer'><p>Let matrices $M_1$ and $M_2$ map local coordinates to global world coordinates:</p><p>$$P_{\\text{world}} = M_1 P_{\\text{CS1}}, \\quad P_{\\text{world}} = M_2 P_{\\text{CS2}}$$</p><p>To express point $P_{\\text{CS1}}$ in CS2's coordinate frame:</p><ol><li>Convert $P_{\\text{CS1}}$ to world coordinates via $M_1$:$$P_{\\text{world}} = M_1 P_{\\text{CS1}}$$</li><li>Convert $P_{\\text{world}}$ into CS2 by multiplying with the inverse matrix $M_2^{-1}$:$$P_{\\text{CS2}} = M_2^{-1} P_{\\text{world}} = M_2^{-1} M_1 P_{\\text{CS1}}$$</li></ol><p>Therefore, the relative transition matrix from CS1 to CS2 is:</p><p>$$M_{1 \\to 2} = M_2^{-1} M_1$$</p><p><strong>Optimization note:</strong> If $M_2$ consists of a rigid body transform (rotation $R_2$ and translation $\\vec{t}_2$), $M_2^{-1}$ can be computed analytically without numerical inversion: $M_2^{-1} = \\begin{pmatrix} R_2^T & -R_2^T \\vec{t}_2 \\\\ 0 & 1 \\end{pmatrix}$.</p></div>",
+    "code_snippets": {
+      "python": "import numpy as np\n\ndef transform_point_cs1_to_cs2(p_cs1, m1, m2):\n    # P_cs2 = inv(M2) * M1 * P_cs1\n    p_homo = np.array([p_cs1[0], p_cs1[1], p_cs1[2], 1.0])\n    m_transition = np.linalg.inv(m2) @ m1\n    p_cs2_homo = m_transition @ p_homo\n    return p_cs2_homo[:3]",
+      "cpp": "#include <array>\n\n// Point P_cs2 = M2_inv * M1 * P_cs1\nstd::array<double, 3> transformBetweenCS(\n    const std::array<double, 3>& pCS1,\n    const double M1[4][4],\n    const double M2_inv[4][4]\n) {\n    double mRel[4][4] = {0};\n    for (int i = 0; i < 4; ++i)\n        for (int j = 0; j < 4; ++j)\n            for (int k = 0; k < 4; ++k)\n                mRel[i][j] += M2_inv[i][k] * M1[k][j];\n\n    double pHomo[4] = { pCS1[0], pCS1[1], pCS1[2], 1.0 };\n    std::array<double, 3> result;\n    for (int i = 0; i < 3; ++i) {\n        result[i] = mRel[i][0]*pHomo[0] + mRel[i][1]*pHomo[1] + mRel[i][2]*pHomo[2] + mRel[i][3]*pHomo[3];\n    }\n    return result;\n}",
+      "csharp": "public static double[] TransformPointCS1ToCS2(double[] pCS1, double[,] m1, double[,] m2Inv) {\n    // Relative matrix M_rel = M2_inv * M1\n    double[,] mRel = new double[4, 4];\n    for (int i = 0; i < 4; i++)\n        for (int j = 0; j < 4; j++)\n            for (int k = 0; k < 4; k++)\n                mRel[i, j] += m2Inv[i, k] * m1[k, j];\n    double[] res = new double[3];\n    for (int i = 0; i < 3; i++) {\n        res[i] = mRel[i, 0]*pCS1[0] + mRel[i, 1]*pCS1[1] + mRel[i, 2]*pCS1[2] + mRel[i, 3]*1.0;\n    }\n    return res;\n}"
+    },
+    "tags": ["Transformations", "Coordinate Systems", "Matrix Operations"],
+    "companies": ["AMC Bridge", "Autodesk", "Dassault Systèmes"],
+    "role_level": "Mid"
+  }
+]

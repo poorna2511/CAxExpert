@@ -1,0 +1,372 @@
+[
+  {
+    "number": 1,
+    "question": "What main data structures do you know?",
+    "answer": "<p>Data structures are specialized formats for organizing, processing, retrieving, and storing data efficiently. They are broadly categorized into:</p><h4>1. Linear Data Structures</h4><ul><li><b>Arrays:</b> Fixed-size contiguous memory blocks allowing $O(1)$ random access.</li><li><b>Dynamic Arrays / Vectors:</b> Resizable contiguous arrays with amortized $O(1)$ appends.</li><li><b>Linked Lists:</b> Nodes with pointers (Singly, Doubly, Circular); efficient $O(1)$ insertions/deletions at known positions.</li><li><b>Stacks:</b> LIFO (Last-In, First-Out) structures with push/pop operations.</li><li><b>Queues:</b> FIFO (First-In, First-Out) structures, including Deques and Priority Queues.</li></ul><h4>2. Non-Linear Data Structures</h4><ul><li><b>Trees:</b> Hierarchical structures (Binary Trees, BSTs, Self-Balancing Trees like AVL and Red-Black Trees, B/B+ Trees, Tries, Heaps).</li><li><b>Graphs:</b> Vertices and edges representing networks (directed/undirected, cyclic/acyclic, weighted/unweighted).</li></ul><h4>3. Hash-Based & Associative Structures</h4><ul><li><b>Hash Tables / Maps / Sets:</b> Key-value stores using hash functions for expected $O(1)$ lookups.</li><li><b>Bitsets / Bloom Filters:</b> Space-efficient probabilistic or compact bitwise containers.</li></ul>",
+    "code_snippets": {
+      "python": "# Common Python built-in and module data structures\nmy_list = [1, 2, 3]                  # Dynamic array\nfrom collections import deque\nmy_queue = deque([1, 2, 3])          # Double-ended queue\nmy_set = {1, 2, 3}                   # Hash set\nmy_dict = {'a': 1, 'b': 2}           # Hash table / dict\nimport heapq\nheap = [3, 1, 4]; heapq.heapify(heap)# Min-heap",
+      "cpp": "// Common C++ STL data structures\n#include <vector>\n#include <list>\n#include <stack>\n#include <queue>\n#include <unordered_map>\n#include <map>\n\nstd::vector<int> vec = {1, 2, 3};          // Dynamic array\nstd::list<int> dlist = {1, 2, 3};          // Doubly linked list\nstd::stack<int> st;                        // LIFO stack\nstd::queue<int> q;                         // FIFO queue\nstd::unordered_map<std::string, int> umap; // Hash table\nstd::map<std::string, int> omap;           // Red-Black Tree",
+      "csharp": "// Common C# .NET data structures\nusing System.Collections.Generic;\n\nList<int> list = new List<int> { 1, 2, 3 };            // Dynamic array\nLinkedList<int> dList = new LinkedList<int>();        // Doubly linked list\nStack<int> stack = new Stack<int>();                  // LIFO stack\nQueue<int> queue = new Queue<int>();                  // FIFO queue\nDictionary<string, int> dict = new Dictionary<string, int>(); // Hash map\nSortedDictionary<string, int> sortedDict = new();    // Balanced BST"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Basics"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 2,
+    "question": "As a data container, what are the main differences between array and list?",
+    "answer": "<p>The distinction between an <b>Array</b> and a <b>List</b> depends on context (low-level memory representation vs. high-level abstract data types):</p><table border='1' cellpadding='8' style='border-collapse:collapse; width:100%;'><thead><tr style='background-color:#f2f2f2;'><th>Feature</th><th>Array (Raw / Static Array)</th><th>Linked List (or Dynamic List)</th></tr></thead><tbody><tr><td><b>Memory Allocation</b></td><td>Contiguous memory block allocated upfront.</td><td>Discontiguous heap nodes connected by pointers (or reallocated blocks in dynamic arrays).</td></tr><tr><td><b>Size Flexibility</b></td><td>Fixed capacity; cannot grow or shrink without manual re-allocation.</td><td>Dynamic; grows/shrinks dynamically on demand.</td></tr><tr><td><b>Access Time</b></td><td><b>$O(1)$</b> constant time random access via index ($base + index \\times size$).</td><td><b>$O(n)$</b> sequential access for linked lists (pointer traversal).</td></tr><tr><td><b>Insertion / Deletion</b></td><td><b>$O(n)$</b> due to shifting elements (except at the very end if capacity remains).</td><td><b>$O(1)$</b> at head/tail or if pointer is known (no shifting required).</td></tr><tr><td><b>Memory Overhead</b></td><td>Minimal (only payload storage; zero pointer overhead).</td><td>Requires extra pointer(s) per node (8–16 bytes overhead per element on 64-bit systems).</td></tr><tr><td><b>Cache Locality</b></td><td>High spatial locality, highly CPU-cache friendly.</td><td>Poor cache locality due to scattered pointer indirection.</td></tr></tbody></table>",
+    "code_snippets": {
+      "python": "# Python list is a dynamic array behind the scenes\nimport array\n# Fixed type array (closer to C-style primitive array)\nraw_arr = array.array('i', [1, 2, 3, 4])\n# Standard Python list (dynamic array of object references)\npy_list = [1, \"two\", 3.0]",
+      "cpp": "#include <array>\n#include <vector>\n#include <list>\n\n// 1. Static Array: fixed size, stack allocated, zero overhead\nstd::array<int, 5> staticArr = {1, 2, 3, 4, 5};\n\n// 2. Dynamic Array (Vector): contiguous heap, amortized O(1) append\nstd::vector<int> dynamicArr = {1, 2, 3, 4, 5};\n\n// 3. Linked List: non-contiguous nodes, O(1) insert anywhere with iterator\nstd::list<int> linkedList = {1, 2, 3, 4, 5};",
+      "csharp": "// 1. Built-in fixed-size Array\nint[] arr = new int[5] { 1, 2, 3, 4, 5 }; // fixed length, contiguous\n\n// 2. Dynamic Array (List<T>)\nList<int> dynamicList = new List<int> { 1, 2, 3, 4, 5 }; // contiguous, resizeable\n\n// 3. Linked List\nLinkedList<int> linkedList = new LinkedList<int>(); // nodes with Next/Prev pointers"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Memory Management"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 3,
+    "question": "What is the difference between singly linked list and doubly linked list data structures?",
+    "answer": "<p>Both are node-based linear collections, but differ in pointer links, directional traversals, and memory footprint:</p><ul><li><b>Singly Linked List (SLL):</b> Each node contains the data and a single pointer (<code>next</code>) pointing to the successor node. Traversal is strictly unidirectional (head to tail).</li><li><b>Doubly Linked List (DLL):</b> Each node contains the data and two pointers: <code>next</code> and <code>prev</code>. Traversal is bidirectional (forward and backward).</li></ul><table border='1' cellpadding='8' style='border-collapse:collapse; width:100%;'><thead><tr style='background-color:#f2f2f2;'><th>Dimension</th><th>Singly Linked List</th><th>Doubly Linked List</th></tr></thead><tbody><tr><td><b>Pointers per Node</b></td><td>1 pointer (<code>next</code>)</td><td>2 pointers (<code>next</code>, <code>prev</code>)</td></tr><tr><td><b>Memory Overhead</b></td><td>Lower ($1 \\times sizeof(pointer)$ per node)</td><td>Higher ($2 \\times sizeof(pointer)$ per node)</td></tr><tr><td><b>Deletion of Given Node</b></td><td><b>$O(n)$</b> if predecessor is not given (must traverse to find previous node).</td><td><b>$O(1)$</b> since predecessor is directly reachable via <code>node->prev</code>.</td></tr><tr><td><b>Reverse Traversal</b></td><td>Impossible without auxiliary stack or reversing the list.</td><td>Trivial and native ($O(1)$ per step backwards).</td></tr><tr><td><b>Implementation Complexity</b></td><td>Simple pointer manipulation.</td><td>More complex (must update both <code>next</code> and <code>prev</code> safely).</td></tr></tbody></table>",
+    "code_snippets": {
+      "python": "class SLLNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n\nclass DLLNode:\n    def __init__(self, val=0, prev=None, next=None):\n        self.val = val\n        self.prev = prev\n        self.next = next",
+      "cpp": "struct SLLNode {\n    int val;\n    SLLNode* next;\n    SLLNode(int v) : val(v), next(nullptr) {}\n};\n\nstruct DLLNode {\n    int val;\n    DLLNode* prev;\n    DLLNode* next;\n    DLLNode(int v) : val(v), prev(nullptr), next(nullptr) {}\n};",
+      "csharp": "public class SLLNode<T> {\n    public T Value { get; set; }\n    public SLLNode<T> Next { get; set; }\n    public SLLNode(T val) => Value = val;\n}\n\npublic class DLLNode<T> {\n    public T Value { get; set; }\n    public DLLNode<T> Prev { get; set; }\n    public DLLNode<T> Next { get; set; }\n    public DLLNode(T val) => Value = val;\n}"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Linked Lists"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 4,
+    "question": "What is the difference between stack and queue data structures?",
+    "answer": "<p><b>Stacks</b> and <b>Queues</b> are abstract linear data structures governed by different access and removal policies:</p><ul><li><b>Stack (LIFO - Last In, First Out):</b> The last element inserted is the first element to be removed. Insertions and removals occur at the same end (the <i>top</i>). Primary operations: <code>push(x)</code>, <code>pop()</code>, <code>peek() / top()</code>.</li><li><b>Queue (FIFO - First In, First Out):</b> The first element inserted is the first element to be removed. Insertions occur at the back (<i>rear / tail</i>), and removals occur at the front (<i>head</i>). Primary operations: <code>enqueue(x) / push(x)</code>, <code>dequeue() / pop()</code>, <code>peek() / front()</code>.</li></ul><table border='1' cellpadding='8' style='border-collapse:collapse; width:100%;'><thead><tr style='background-color:#f2f2f2;'><th>Feature</th><th>Stack</th><th>Queue</th></tr></thead><tbody><tr><td><b>Principle</b></td><td>LIFO (Last In First Out)</td><td>FIFO (First In First Out)</td></tr><tr><td><b>Access Points</b></td><td>1 active end (Top)</td><td>2 active ends (Front for removal, Rear for insertion)</td></tr><tr><td><b>Real-world Analogy</b></td><td>Stack of cafeteria plates</td><td>Line of people at a ticket counter</td></tr><tr><td><b>Primary Use Cases</b></td><td>Function call call-stack, recursion backtracking, undo/redo mechanics, bracket matching, DFS traversal.</td><td>Task scheduling, message queues (RabbitMQ/Kafka), printer spoolers, BFS traversal, buffer caches.</td></tr></tbody></table>",
+    "code_snippets": {
+      "python": "from collections import deque\n\n# Stack (using list or deque)\nstack = []\nstack.append(10)      # push\ntop_val = stack.pop() # pop (LIFO)\n\n# Queue (using deque for O(1) front pop)\nqueue = deque()\nqueue.append(10)          # enqueue\nfront_val = queue.popleft() # dequeue (FIFO)",
+      "cpp": "#include <stack>\n#include <queue>\n\n// Stack\nstd::stack<int> s;\ns.push(10);           // push\nint s_top = s.top();  // peek\ns.pop();              // pop\n\n// Queue\nstd::queue<int> q;\nq.push(10);           // enqueue\nint q_front = q.front(); // peek\nq.pop();              // dequeue",
+      "csharp": "using System.Collections.Generic;\n\n// Stack\nStack<int> s = new Stack<int>();\ns.Push(10);\nint top = s.Pop();\n\n// Queue\nQueue<int> q = new Queue<int>();\nq.Enqueue(10);\nint front = q.Dequeue();"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Stacks and Queues"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Jr"
+  },
+  {
+    "number": 5,
+    "question": "What is algorithm complexity?",
+    "answer": "<p><b>Algorithm Complexity</b> is a formal mathematical measure of the computational resources (time and memory) required by an algorithm to execute as a function of the input size $n$.</p><h4>1. Types of Complexity</h4><ul><li><b>Time Complexity:</b> Quantifies the number of elementary operations executed by an algorithm relative to $n$.</li><li><b>Space Complexity:</b> Quantifies the total memory consumed by an algorithm (auxiliary working space + input space) relative to $n$.</li></ul><h4>2. Asymptotic Notations</h4><ul><li><b>Big-O Notation ($O$):</b> Represents the <i>asymptotic upper bound</i> (worst-case performance guarantee). It describes the maximum growth rate as $n \\to \\infty$.</li><li><b>Big-Omega Notation ($\\Omega$):</b> Represents the <i>asymptotic lower bound</i> (best-case performance).</li><li><b>Big-Theta Notation ($\\Theta$):</b> Represents an <i>asymptotically tight bound</i> where upper and lower bounds match ($f(n) = \\Theta(g(n))$).</li></ul><h4>3. Common Complexity Hierarchy</h4><p>$$O(1) < O(\\log n) < O(\\sqrt{n}) < O(n) < O(n \\log n) < O(n^2) < O(2^n) < O(n!)$$</p>",
+    "code_snippets": {
+      "python": "# O(1) - Constant Time\ndef get_first(arr): return arr[0] if arr else None\n\n# O(n) - Linear Time\ndef find_max(arr):\n    m = arr[0]\n    for x in arr: \n        if x > m: m = x\n    return m\n\n# O(n^2) - Quadratic Time\ndef bubble_pass(arr):\n    for i in range(len(arr)):\n        for j in range(len(arr) - 1):\n            if arr[j] > arr[j+1]: arr[j], arr[j+1] = arr[j+1], arr[j]",
+      "cpp": "// O(1) vs O(n) vs O(log n)\nint getFirst(const std::vector<int>& v) { return v[0]; } // O(1)\n\n// O(log n) Binary search\nint binarySearch(const std::vector<int>& v, int key) {\n    int l = 0, r = v.size() - 1;\n    while (l <= r) {\n        int mid = l + (r - l) / 2;\n        if (v[mid] == key) return mid;\n        if (v[mid] < key) l = mid + 1;\n        else r = mid - 1;\n    }\n    return -1;\n}",
+      "csharp": "// Complexity Examples in C#\npublic int ConstantTime(int[] arr) => arr[0]; // O(1)\n\npublic int LinearTime(int[] arr) {             // O(n)\n    int sum = 0;\n    foreach (var x in arr) sum += x;\n    return sum;\n}"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Complexity Analysis"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 6,
+    "question": "What are associative unordered and ordered containers?",
+    "answer": "<p>Associative containers store elements as key-value pairs (or unique keys) enabling fast lookup by key rather than index.</p><h4>1. Ordered Associative Containers</h4><ul><li><b>Underlying Structure:</b> Self-balancing Binary Search Trees (typically <b>Red-Black Trees</b>).</li><li><b>Ordering:</b> Strict weak ordering maintained according to a comparator (default: <code><</code>). Iteration traverses elements in sorted order.</li><li><b>Time Complexity:</b> Search, Insert, and Delete are guaranteed <b>$O(\\log n)$</b>.</li><li><b>Standard Implementations:</b> C++ <code>std::map</code> / <code>std::set</code>; C# <code>SortedDictionary&lt;K,V&gt;</code> / <code>SortedSet&lt;T&gt;</code>.</li></ul><h4>2. Unordered Associative Containers</h4><ul><li><b>Underlying Structure:</b> <b>Hash Table</b> (array of buckets with hash collision chaining or open addressing).</li><li><b>Ordering:</b> No predictable order; iteration sequence depends on bucket distribution and hash values.</li><li><b>Time Complexity:</b> Average case <b>$O(1)$</b> for Search, Insert, and Delete; worst case <b>$O(n)$</b> (when hash collisions degrade buckets into linear chains).</li><li><b>Standard Implementations:</b> C++ <code>std::unordered_map</code> / <code>std::unordered_set</code>; Python <code>dict</code> / <code>set</code>; C# <code>Dictionary&lt;K,V&gt;</code> / <code>HashSet&lt;T&gt;</code>.</li></ul>",
+    "code_snippets": {
+      "python": "# Python dict & set are hash tables (unordered conceptually, though Python 3.7+ preserves insertion order)\nhash_map = {'b': 2, 'a': 1, 'c': 3}  # Average O(1)\n\n# Ordered by key using sorted dictionary / collection\nfrom collections import OrderedDict\nsorted_map = dict(sorted(hash_map.items())) # Sorted by key",
+      "cpp": "#include <map>\n#include <unordered_map>\n\n// Ordered: Red-Black Tree, O(log n), keys are strictly sorted\nstd::map<int, std::string> orderedMap;\norderedMap[3] = \"three\";\norderedMap[1] = \"one\"; // Iterates as 1, 3\n\n// Unordered: Hash Table, Average O(1), no sorting\nstd::unordered_map<int, std::string> unorderedMap;\nunorderedMap[3] = \"three\";\nunorderedMap[1] = \"one\";",
+      "csharp": "using System.Collections.Generic;\n\n// Unordered Associative Container (Hash Table - O(1) avg)\nDictionary<int, string> unord = new Dictionary<int, string>();\n\n// Ordered Associative Container (Red-Black Tree - O(log n))\nSortedDictionary<int, string> ord = new SortedDictionary<int, string>();"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Containers",
+      "C++ STL"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 7,
+    "question": "Explain what the binary tree is.",
+    "answer": "<p>A <b>Binary Tree</b> is a hierarchical non-linear data structure composed of nodes, where each node has <b>at most two children</b>, conventionally referred to as the <i>left child</i> and <i>right child</i>.</p><h4>Key Properties & Terminology</h4><ul><li><b>Root:</b> The topmost node with no parent.</li><li><b>Leaf Node:</b> A node with zero children.</li><li><b>Depth / Height:</b> The length of the path from root to node (depth) or from node to deepest leaf (height).</li><li><b>Max nodes at level $l$:</b> $2^l$ (assuming root is level 0).</li><li><b>Max nodes in tree of height $h$:</b> $2^{h+1} - 1$.</li></ul><h4>Special Types of Binary Trees</h4><ul><li><b>Full Binary Tree:</b> Every node has either 0 or 2 children.</li><li><b>Complete Binary Tree:</b> All levels are completely filled except possibly the last level, which is populated left-to-right (used in Binary Heaps).</li><li><b>Perfect Binary Tree:</b> All internal nodes have 2 children and all leaves are at the exact same level.</li><li><b>Binary Search Tree (BST):</b> For every node $N$, all nodes in its left subtree have keys $\\le N.key$, and all nodes in its right subtree have keys $\\ge N.key$.</li><li><b>Balanced Binary Tree (e.g., AVL, Red-Black):</b> Enforces height constraints such that height remains $O(\\log n)$.</li></ul>",
+    "code_snippets": {
+      "python": "class TreeNode:\n    def __init__(self, val=0, left=None, right=None):\n        self.val = val\n        self.left = left\n        self.right = right\n\nroot = TreeNode(10, TreeNode(5), TreeNode(15))",
+      "cpp": "struct TreeNode {\n    int val;\n    TreeNode* left;\n    TreeNode* right;\n    TreeNode(int v) : val(v), left(nullptr), right(nullptr) {}\n};\n\nTreeNode* root = new TreeNode(10);\nroot->left = new TreeNode(5);\nroot->right = new TreeNode(15);",
+      "csharp": "public class TreeNode {\n    public int Value { get; set; }\n    public TreeNode Left { get; set; }\n    public TreeNode Right { get; set; }\n    public TreeNode(int val) => Value = val;\n}\n\nvar root = new TreeNode(10) {\n    Left = new TreeNode(5),\n    Right = new TreeNode(15)\n};"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Trees"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 8,
+    "question": "What is the search time complexity for binary tree? Why? Is it guaranteed?",
+    "answer": "<p>The search time complexity depends directly on whether the tree is a generic binary tree, an arbitrary Binary Search Tree (BST), or a self-balancing BST:</p><h4>1. Unordered Binary Tree</h4><ul><li><b>Time Complexity:</b> <b>$O(n)$</b>. Because no ordering property exists, every single node must be inspected via BFS or DFS in the worst case.</li></ul><h4>2. Standard Binary Search Tree (BST)</h4><ul><li><b>Average Case:</b> <b>$O(\\log n)$</b>. When keys are inserted in random order, height is balanced on average, halving the search space at each branch.</li><li><b>Worst Case:</b> <b>$O(n)$</b>. If elements are inserted in already sorted or reverse-sorted order (e.g., <code>[1, 2, 3, 4, 5]</code>), the tree degenerates into a linear linked list (skewed tree) of height $n$.</li></ul><h4>3. Is $O(\\log n)$ Guaranteed?</h4><p><b>No, it is NOT guaranteed in a basic BST.</b></p><p>To <b>guarantee</b> $O(\\log n)$ search time, you must use <b>Self-Balancing Binary Search Trees</b> such as <b>AVL Trees</b> or <b>Red-Black Trees</b>, which perform tree rotations on insertions and deletions to strictly maintain a height bound of $h \\le c \\cdot \\log_2 n$.</p>",
+    "code_snippets": {
+      "python": "# BST Search: O(h) where h can be O(log n) to O(n)\ndef search_bst(root, target):\n    curr = root\n    while curr:\n        if curr.val == target:\n            return curr\n        elif target < curr.val:\n            curr = curr.left\n        else:\n            curr = curr.right\n    return None",
+      "cpp": "TreeNode* searchBST(TreeNode* root, int key) {\n    while (root != nullptr && root->val != key) {\n        if (key < root->val)\n            root = root->left;\n        else\n            root = root->right;\n    }\n    return root;\n}",
+      "csharp": "public TreeNode SearchBST(TreeNode root, int key) {\n    TreeNode curr = root;\n    while (curr != null && curr.Value != key) {\n        curr = (key < curr.Value) ? curr.Left : curr.Right;\n    }\n    return curr;\n}"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Trees",
+      "Complexity Analysis"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 9,
+    "question": "What is the difference between depth-first and breadth-first searches for binary tree?",
+    "answer": "<p><b>Depth-First Search (DFS)</b> and <b>Breadth-First Search (BFS)</b> are the two foundational graph/tree traversal paradigms:</p><table border='1' cellpadding='8' style='border-collapse:collapse; width:100%;'><thead><tr style='background-color:#f2f2f2;'><th>Feature</th><th>Depth-First Search (DFS)</th><th>Breadth-First Search (BFS / Level Order)</th></tr></thead><tbody><tr><td><b>Traversal Strategy</b></td><td>Explores as deep as possible along each branch before backtracking.</td><td>Explores neighbor nodes level-by-level before moving deeper.</td></tr><tr><td><b>Data Structure</b></td><td><b>Stack</b> (Call-stack via recursion or explicit <code>std::stack</code>).</td><td><b>Queue</b> (FIFO queue).</td></tr><tr><td><b>Variants / Orders</b></td><td>Pre-order (Root-L-R), In-order (L-Root-R), Post-order (L-R-Root).</td><td>Level-order traversal (Root $\\to$ Level 1 $\\to$ Level 2...).</td></tr><tr><td><b>Memory / Space Complexity</b></td><td>$O(h)$ where $h$ is height ($O(\\log n)$ balanced, $O(n)$ skewed).</td><td>$O(w)$ where $w$ is maximum width (up to $O(n/2) = O(n)$ at leaf level).</td></tr><tr><td><b>Use Cases</b></td><td>Path finding, topological sort, expression evaluation, subtree subtree properties.</td><td>Shortest path in unweighted graphs, serialization, finding nearest leaf.</td></tr></tbody></table>",
+    "code_snippets": {
+      "python": "from collections import deque\n\n# BFS (Level-order)\ndef bfs(root):\n    if not root: return []\n    res, q = [], deque([root])\n    while q:\n        node = q.popleft()\n        res.append(node.val)\n        if node.left: q.append(node.left)\n        if node.right: q.append(node.right)\n    return res\n\n# DFS (Pre-order)\ndef dfs_preorder(root):\n    return [root.val] + dfs_preorder(root.left) + dfs_preorder(root.right) if root else []",
+      "cpp": "#include <queue>\n#include <vector>\n\n// BFS\nstd::vector<int> bfs(TreeNode* root) {\n    std::vector<int> res;\n    if (!root) return res;\n    std::queue<TreeNode*> q;\n    q.push(root);\n    while (!q.empty()) {\n        TreeNode* curr = q.front(); q.pop();\n        res.push_back(curr->val);\n        if (curr->left) q.push(curr->left);\n        if (curr->right) q.push(curr->right);\n    }\n    return res;\n}",
+      "csharp": "using System.Collections.Generic;\n\npublic List<int> BFS(TreeNode root) {\n    var res = new List<int>();\n    if (root == null) return res;\n    var q = new Queue<TreeNode>();\n    q.Enqueue(root);\n    while (q.Count > 0) {\n        var curr = q.Dequeue();\n        res.Add(curr.Value);\n        if (curr.Left != null) q.Enqueue(curr.Left);\n        if (curr.Right != null) q.Enqueue(curr.Right);\n    }\n    return res;\n}"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Trees",
+      "Graph Algorithms"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 10,
+    "question": "What is the structure of a hash table? How does it work?",
+    "answer": "<p>A <b>Hash Table</b> is a data structure that implements an associative array abstract data type, mapping keys to values using a <b>Hash Function</b>.</p><h4>1. Core Components</h4><ul><li><b>Underlying Array (Buckets):</b> A contiguous block of memory slots of size $M$.</li><li><b>Hash Function:</b> A mathematical function $h(k)$ converting an arbitrary key $k$ into an integer hash code, mapped to an array index via $index = h(k) \\pmod M$.</li><li><b>Collision Resolution Strategy:</b> Mechanism to handle cases where two distinct keys produce the same index.</li></ul><h4>2. How Collision Resolution Works</h4><ul><li><b>Separate Chaining:</b> Each bucket holds a linked list (or balanced tree if bucket length grows large, as in Java 8+ HashMap). Colliding keys are appended to the bucket's list.</li><li><b>Open Addressing:</b> All elements reside directly in the bucket array. Upon collision, systematic probing is performed to find the next empty slot:<ul><li><i>Linear Probing:</i> $index = (h(k) + i) \\pmod M$</li><li><i>Quadratic Probing:</i> $index = (h(k) + c_1 i + c_2 i^2) \\pmod M$</li><li><i>Double Hashing:</i> $index = (h_1(k) + i \\cdot h_2(k)) \\pmod M$</li></ul></li></ul><h4>3. Load Factor and Dynamic Resizing</h4><p>The <b>Load Factor</b> is $\\alpha = \\frac{N}{M}$ ($N$ = items, $M$ = capacity). When $\\alpha$ exceeds a predefined threshold (typically $0.70$–$0.75$), the array is resized (typically doubled), and all existing elements are rehashed to maintain constant-time performance.</p>",
+    "code_snippets": {
+      "python": "# Simple Hash Table with Separate Chaining\nclass SimpleHashTable:\n    def __init__(self, size=10):\n        self.size = size\n        self.buckets = [[] for _ in range(size)]\n        \n    def _hash(self, key):\n        return hash(key) % self.size\n        \n    def put(self, key, value):\n        b = self.buckets[self._hash(key)]\n        for i, (k, v) in enumerate(b):\n            if k == key:\n                b[i] = (key, value)\n                return\n        b.append((key, value))\n        \n    def get(self, key):\n        b = self.buckets[self._hash(key)]\n        for k, v in b:\n            if k == key: return v\n        return None",
+      "cpp": "// Basic hash bucket visualization\n#include <vector>\n#include <list>\n#include <string>\n\nclass HashTableChaining {\n    int buckets;\n    std::vector<std::list<std::pair<std::string, int>>> table;\npublic:\n    HashTableChaining(int b) : buckets(b), table(b) {}\n    \n    int hashFunc(const std::string& key) {\n        return std::hash<std::string>{}(key) % buckets;\n    }\n    void insert(const std::string& key, int val) {\n        int idx = hashFunc(key);\n        table[idx].push_back({key, val});\n    }\n};",
+      "csharp": "// Conceptual structure of separate chaining hash table\nusing System.Collections.Generic;\n\npublic class SimpleHashMap<TKey, TValue> {\n    private readonly LinkedList<KeyValuePair<TKey, TValue>>[] _buckets;\n    public SimpleHashMap(int capacity = 16) {\n        _buckets = new LinkedList<KeyValuePair<TKey, TValue>>[capacity];\n    }\n    private int GetIndex(TKey key) => (key.GetHashCode() & 0x7fffffff) % _buckets.Length;\n}"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Hash Tables"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 11,
+    "question": "What is the time complexity of add/search operations in a hash table?",
+    "answer": "<p>The time complexity of insertion (add), search (lookup), and deletion operations in a hash table depends on the collision frequency and load factor:</p><table border='1' cellpadding='8' style='border-collapse:collapse; width:100%;'><thead><tr style='background-color:#f2f2f2;'><th>Operation</th><th>Average Case</th><th>Worst Case</th><th>Explanation</th></tr></thead><tbody><tr><td><b>Search (Lookup)</b></td><td><b>$O(1)$</b></td><td><b>$O(n)$</b></td><td>Uniform hashing distributes keys evenly across buckets. In the worst case (all keys hash to the identical bucket), lookup degrades to traversing a linked list of length $n$.</td></tr><tr><td><b>Add (Insertion)</b></td><td><b>$O(1)$</b> (amortized)</td><td><b>$O(n)$</b></td><td>Inserting into an existing bucket takes $O(1)$. When load factor threshold is breached, resizing allocates a new array and rehashes all $n$ items ($O(n)$ spike, amortizing to $O(1)$).</td></tr><tr><td><b>Delete</b></td><td><b>$O(1)$</b></td><td><b>$O(n)$</b></td><td>Finding the key takes $O(1)$ average, followed by pointer relinking.</td></tr></tbody></table><p><i>Note:</i> In modern libraries (like Java 8+ HashMap), worst-case search is improved from $O(n)$ to <b>$O(\\log n)$</b> by converting overloaded buckets into Red-Black Trees when bucket size exceeds 8.</p>",
+    "code_snippets": {
+      "python": "# Dictionary lookup and insertion performance\nd = {}\nd['key'] = 42          # Average O(1), Worst O(n) during rehash/collision\nval = d.get('key')     # Average O(1), Worst O(n)",
+      "cpp": "#include <unordered_map>\n\nstd::unordered_map<int, int> umap;\numap[10] = 100;        // Average O(1), Amortized\nauto it = umap.find(10); // Average O(1), Worst O(n)",
+      "csharp": "using System.Collections.Generic;\n\nvar dict = new Dictionary<string, int>();\ndict[\"cad\"] = 1;       // Average O(1)\nbool exists = dict.ContainsKey(\"cad\"); // Average O(1)"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Hash Tables",
+      "Complexity Analysis"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 12,
+    "question": "Explain what the binary search algorithm is.",
+    "answer": "<p><b>Binary Search</b> is an optimal search algorithm that finds the position of a target value within a <b>sorted</b> array by repeatedly dividing the search interval in half (Divide and Conquer).</p><h4>How It Works</h4><ol><li>Initialize two pointers: <code>low = 0</code> and <code>high = n - 1</code>.</li><li>Calculate the midpoint: <code>mid = low + (high - low) / 2</code> (preventing integer overflow).</li><li>Compare target with array element at <code>mid</code>:</li><ul><li>If <code>arr[mid] == target</code>: Target found; return <code>mid</code>.</li><li>If <code>arr[mid] < target</code>: Target must be in the right half; set <code>low = mid + 1</code>.</li><li>If <code>arr[mid] > target</code>: Target must be in the left half; set <code>high = mid - 1</code>.</li></ul><li>Repeat steps 2–3 until <code>low > high</code>. If not found, return $-1$.</li></ol><h4>Complexity</h4><ul><li><b>Time Complexity:</b> <b>$O(\\log n)$</b> (reduces search space by factor of 2 at each iteration: $\\frac{n}{2^k} = 1 \\implies k = \\log_2 n$).</li><li><b>Space Complexity:</b> <b>$O(1)$</b> iterative, <b>$O(\\log n)$</b> recursive (due to call stack).</li><li><b>Prerequisite:</b> Data container must be <b>sorted</b> and support <b>$O(1)$ random access</b>.</li></ul>",
+    "code_snippets": {
+      "python": "def binary_search(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = low + (high - low) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return -1",
+      "cpp": "int binarySearch(const std::vector<int>& arr, int target) {\n    int low = 0, high = static_cast<int>(arr.size()) - 1;\n    while (low <= high) {\n        int mid = low + (high - low) / 2;\n        if (arr[mid] == target) return mid;\n        if (arr[mid] < target) low = mid + 1;\n        else high = mid - 1;\n    }\n    return -1;\n}",
+      "csharp": "public static int BinarySearch(int[] arr, int target) {\n    int low = 0, high = arr.Length - 1;\n    while (low <= high) {\n        int mid = low + (high - low) / 2;\n        if (arr[mid] == target) return mid;\n        if (arr[mid] < target) low = mid + 1;\n        else high = mid - 1;\n    }\n    return -1;\n}"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Searching Algorithms"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 13,
+    "question": "What sorting algorithms do you know?",
+    "answer": "<p>Sorting algorithms rearrange elements into numerical or lexicographical order. They are classified by complexity, stability, and memory in-place mechanics:</p><table border='1' cellpadding='8' style='border-collapse:collapse; width:100%;'><thead><tr style='background-color:#f2f2f2;'><th>Algorithm</th><th>Best Time</th><th>Average Time</th><th>Worst Time</th><th>Space</th><th>Stable?</th></tr></thead><tbody><tr><td><b>Bubble Sort</b></td><td>$O(n)$</td><td>$O(n^2)$</td><td>$O(n^2)$</td><td>$O(1)$</td><td>Yes</td></tr><tr><td><b>Selection Sort</b></td><td>$O(n^2)$</td><td>$O(n^2)$</td><td>$O(n^2)$</td><td>$O(1)$</td><td>No</td></tr><tr><td><b>Insertion Sort</b></td><td>$O(n)$</td><td>$O(n^2)$</td><td>$O(n^2)$</td><td>$O(1)$</td><td>Yes</td></tr><tr><td><b>Merge Sort</b></td><td>$O(n \\log n)$</td><td>$O(n \\log n)$</td><td>$O(n \\log n)$</td><td>$O(n)$</td><td>Yes</td></tr><tr><td><b>Quick Sort</b></td><td>$O(n \\log n)$</td><td>$O(n \\log n)$</td><td>$O(n^2)$</td><td>$O(\\log n)$</td><td>No</td></tr><tr><td><b>Heap Sort</b></td><td>$O(n \\log n)$</td><td>$O(n \\log n)$</td><td>$O(n \\log n)$</td><td>$O(1)$</td><td>No</td></tr><tr><td><b>Counting Sort</b> (non-comparison)</td><td>$O(n + k)$</td><td>$O(n + k)$</td><td>$O(n + k)$</td><td>$O(k)$</td><td>Yes</td></tr><tr><td><b>Radix Sort</b> (non-comparison)</td><td>$O(d \\cdot (n + k))$</td><td>$O(d \\cdot (n + k))$</td><td>$O(d \\cdot (n + k))$</td><td>$O(n + k)$</td><td>Yes</td></tr><tr><td><b>Timsort / IntroSort</b> (Hybrid)</td><td>$O(n)$</td><td>$O(n \\log n)$</td><td>$O(n \\log n)$</td><td>$O(n) / O(\\log n)$</td><td>Timsort (Yes) / IntroSort (No)</td></tr></tbody></table>",
+    "code_snippets": {
+      "python": "# Quick Sort implementation\ndef quick_sort(arr):\n    if len(arr) <= 1: return arr\n    pivot = arr[len(arr) // 2]\n    left = [x for x in arr if x < pivot]\n    mid = [x for x in arr if x == pivot]\n    right = [x for x in arr if x > pivot]\n    return quick_sort(left) + mid + quick_sort(right)",
+      "cpp": "#include <algorithm>\n#include <vector>\n\n// std::sort uses IntroSort (hybrid of QuickSort, HeapSort, and InsertionSort)\nvoid sortVector(std::vector<int>& v) {\n    std::sort(v.begin(), v.end());\n}",
+      "csharp": "using System;\n\npublic class Sorter {\n    public static void Sort(int[] arr) {\n        // Array.Sort uses IntroSort in .NET\n        Array.Sort(arr);\n    }\n}"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Sorting Algorithms"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 14,
+    "question": "How do you effectively delete sequence of elements from the middle of array?",
+    "answer": "<p>Deleting a contiguous sequence of $k$ elements starting at index $start$ ($[start, start + k - 1]$) from an array of size $n$ can be done effectively in <b>$O(n)$ time</b> and <b>$O(1)$ auxiliary space</b>:</p><h4>Optimal Approach: In-Place Shifting (Memmove / Two-Pointers)</h4><ol><li>Shift all subsequent elements located at indices from $start + k$ through $n - 1$ to the left by $k$ positions: <code>arr[i] = arr[i + k]</code>.</li><li>Truncate the logical size of the array or resize the container by $k$ elements.</li><li>Using low-level memory block movement (<code>memmove</code> or <code>std::move</code>) minimizes overhead by moving blocks of raw bytes via SIMD/cache lines rather than element-by-element manual loops.</li></ol><p><b>Complexity:</b> Time: $O(n - start - k)$ elements shifted (at most $O(n)$); Space: $O(1)$ in-place.</p>",
+    "code_snippets": {
+      "python": "def delete_sequence(arr, start, k):\n    \"\"\"Deletes k elements starting from index start in-place.\"\"\"\n    # Slice assignment in Python shifts underlying C-array efficiently via memmove\n    arr[start:start + k] = []\n    return arr\n\n# Example:\na = [0, 1, 2, 3, 4, 5, 6, 7]\ndelete_sequence(a, 2, 3) # Removes 2, 3, 4 -> [0, 1, 5, 6, 7]",
+      "cpp": "#include <vector>\n#include <algorithm>\n\n// Effective deletion using std::vector::erase with std::move\nvoid deleteSequence(std::vector<int>& arr, size_t start, size_t count) {\n    if (start >= arr.size()) return;\n    size_t actual_count = std::min(count, arr.size() - start);\n    arr.erase(arr.begin() + start, arr.begin() + start + actual_count);\n}",
+      "csharp": "using System;\nusing System.Collections.Generic;\n\npublic static void DeleteSequence<T>(List<T> list, int start, int count) {\n    // List<T>.RemoveRange internally uses Array.Copy (memmove)\n    list.RemoveRange(start, count);\n}\n\n// For raw array:\npublic static int[] DeleteSequenceArray(int[] arr, int start, int count) {\n    int newSize = arr.Length - count;\n    int[] result = new int[newSize];\n    Array.Copy(arr, 0, result, 0, start);\n    Array.Copy(arr, start + count, result, start, arr.Length - (start + count));\n    return result;\n}"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Arrays"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 15,
+    "question": "Given an array with 100 elements (numbers from 0 to 99). One element has been removed from the array. How would you find the removed element? How would you solve this if the array is sorted, or the array is not sorted?",
+    "answer": "<p>The original set consists of all integers in the range $[0, 99]$ (total $N = 100$ numbers). The array currently contains 99 distinct elements with 1 number missing.</p><h4>Case 1: The Array is NOT Sorted</h4><ul><li><b>Method A: Mathematical Sum ($O(n)$ time, $O(1)$ space)</b><br/>The expected sum of numbers from $0$ to $N - 1$ is $\\frac{(N - 1) \\times N}{2} = \\frac{99 \\times 100}{2} = 4950$.<br/>The missing number is: $Missing = 4950 - \\sum_{i=0}^{98} arr[i]$.</li><li><b>Method B: XOR Accumulation ($O(n)$ time, $O(1)$ space, No Overflow risk)</b><br/>Compute $XOR = (0 \\oplus 1 \\oplus \\dots \\oplus 99) \\oplus (arr[0] \\oplus \\dots \\oplus arr[98])$. Because $x \\oplus x = 0$ and $x \\oplus 0 = x$, all paired elements cancel out, leaving exactly the missing number.</li></ul><h4>Case 2: The Array IS Sorted</h4><ul><li><b>Method: Modified Binary Search ($O(\\log n)$ time, $O(1)$ space)</b><br/>Since numbers are originally $0, 1, \\dots, 99$, before the missing element, each element matches its index: <code>arr[i] == i</code>.<br/>At and after the missing element, indices shift: <code>arr[i] == i + 1</code>.<br/>We binary search for the first index where <code>arr[mid] != mid</code>. That index is the missing number.</li></ul>",
+    "code_snippets": {
+      "python": "# Unsorted: O(n) XOR approach\ndef find_missing_unsorted(arr, n=100):\n    xor_all = 0\n    for i in range(n): xor_all ^= i\n    for num in arr: xor_all ^= num\n    return xor_all\n\n# Sorted: O(log n) Binary Search\ndef find_missing_sorted(arr):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = low + (high - low) // 2\n        if arr[mid] == mid:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return low",
+      "cpp": "#include <vector>\n#include <numeric>\n\n// Unsorted: O(n) Sum or XOR\nint findMissingUnsorted(const std::vector<int>& arr, int n = 100) {\n    int expected = (n - 1) * n / 2; // 4950\n    int actual = std::accumulate(arr.begin(), arr.end(), 0);\n    return expected - actual;\n}\n\n// Sorted: O(log n) Binary Search\nint findMissingSorted(const std::vector<int>& arr) {\n    int low = 0, high = static_cast<int>(arr.size()) - 1;\n    while (low <= high) {\n        int mid = low + (high - low) / 2;\n        if (arr[mid] == mid) low = mid + 1;\n        else high = mid - 1;\n    }\n    return low;\n}",
+      "csharp": "public static int FindMissingUnsorted(int[] arr, int n = 100) {\n    int xor = 0;\n    for (int i = 0; i < n; i++) xor ^= i;\n    foreach (int val in arr) xor ^= val;\n    return xor;\n}\n\npublic static int FindMissingSorted(int[] arr) {\n    int low = 0, high = arr.Length - 1;\n    while (low <= high) {\n        int mid = low + (high - low) / 2;\n        if (arr[mid] == mid) low = mid + 1;\n        else high = mid - 1;\n    }\n    return low;\n}"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Arrays",
+      "Binary Search"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 16,
+    "question": "How do you find duplicates in array? How would you solve it for the array of chars?",
+    "answer": "<p>Finding duplicates can be approached in multiple ways depending on memory constraints and value range:</p><h4>1. General Array of Elements</h4><ul><li><b>Hash Set ($O(n)$ time, $O(n)$ space):</b> Iterate through elements, inserting into a HashSet. If <code>set.contains(x)</code> is true, $x$ is a duplicate.</li><li><b>Sorting ($O(n \\log n)$ time, $O(1)$ auxiliary space):</b> Sort the array and check adjacent elements: <code>arr[i] == arr[i-1]</code>.</li><li><b>In-place Negation (if elements are bounded in $[1, n]$):</b> Use values as indices and negate the value at <code>arr[abs(x) - 1]</code>. If already negative, $x$ is a duplicate ($O(n)$ time, $O(1)$ space).</li></ul><h4>2. Specialized Solution for Array of <code>char</code></h4><ul><li><b>Direct Addressing / Fixed Frequency Array ($O(n)$ time, $O(1)$ space):</b><br/>Since the ASCII character set has only 128 (or 256 for extended ASCII) possibilities, use a fixed-size boolean or integer array: <code>bool seen[256] = {false};</code>.<br/>Space is strictly constant: exactly 256 bytes regardless of input size $n$.</li><li><b>Bit Manipulation (Bitmask) ($O(n)$ time, $O(1)$ space, 8–32 bytes memory):</b><br/>If characters are restricted to lowercase English letters (<code>'a'</code>–<code>'z'</code>), a single 32-bit integer bitmask can track occurrences using <code>checker & (1 << (c - 'a'))</code>.</li></ul>",
+    "code_snippets": {
+      "python": "# General array: Hash Set\ndef find_duplicates(arr):\n    seen, dupes = set(), set()\n    for x in arr:\n        if x in seen: dupes.add(x)\n        else: seen.add(x)\n    return list(dupes)\n\n# Array of chars: Bitmask for 'a'-'z'\ndef find_char_duplicates(chars):\n    checker = 0\n    dupes = set()\n    for c in chars:\n        bit = 1 << (ord(c) - ord('a'))\n        if checker & bit: dupes.add(c)\n        else: checker |= bit\n    return list(dupes)",
+      "cpp": "#include <vector>\n#include <unordered_set>\n#include <string>\n\n// General vector duplicates\nstd::vector<int> findDuplicates(const std::vector<int>& arr) {\n    std::unordered_set<int> seen, dupes;\n    for (int x : arr) {\n        if (!seen.insert(x).second) dupes.insert(x);\n    }\n    return std::vector<int>(dupes.begin(), dupes.end());\n}\n\n// Char array: fixed 256-element boolean map (O(1) space)\nstd::vector<char> findCharDuplicates(const std::vector<char>& chars) {\n    bool seen[256] = {false};\n    std::vector<char> dupes;\n    for (char c : chars) {\n        unsigned char uc = static_cast<unsigned char>(c);\n        if (seen[uc]) dupes.push_back(c);\n        else seen[uc] = true;\n    }\n    return dupes;\n}",
+      "csharp": "using System.Collections.Generic;\n\npublic static List<char> FindCharDuplicates(char[] chars) {\n    bool[] seen = new bool[256];\n    HashSet<char> dupes = new HashSet<char>();\n    foreach (char c in chars) {\n        if (seen[c]) dupes.Add(c);\n        else seen[c] = true;\n    }\n    return new List<char>(dupes);\n}"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Arrays",
+      "Bit Manipulation"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 17,
+    "question": "How do you find the middle element of a singly linked list in one pass?",
+    "answer": "<p>The optimal technique to find the middle element of a singly linked list in a single pass is the <b>Fast and Slow Pointer (Tortoise and Hare)</b> algorithm:</p><h4>Algorithm Steps</h4><ol><li>Initialize two pointers, <code>slow</code> and <code>fast</code>, both pointing to the <code>head</code> of the linked list.</li><li>Traverse the list: in each step, advance <code>slow</code> by <b>1 node</b> and <code>fast</code> by <b>2 nodes</b>.</li><li>Continue while <code>fast != null && fast.next != null</code>.</li><li>When <code>fast</code> reaches the end (or runs off the end), <code>slow</code> will be positioned exactly at the middle element.</li></ol><h4>Even vs Odd Lengths</h4><ul><li><b>Odd length ($2k + 1$ nodes):</b> When <code>fast.next == null</code>, <code>slow</code> points to the exact middle node (node $k + 1$).</li><li><b>Even length ($2k$ nodes):</b> When <code>fast == null</code>, <code>slow</code> points to the second middle node (node $k + 1$). If the first middle node is required, terminate when <code>fast.next.next == null</code>.</li></ul><p><b>Complexity:</b> Time: <b>$O(n)$</b> (traverses the list exactly once); Space: <b>$O(1)$</b> auxiliary space.</p>",
+    "code_snippets": {
+      "python": "def find_middle(head):\n    slow = fast = head\n    while fast and fast.next:\n        slow = slow.next\n        fast = fast.next.next\n    return slow  # slow is the middle node",
+      "cpp": "ListNode* findMiddle(ListNode* head) {\n    ListNode* slow = head;\n    ListNode* fast = head;\n    while (fast != nullptr && fast->next != nullptr) {\n        slow = slow->next;\n        fast = fast->next->next;\n    }\n    return slow;\n}",
+      "csharp": "public ListNode FindMiddle(ListNode head) {\n    ListNode slow = head;\n    ListNode fast = head;\n    while (fast != null && fast.Next != null) {\n        slow = slow.Next;\n        fast = fast.Next.Next;\n    }\n    return slow;\n}"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Linked Lists",
+      "Two Pointers"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Jr/Mid"
+  },
+  {
+    "number": 18,
+    "question": "How do you detect a loop in a singly linked list?",
+    "answer": "<p>The industry-standard optimal approach is <b>Floyd's Cycle-Finding Algorithm</b> (also known as the <i>Tortoise and Hare</i> algorithm):</p><h4>1. Cycle Detection Principle</h4><ol><li>Initialize two pointers at <code>head</code>: <code>slow</code> (moves 1 step at a time) and <code>fast</code> (moves 2 steps at a time).</li><li>Advance both pointers until <code>fast</code> or <code>fast.next</code> becomes <code>null</code> (no cycle) or <code>slow == fast</code> (cycle detected).</li><li>If a cycle exists, the fast pointer will eventually lap the slow pointer inside the loop because the relative distance between them decreases by 1 node per iteration ($2 - 1 = 1$).</li></ol><h4>2. Finding the Start of the Loop (Follow-up)</h4><p>Once <code>slow == fast</code>, reset <code>slow = head</code> while keeping <code>fast</code> at the meeting point. Move both pointers forward <b>1 step at a time</b>. The node where they meet again is the exact start of the cycle ($L_{head\\_to\\_cycle} = k \\cdot C - d_{entry\\_to\\_meet}$).</p><p><b>Complexity:</b> Time: <b>$O(n)$</b>; Auxiliary Space: <b>$O(1)$</b>.</p>",
+    "code_snippets": {
+      "python": "def has_cycle(head):\n    slow = fast = head\n    while fast and fast.next:\n        slow = slow.next\n        fast = fast.next.next\n        if slow == fast:\n            return True\n    return False",
+      "cpp": "bool hasCycle(ListNode *head) {\n    ListNode *slow = head, *fast = head;\n    while (fast != nullptr && fast->next != nullptr) {\n        slow = slow->next;\n        fast = fast->next->next;\n        if (slow == fast) return true;\n    }\n    return false;\n}",
+      "csharp": "public bool HasCycle(ListNode head) {\n    ListNode slow = head, fast = head;\n    while (fast != null && fast.Next != null) {\n        slow = slow.Next;\n        fast = fast.Next.Next;\n        if (slow == fast) return true;\n    }\n    return false;\n}"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Linked Lists",
+      "Two Pointers"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 19,
+    "question": "Given an array of numbers: 20, 17, 30, 21, 45, 2, 18. Form a sorted binary tree diagram. How should the sequences be changed to produce the worst binary search tree?",
+    "answer": "<p>Given the insertion sequence: <code>[20, 17, 30, 21, 45, 2, 18]</code> into a Binary Search Tree (BST):</p><h4>1. Step-by-Step BST Construction</h4><ol><li><b>20:</b> Root node.</li><li><b>17:</b> $17 < 20 \\implies$ Left child of 20.</li><li><b>30:</b> $30 > 20 \\implies$ Right child of 20.</li><li><b>21:</b> $21 > 20, 21 < 30 \\implies$ Left child of 30.</li><li><b>45:</b> $45 > 20, 45 > 30 \\implies$ Right child of 30.</li><li><b>2:</b> $2 < 20, 2 < 17 \\implies$ Left child of 17.</li><li><b>18:</b> $18 < 20, 18 > 17 \\implies$ Right child of 17.</li></ol><h4>Tree Diagram:</h4><pre style='background:#f4f4f4; padding:10px; border-radius:5px; font-family:monospace;'>        20\n       /  \\\n     17    30\n    /  \\   /  \\\n   2   18 21   45</pre><p><i>Note:</i> This resulting tree is a balanced, complete binary search tree of minimum height $h = 2$ (levels 0, 1, 2).</p><h4>2. Sequence to Produce the Worst BST</h4><p>The worst possible BST is a <b>degenerate (skewed) tree</b> where every node has only one child, forming an effective linked list with maximum height $h = n - 1 = 6$ and $O(n)$ search time.</p><p>To produce this worst BST, the sequence must be inserted in strictly <b>monotonically sorted</b> order:</p><ul><li><b>Right-skewed worst sequence (Ascending):</b> <code>[2, 17, 18, 20, 21, 30, 45]</code> (every node inserted to the right child).</li><li><b>Left-skewed worst sequence (Descending):</b> <code>[45, 30, 21, 20, 18, 17, 2]</code> (every node inserted to the left child).</li></ul>",
+    "code_snippets": {
+      "python": "# BST insertion simulation\nclass Node:\n    def __init__(self, val): self.val, self.left, self.right = val, None, None\n\ndef insert(root, val):\n    if not root: return Node(val)\n    if val < root.val: root.left = insert(root.left, val)\n    else: root.right = insert(root.right, val)\n    return root\n\n# Construct original tree\nseq = [20, 17, 30, 21, 45, 2, 18]\nroot = None\nfor x in seq: root = insert(root, x)\n\n# Worst case sequence (Ascending)\nworst_seq = sorted(seq) # [2, 17, 18, 20, 21, 30, 45]",
+      "cpp": "struct Node {\n    int val;\n    Node *left = nullptr, *right = nullptr;\n    Node(int v) : val(v) {}\n};\n\nNode* insert(Node* node, int val) {\n    if (!node) return new Node(val);\n    if (val < node->val) node->left = insert(node->left, val);\n    else node->right = insert(node->right, val);\n    return node;\n}\n// Worst sequence: sorted ascending {2, 17, 18, 20, 21, 30, 45}",
+      "csharp": "public class Node {\n    public int Val;\n    public Node Left, Right;\n    public Node(int v) => Val = v;\n}\n\npublic static Node Insert(Node root, int val) {\n    if (root == null) return new Node(val);\n    if (val < root.Val) root.Left = Insert(root.Left, val);\n    else root.Right = Insert(root.Right, val);\n    return root;\n}\n// Worst case: Array.Sort(seq);"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Binary Search Tree",
+      "Trees"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Mid"
+  },
+  {
+    "number": 20,
+    "question": "Provide a recursive and a non-recursive solution for the tree traversal algorithms for a binary tree.",
+    "answer": "<p>Tree traversal visits every node in a binary tree exactly once. The three classic depth-first traversals are <b>Pre-order</b> (Root, L, R), <b>In-order</b> (L, Root, R), and <b>Post-order</b> (L, R, Root).</p><h4>1. In-Order Traversal (L $\\to$ Root $\\to$ R)</h4><ul><li><b>Recursive:</b> Trivially call <code>inorder(node.left)</code>, process <code>node.val</code>, then call <code>inorder(node.right)</code>.</li><li><b>Iterative (Non-recursive):</b> Uses an explicit <code>Stack</code>. Push nodes moving as far left as possible. When left reaches <code>null</code>, pop from stack, visit the node, and transition to its right child.</li></ul><h4>2. Pre-Order Traversal (Root $\\to$ L $\\to$ R)</h4><ul><li><b>Recursive:</b> Process <code>node.val</code>, then recurse left and right.</li><li><b>Iterative:</b> Push root to stack. In each loop iteration, pop node, visit it, and push right child first, then left child (ensuring left is processed first due to LIFO).</li></ul><p><b>Complexity:</b> Time: <b>$O(n)$</b> for all approaches. Auxiliary Space: <b>$O(h)$</b> where $h$ is tree height.</p>",
+    "code_snippets": {
+      "python": "# Recursive In-Order\ndef inorder_recursive(root):\n    res = []\n    def dfs(node):\n        if not node: return\n        dfs(node.left)\n        res.append(node.val)\n        dfs(node.right)\n    dfs(root)\n    return res\n\n# Non-Recursive (Iterative) In-Order\ndef inorder_iterative(root):\n    res, stack, curr = [], [], root\n    while curr or stack:\n        while curr:\n            stack.append(curr)\n            curr = curr.left\n        curr = stack.pop()\n        res.append(curr.val)\n        curr = curr.right\n    return res",
+      "cpp": "#include <vector>\n#include <stack>\n\n// Recursive In-Order\nvoid inorderRec(TreeNode* root, std::vector<int>& res) {\n    if (!root) return;\n    inorderRec(root->left, res);\n    res.push_back(root->val);\n    inorderRec(root->right, res);\n}\n\n// Iterative In-Order\nstd::vector<int> inorderIterative(TreeNode* root) {\n    std::vector<int> res;\n    std::stack<TreeNode*> st;\n    TreeNode* curr = root;\n    while (curr != nullptr || !st.empty()) {\n        while (curr != nullptr) {\n            st.push(curr);\n            curr = curr->left;\n        }\n        curr = st.top(); st.pop();\n        res.push_back(curr->val);\n        curr = curr->right;\n    }\n    return res;\n}",
+      "csharp": "using System.Collections.Generic;\n\n// Iterative In-Order Traversal\npublic List<int> InorderIterative(TreeNode root) {\n    var res = new List<int>();\n    var stack = new Stack<TreeNode>();\n    var curr = root;\n    while (curr != null || stack.Count > 0) {\n        while (curr != null) {\n            stack.Push(curr);\n            curr = curr.Left;\n        }\n        curr = stack.Pop();\n        res.Add(curr.Value);\n        curr = curr.Right;\n    }\n    return res;\n}"
+    },
+    "tags": [
+      "Algorithms and data structures",
+      "Trees",
+      "Tree Traversal"
+    ],
+    "companies": [
+      "AMC Bridge"
+    ],
+    "role_level": "Mid/Sr"
+  }
+]
